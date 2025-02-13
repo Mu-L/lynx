@@ -30,7 +30,7 @@ def generate_objc_interface(class_name, definition, definitions, file_imports):
             if 'properties' in item:
                 properties.update(item['properties'])
             if '$ref' in item:
-                ref_class = resolve_ref(item['$ref'], definitions, definition_dir)
+                ref_class = resolve_ref(item['$ref'], definitions)
                 if isinstance(ref_class, dict) and 'properties' in ref_class:
                     properties.update(ref_class['properties'])
 
@@ -79,7 +79,7 @@ def generate_objc_implementation(class_name, definition, definitions, file_impor
             if 'properties' in item:
                 properties.update(item['properties'])
             if '$ref' in item:
-                ref_class = resolve_ref(item['$ref'], definitions, definition_dir)
+                ref_class = resolve_ref(item['$ref'], definitions)
                 if isinstance(ref_class, dict) and 'properties' in ref_class:
                     properties.update(ref_class['properties'])
 

@@ -1,17 +1,36 @@
 # PerformanceEntry Definitions
 
 ## Description
-The YAML files in this directory are used to describe PerformanceEntries for the PerformanceObserver functionality. The `generate_performance_entry.py` script will generate corresponding JAVA/OC/TS definition files based on all the YAML files in this directory.
 
-Location of TS output: `lynx/js_libraries/types/types/background-thread/lynx-performance-entry.d.ts`
+The YAML files in this directory are designed to define [PerformanceEntry](https://lynxjs.org/api/lynx-api/performance-api/performance-entry.html). The `generate_performance_entry.py` script utilizes these YAML files to generate corresponding files in Java, Objective-C and TypeScript.
 
 ## Usage
-If you are modifying an existing PerformanceEntry, simply modify the desired yml file. 😊
 
-If you are adding a new PerformanceEntry, create it and then add it to `tools/performance/performance_observer/performance_entry_definition_files`. 👷
+- **How to modify a PerformanceEntry?**
 
-### File Syntax
-Your PerformanceEntry file should consist of a new filename, inheritance, and variable definitions. Its basic structure should resemble the code below:
+_Modifying an Existing PerformanceEntry_: Simply update the relevant YAML file. 😊
+
+_Adding a New PerformanceEntry_: Create a new YAML file and place it in the `lynx/tools/performance/performance_observer/performance_entry_definition_files`. 👷
+
+- **How can I verify my modifications?**
+
+Generate PerformanceEntry files through habitat sync:
+
+```shell
+cd /path/to/lynx
+source ./tools/envsetup.sh
+./hab sync
+```
+
+Then check the output:
+
+1. Check `lynx/js_libraries/types/types/background-thread` for TypeScript interfaces.
+2. Check `lynx/platform/android/lynx_android/src/main/java/com/lynx/tasm/performance/performanceobserver` for Java files.
+3. Check `lynx/platform/darwin/common/lynx/performance/performance_observer` for Objective-C implementation files and `lynx/platform/darwin/common/lynx/public/performance/performance_observer` for Objective-C header files.
+
+### YAML Syntax
+
+A PerformanceEntry file should include a new class name, inheritances, and variable definitions. Its structure typically looks like this:
 
 ```yaml
 # NewEntry.yml
@@ -24,31 +43,32 @@ NewEntry:
             type: string
 ```
 
-First, `allOf` indicates that your definition inherits from PerformanceEntry. You must ensure that the NewEntry you define has an inheritance relationship with PerformanceEntry.
+`allOf` signifies that your definition inherits from `PerformanceEntry`, so ensure that `NewEntry` maintains this inheritance relationship.
 
-Next, you can define your basic data types as follows:
+You can define basic data types as follows:
 
 ```yaml
 name:
     type: number/string/string/map
 ```
 
-Or, define more complex object types as follows:
+For more complex object types, use:
 
 ```yaml
 name:
     $ref: 'ReferenceObject.yml#/ReferenceObject'
 ```
 
-### Extension Syntax
-To facilitate organizing multi-terminal outputs, we added three descriptors `x-ignore-java`, `x-ignore-oc`, and `x-ignore-ts` to control whether to generate code for specific languages. You can use these extension tags as shown in the code below:
+#### Extension Tags
+
+To effectively manage multi-platform outputs, we've introduced the `x-ts-only` symbol to control the generation of TypeScript scripts exclusively. Additionally, custom symbols can be added as needed.
+
+For example, by using the `x-ts-only` tag in NewEntry.yml, **only NewEntry.ts** will be generated, without producing scripts for Java, C++, or any other languages.
 
 ```yaml
-// NewEntry.yml
+# NewEntry.yml
 NewEntry:
-  x-ignore-java: False
-  x-ignore-oc: True
-  x-ignore-ts: False
+  x-ts-only: true
   allOf:
     - $ref: 'PerformanceEntry.yml#/PerformanceEntry'
     - type: object
