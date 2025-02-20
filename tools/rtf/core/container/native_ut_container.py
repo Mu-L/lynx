@@ -103,6 +103,7 @@ class NativeUTContainer(Container):
         for target in self.parallel_queue:
             if not target.is_end():
                 Log.error(f"{target.name} timeout!")
+                target.print_log()
         self.kill_all_process()
         return -1
 
