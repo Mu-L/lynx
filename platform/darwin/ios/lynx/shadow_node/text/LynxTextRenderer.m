@@ -76,6 +76,14 @@
   return self;
 }
 
+- (void)dealloc {
+  if ([LynxEnv.sharedInstance enableTextStorageDeallocFix]) {
+    for (NSLayoutManager *manager in [_textStorage layoutManagers]) {
+      [_textStorage removeLayoutManager:manager];
+    }
+  }
+}
+
 - (void)ensureTextRenderLayout {
   LYNX_TRACE_SECTION(LYNX_TRACE_CATEGORY_WRAPPER, @"LynxTextRenderer.layout");
 

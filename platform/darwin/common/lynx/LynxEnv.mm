@@ -466,6 +466,17 @@
   return enableTextContainerOpt;
 }
 
+// TODO(linxs): to be deleted after sufficient verification
+- (BOOL)enableTextStorageDeallocFix {
+  static dispatch_once_t onceToken;
+  static BOOL enableTextStorageDeallocFix = YES;
+  dispatch_once(&onceToken, ^{
+    enableTextStorageDeallocFix = [self boolFromExternalEnv:LynxEnvEnableTextStorageDeallocFix
+                                               defaultValue:YES];
+  });
+  return enableTextStorageDeallocFix;
+}
+
 - (BOOL)enableGenericResourceFetcher {
   static dispatch_once_t onceToken;
   static BOOL enableGenericResourceFetcher = NO;
@@ -573,6 +584,7 @@
     @(LynxEnvEnableLifecycleTimeReport) : @"enable_lifecycle_time_report",
     @(LynxEnvCachesCleanupUntrackedFiles) : @"caches_cleanup_untracked_files",
     @(LynxEnvEnableTextContainerOpt) : @"enable_text_container_opt",
+    @(LynxEnvEnableTextStorageDeallocFix) : @"enable_text_storage_dealloc_fix"
   };
   NSString *keyString = envKeyBinding[@(key)];
   NSAssert(keyString.length > 0, @"LynxEnv key string should not be nill.");

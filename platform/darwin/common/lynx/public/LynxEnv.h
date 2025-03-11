@@ -133,6 +133,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)enableTextContainerOpt;
 
+- (BOOL)enableTextStorageDeallocFix;
+
 - (NSDictionary<NSString *, NSString *> *)cppEnvDebugDescription;
 
 - (NSDictionary<NSString *, NSString *> *)platformEnvDebugDescription;
