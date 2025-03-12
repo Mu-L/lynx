@@ -355,16 +355,7 @@ public abstract class LynxObserverManager {
   }
 
   protected RectF getWindowRect(LynxContext context) {
-    DisplayMetrics metric = null;
     if (context != null) {
-      metric = DisplayMetricsHolder.getRealScreenDisplayMetrics(context);
-    }
-    if (metric == null || (metric.widthPixels == 0 && metric.heightPixels == 0)) {
-      LLog.w(TAG,
-          "getWindowRect getRealScreenDisplayMetrics failed, use getWindowDisplayMetrics instead");
-      metric = DisplayMetricsHolder.getWindowDisplayMetrics();
-    }
-    if (metric != null) {
       Activity activity = context.getActivity();
       int[] position = new int[2];
       if (activity != null) {
@@ -373,10 +364,11 @@ public abstract class LynxObserverManager {
           window.getDecorView().getLocationOnScreen(position);
         }
       }
-      return new RectF(position[0], position[1], position[0] + metric.widthPixels,
-          position[1] + metric.heightPixels);
+      return new RectF(position[0], position[1],
+          position[0] + context.getScreenMetrics().widthPixels,
+          position[1] + context.getScreenMetrics().heightPixels);
     } else {
-      LLog.e(TAG, "getWindowRect func failed since DisplayMetrics is null");
+      LLog.e(TAG, "getWindowRect func failed since context is null");
     }
     return new RectF();
   }
