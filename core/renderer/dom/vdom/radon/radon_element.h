@@ -44,11 +44,7 @@ class RadonElement : public Element {
 
   bool is_component() const;
 
-  bool CanBeLayoutOnly() const override {
-    return config_enable_layout_only_ && has_layout_only_props_ &&
-           overflow_ == OVERFLOW_XY &&
-           (!is_component() || enable_component_layout_only_);
-  }
+  bool CanBeLayoutOnly() const override;
 
   bool InComponent() const override;
 

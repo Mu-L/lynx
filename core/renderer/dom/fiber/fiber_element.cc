@@ -3443,6 +3443,11 @@ void FiberElement::AsyncResolveSubtreeProperty() {
   }
 }
 
+bool FiberElement::CanBeLayoutOnly() const {
+  return can_be_layout_only_ && element_manager()->GetEnableLayoutOnly() &&
+         has_layout_only_props_ && overflow_ == OVERFLOW_XY;
+}
+
 #if ENABLE_TRACE_PERFETTO
 void FiberElement::UpdateTraceDebugInfo(TraceEvent *event) {
   auto *tagInfo = event->add_debug_annotations();

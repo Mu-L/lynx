@@ -864,5 +864,11 @@ void RadonElement::UpdatePlatformNodeTag() {
   }
 }
 
+bool RadonElement::CanBeLayoutOnly() const {
+  return element_manager()->GetEnableLayoutOnly() && has_layout_only_props_ &&
+         overflow_ == OVERFLOW_XY &&
+         (!is_component() || enable_component_layout_only_);
+}
+
 }  // namespace tasm
 }  // namespace lynx

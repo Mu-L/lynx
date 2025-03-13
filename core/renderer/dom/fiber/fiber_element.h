@@ -230,10 +230,7 @@ class FiberElement : public Element, public SelectorItem {
   // data model and mark the element as created by the inspector.
   void ResetDataModel() { data_model_.reset(); }
 
-  virtual bool CanBeLayoutOnly() const override {
-    return can_be_layout_only_ && config_enable_layout_only_ &&
-           has_layout_only_props_ && overflow_ == OVERFLOW_XY;
-  }
+  virtual bool CanBeLayoutOnly() const override;
 
   void MarkCanBeLayoutOnly(bool flag) { can_be_layout_only_ = flag; }
 

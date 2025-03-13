@@ -16,11 +16,10 @@ namespace testing {
 
 // position:fixed related
 TEST_P(FiberElementTest, FiberElementUnderNewFixed) {
+  manager->config_->layout_configs_.enable_fixed_new_ = true;
   auto page = manager->CreateFiberPage("page", 11);
-  page->enable_new_fixed_ = true;
 
   auto element0 = manager->CreateFiberNode("view");
-  element0->enable_new_fixed_ = true;
 
   element0->SetStyle(CSSPropertyID::kPropertyIDBackground,
                      lepus::Value("green"));
@@ -28,7 +27,6 @@ TEST_P(FiberElementTest, FiberElementUnderNewFixed) {
 
   // fixed
   auto fixed_element = manager->CreateFiberNode("view");
-  fixed_element->enable_new_fixed_ = true;
   fixed_element->SetStyle(CSSPropertyID::kPropertyIDBackground,
                           lepus::Value("red"));
   fixed_element->SetStyle(CSSPropertyID::kPropertyIDPosition,
@@ -36,11 +34,9 @@ TEST_P(FiberElementTest, FiberElementUnderNewFixed) {
   element0->InsertNode(fixed_element);
 
   auto text = manager->CreateFiberText("text");
-  text->enable_new_fixed_ = true;
   fixed_element->InsertNode(text);
 
   auto element2 = manager->CreateFiberNode("view");
-  element2->enable_new_fixed_ = true;
   element2->SetStyle(CSSPropertyID::kPropertyIDBackground,
                      lepus::Value("blue"));
   page->InsertNode(element2);

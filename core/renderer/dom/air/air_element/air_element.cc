@@ -50,8 +50,6 @@ AirElement::AirElement(AirElementType type, ElementManager *manager,
       root_font_size_(manager->GetLynxEnvConfig().DefaultFontSize()),
       air_element_manager_(manager) {
   id_ = id > 0 ? id : manager->GenerateElementID();
-  // page config switch for enabling layout-only ability
-  config_enable_layout_only_ = manager->GetEnableLayoutOnly();
   config_flatten_ = manager->GetPageFlatten();
   element_manager()->CreateLayoutNode(id_, tag_);
 }
@@ -1299,6 +1297,17 @@ bool AirElement::AirComputedCSSStyle::ProcessWithPattern(
     return true;
   }
   return false;
+}
+
+/**
+ * + config_enable_layout_only_: 1. LynxViewBuilder.setEnableLayoutOnly, 2.
+ * PageConfig decode 'enableNewLayoutOnly'
+ *
+ * + has_layout_only_props_:
+ * SetAttribute、SetEventHandler、view+component
+ */
+bool AirElement::CanBeLayoutOnly() const {
+  return element_manager()->GetEnableLayoutOnly() && has_layout_only_props_;
 }
 
 }  // namespace tasm
