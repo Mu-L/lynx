@@ -359,7 +359,7 @@ LYNX_PROP_DEFINE("internal-cell-prepare-for-reuse-notification",
   self.needsInternalCellPrepareForReuseNotification = value;
 }
 
-LYNX_PROP_DEFINE("should-request-state-restore", setShouldRequestStateRestore, BOOL) {
+LYNX_PROP_SETTER("should-request-state-restore", setShouldRequestStateRestore, BOOL) {
   if (requestReset) {
     value = false;
   }
