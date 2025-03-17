@@ -5,8 +5,7 @@ system = platform.system().lower()
 machine = platform.machine().lower()
 machine = "x86_64" if machine == "amd64" else machine
 
-venv_python = ".venv/bin/python3"
-venv_pip3 = ".venv/bin/pip3"
+venv_python = "./tools/vpython"
 
 deps = {
     'platform/android/gradle/wrapper/gradle-6.7.1-all.zip': {
@@ -259,46 +258,27 @@ deps = {
         ],
         "condition": system in ['linux', 'darwin', 'windows']
     },
-    ### pyenv setup
-    'py_env_setup': {
-        "type": "action",
-        "cwd": root_dir,
-        "commands": [
-            "[ -d .venv ] || python3 -m venv .venv" if system in ['linux', 'darwin'] else "if not exist .venv python -m venv .venv",
-            venv_pip3 + " install --upgrade pip",
-            venv_python + " -m pip install PyYAML",
-        ],
-    },
     ### AUTO GENERATED SCRIPT START
     'gen_feature_count': {
         "type": "action",
         "cwd": root_dir,
         "commands": [
             venv_python + " tools/feature_count/generate_feature_count.py",
-        ],
-        "require": [
-            "py_env_setup",
-        ],
+        ]
     },
     'gen_error_code': {
         "type": "action",
         "cwd": root_dir,
         "commands": [
             venv_python + " tools/error_code/gen_error_code.py",
-        ],
-        "require": [
-            "py_env_setup",
-        ],
+        ]
     },
     'gen_lynx_perfromance_entry': {
         "type": "action",
         "cwd": root_dir,
         "commands": [
             venv_python + " tools/performance/performance_observer/generate_performance_entry.py",
-        ],
-        "require": [
-            "py_env_setup",
-        ],
+        ]
     },
     ### AUTO GENERATED SCRIPT END
     'explorer/darwin/ios/lynx_explorer/xctestrunner': {
