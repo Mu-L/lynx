@@ -242,16 +242,22 @@ void InspectorClientDelegateBaseImpl::RecordDebuggingInstanceID(
   }
 }
 
-void InspectorClientDelegateBaseImpl::AddEngineTypeParam(
+bool InspectorClientDelegateBaseImpl::AddEngineTypeParam(
     rapidjson::Document &message) {
-  if (message.HasMember(kKeyResult) &&
-      message[kKeyResult].HasMember(kKeyDebuggerId) &&
-      vm_type_ != kKeyEngineLepus) {
-    message[kKeyResult].AddMember(
-        rapidjson::Value(kKeyEngineType, message.GetAllocator()),
-        rapidjson::Value(vm_type_, message.GetAllocator()),
-        message.GetAllocator());
+  if (vm_type_ == kKeyEngineLepus) {
+    return false;
   }
+  if (!message.HasMember(kKeyResult)) {
+    return false;
+  }
+  if (!message[kKeyResult].HasMember(kKeyDebuggerId)) {
+    return false;
+  }
+  message[kKeyResult].AddMember(
+      rapidjson::Value(kKeyEngineType, message.GetAllocator()),
+      rapidjson::Value(vm_type_, message.GetAllocator()),
+      message.GetAllocator());
+  return true;
 }
 
 std::string InspectorClientDelegateBaseImpl::GenSimpleMessage(

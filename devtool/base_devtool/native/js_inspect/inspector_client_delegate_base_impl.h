@@ -104,7 +104,7 @@ class BASE_EXPORT InspectorClientDelegateBaseImpl
                                  int instance_id);
 
   // Add "engineType" parameter to the response of "Debugger.enable" message.
-  void AddEngineTypeParam(rapidjson::Document& message);
+  bool AddEngineTypeParam(rapidjson::Document& message);
 
   // Generate a simple CDP message which only has "method" and "id".
   std::string GenSimpleMessage(const std::string& method, int message_id = 0);
