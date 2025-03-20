@@ -596,6 +596,7 @@
     @(LynxEnvEnableTextContainerOpt) : @"enable_text_container_opt",
     @(LynxEnvEnableTextStorageDeallocFix) : @"enable_text_storage_dealloc_fix",
     @(LynxEnvEnableUnsafeCallOfLayoutMethod) : @"enable_unsafe_call_of_layout_method",
+    @(LynxEnvEnableJSGroupThreadByDefault) : @"enable_multi_js_thread_by_default",
   };
   NSString *keyString = envKeyBinding[@(key)];
   NSAssert(keyString.length > 0, @"LynxEnv key string should not be nill.");

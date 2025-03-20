@@ -4,6 +4,8 @@
 package com.lynx.tasm;
 
 import androidx.annotation.Nullable;
+import com.lynx.tasm.LynxEnv;
+import com.lynx.tasm.LynxEnvKey;
 import com.lynx.tasm.base.LLog;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +45,14 @@ public class LynxGroup {
     this.mGroupName = builder.mGroupName;
     this.mID = builder.mID != null ? builder.mID : generateID();
     this.mPreloadJSPaths = builder.mPreloadJSPaths;
-    this.mEnableJSGroupThread = builder.mEnableJSGroupThread;
+
+    if (builder.mEnableJSGroupThread == null) {
+      this.mEnableJSGroupThread =
+          LynxEnv.getBooleanFromExternalEnv(LynxEnvKey.ENABLE_MULTI_JS_THREAD_BY_DEFAULT, false);
+    } else {
+      this.mEnableJSGroupThread = builder.mEnableJSGroupThread;
+    }
+
     this.mEnableV8 = builder.mEnableV8;
     this.mConfig = builder.mConfig;
 
@@ -55,7 +64,7 @@ public class LynxGroup {
   }
 
   protected LynxGroup(String name, String id, @Nullable String[] preloadJSPaths,
-      boolean enableJSGroupThread, boolean enableWhiteBoard) {
+      Boolean enableJSGroupThread, boolean enableWhiteBoard) {
     this(new LynxGroup.LynxGroupBuilder()
              .setGroupName(name)
              .setID(id)
@@ -128,7 +137,7 @@ public class LynxGroup {
     protected String mID;
     protected String[] mPreloadJSPaths;
     protected boolean mEnableV8;
-    protected boolean mEnableJSGroupThread;
+    protected Boolean mEnableJSGroupThread;
     protected boolean mEnableWhiteBoard;
     protected Map<String, Object> mConfig;
 
@@ -156,7 +165,7 @@ public class LynxGroup {
       return this;
     }
 
-    public LynxGroupBuilder setEnableJSGroupThread(boolean enableJSGroupThread) {
+    public LynxGroupBuilder setEnableJSGroupThread(Boolean enableJSGroupThread) {
       this.mEnableJSGroupThread = enableJSGroupThread;
       return this;
     }

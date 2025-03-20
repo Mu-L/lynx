@@ -57,6 +57,7 @@ typedef NS_ENUM(uint64_t, LynxEnvKey) {
   LynxEnvEnableTextContainerOpt,
   LynxEnvEnableTextStorageDeallocFix,
   LynxEnvEnableUnsafeCallOfLayoutMethod,
+  LynxEnvEnableJSGroupThreadByDefault,
 
   // Please add new enum values above
   LynxEnvKeyEndMark,  // Keep this as the last enum value, and do not use

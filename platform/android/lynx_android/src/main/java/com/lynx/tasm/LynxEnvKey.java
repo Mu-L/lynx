@@ -36,8 +36,8 @@ public enum LynxEnvKey {
   ENABLE_LIFECYCLE_TIME_REPORT("enable_lifecycle_time_report"),
   ENABLE_STABLE_TRANSLATE_Z_SORTING("enable_stable_translate_z_sorting"),
   ENABLE_REFRESH_RATE_OPT("enable_refresh_rate_opt"),
-
-  ENABLE_UNSAFE_CALL_OF_LAYOUT_METHOD("enable_unsafe_call_of_layout_method");
+  ENABLE_UNSAFE_CALL_OF_LAYOUT_METHOD("enable_unsafe_call_of_layout_method"),
+  ENABLE_MULTI_JS_THREAD_BY_DEFAULT("enable_multi_js_thread_by_default");
 
   private final String description;
 
