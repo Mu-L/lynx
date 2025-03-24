@@ -135,6 +135,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)enableTextStorageDeallocFix;
 
+- (BOOL)enableUnsafeCallOfLayoutMethod;
+
 - (NSDictionary<NSString *, NSString *> *)cppEnvDebugDescription;
 
 - (NSDictionary<NSString *, NSString *> *)platformEnvDebugDescription;

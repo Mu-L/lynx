@@ -180,6 +180,8 @@ public class LynxEnv {
   protected boolean mEnableRefreshRateOpt = true;
   protected boolean mEnableCheckAccessFromNonUIThread = false;
 
+  protected boolean mEnableUnsafeCallOfLayoutMethod = false;
+
   protected final Object mLazyInitLock = new Object();
 
   private static ILynxDevToolService devtoolService = null;
@@ -313,6 +315,7 @@ public class LynxEnv {
     initEnableTextBoringLayout();
     initEnableRefreshRateOpt();
     initEnableCheckAccessFromNonUiThread();
+    initEnableUnsafeCallOfLayoutMethod();
 
     ICURegister.loadLibrary(mLibraryLoader);
     // notify LynxEnv prepared
@@ -1289,9 +1292,18 @@ public class LynxEnv {
     return this.mEnableCheckAccessFromNonUIThread;
   }
 
+  public boolean enableUnsafeCallOfLayoutMethod() {
+    return this.mEnableUnsafeCallOfLayoutMethod;
+  }
+
   protected void initEnableGenericResourceFetcher() {
     mEnableGenericResourceFetcher =
         getBooleanFromExternalEnv(LynxEnvKey.ENABLE_GENERIC_RESOURCE_FETCHER, false);
+  }
+
+  protected void initEnableUnsafeCallOfLayoutMethod() {
+    mEnableUnsafeCallOfLayoutMethod =
+        getBooleanFromExternalEnv(LynxEnvKey.ENABLE_UNSAFE_CALL_OF_LAYOUT_METHOD, false);
   }
 
   protected void initEnableTextBoringLayout() {

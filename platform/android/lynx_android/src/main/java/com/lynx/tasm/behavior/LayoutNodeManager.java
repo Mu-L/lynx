@@ -5,6 +5,7 @@ package com.lynx.tasm.behavior;
 
 import android.os.Handler;
 import android.os.Looper;
+import com.lynx.tasm.LynxEnv;
 
 public class LayoutNodeManager {
   public static float UNDEFINED_MAX_SIZE = (float) 0x7FFFFFF;
@@ -13,6 +14,7 @@ public class LayoutNodeManager {
   private Looper mLayoutLooper;
   private Handler mLayoutHandler;
   private LayoutThreadMonitor mLayoutThreadMonitor;
+  private boolean mEnableThreadControl = !LynxEnv.inst().enableUnsafeCallOfLayoutMethod();
 
   public interface LayoutThreadMonitor {
     void reportThreadError(int id, String methodName);
@@ -42,7 +44,7 @@ public class LayoutNodeManager {
     if (mNativePtr == 0) {
       return;
     }
-    if (Looper.myLooper() != mLayoutLooper) {
+    if (Looper.myLooper() != mLayoutLooper && mEnableThreadControl) {
       mLayoutHandler.post(() -> setMeasureFunc(id, shadowNode));
       reportBehaviorChanged(id, "setMeasureFunc");
     } else {
@@ -54,7 +56,7 @@ public class LayoutNodeManager {
     if (mNativePtr == 0) {
       return;
     }
-    if (Looper.myLooper() != mLayoutLooper) {
+    if (Looper.myLooper() != mLayoutLooper && mEnableThreadControl) {
       mLayoutHandler.post(() -> markDirty(id));
       reportBehaviorChanged(id, "markDirty");
     } else {
@@ -95,7 +97,7 @@ public class LayoutNodeManager {
     if (mNativePtr == 0) {
       return;
     }
-    if (Looper.myLooper() != mLayoutLooper) {
+    if (Looper.myLooper() != mLayoutLooper && mEnableThreadControl) {
       mLayoutHandler.post(() -> alignNativeNode(id, offset_top, offset_left));
       reportBehaviorChanged(id, "alignNativeNode");
     } else {
