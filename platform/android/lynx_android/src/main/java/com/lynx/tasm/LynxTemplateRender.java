@@ -2516,8 +2516,6 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
 
       if (mLynxContext != null) {
         mLynxContext.onPageConfigDecoded(config);
-        mLynxContext.getFluencyTraceHelper().setPageConfigProbability(
-            config.getEnableLynxScrollFluency());
       } else {
         LLog.e(TAG, "lynx context free in used: LynxUI configs may be not valid");
       }

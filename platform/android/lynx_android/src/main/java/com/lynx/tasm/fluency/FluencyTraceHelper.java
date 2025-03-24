@@ -10,13 +10,11 @@ import java.security.SecureRandom;
 
 public class FluencyTraceHelper {
   private FluencyTracerImpl mTracer;
-  private final SecureRandom mSecureRandom = new SecureRandom();
 
+  private final SecureRandom mSecureRandom = new SecureRandom();
   public static final double UNKNOWN_FLUENCY_PAGECONFIG_PROBABILITY = -1;
   private double mPageConfigProbability = UNKNOWN_FLUENCY_PAGECONFIG_PROBABILITY;
-
   public enum ForceStatus { FORCED_ON, FORCED_OFF, NON_FORCED }
-  ;
   private ForceStatus mStatus = ForceStatus.NON_FORCED;
   private boolean mProbabilityDetermined = false;
   private LynxBooleanOption mEnabled = LynxBooleanOption.UNSET;
@@ -26,6 +24,7 @@ public class FluencyTraceHelper {
   @Deprecated private String mTag = "";
 
   public FluencyTraceHelper(LynxContext context) {
+    setPageConfigProbability(context.getEnableLynxScrollFluency());
     mTracer = new FluencyTracerImpl(context);
   }
 
@@ -149,6 +148,7 @@ public class FluencyTraceHelper {
     config.setEnabledBySampling(mEnabled);
     mTracer.start(sign, config);
   }
+
   @UiThread
   public void stop(int sign) {
     if (mTracer == null || !shouldSendAllScrollEvent()) {

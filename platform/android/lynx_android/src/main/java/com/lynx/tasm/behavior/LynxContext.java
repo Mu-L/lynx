@@ -149,6 +149,7 @@ public abstract class LynxContext extends LynxBaseContext implements ExceptionHa
 
   private boolean mEnableFiberArc = false;
   private boolean mCssAlignWithLegacyW3c = false;
+  private double mEnableLynxScrollFluency = -1.0;
 
   private HashMap<String, Object> mContextData;
 
@@ -236,6 +237,16 @@ public abstract class LynxContext extends LynxBaseContext implements ExceptionHa
     mMapContainerType = config.getMapContainerType();
     mEnableFiberArc = config.getEnableFiberArc();
     mCssAlignWithLegacyW3c = config.isCssAlignWithLegacyW3c();
+    mEnableLynxScrollFluency = config.getEnableLynxScrollFluency();
+  }
+
+  /**
+   * Get the probability of enabling Lynx Fluency Monitor in this context.
+   *
+   * @return double value of the probability
+   */
+  public double getEnableLynxScrollFluency() {
+    return mEnableLynxScrollFluency;
   }
 
   public boolean isAsyncRedirect() {
