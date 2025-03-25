@@ -548,7 +548,8 @@ class FiberElement : public Element, public SelectorItem {
 
   void MarkRefreshCSSStyles() { MarkDirty(kDirtyRefreshCSSVariables); }
 
-  void ConsumeStyle(const StyleMap& styles, StyleMap* inherit_styles) override;
+  void ConsumeStyle(const StyleMap& styles,
+                    const StyleMap* inherit_styles) override;
 
   void AddDataset(const base::String& key, const lepus::Value& value);
   void SetDataset(const lepus::Value& data_set);
@@ -829,7 +830,7 @@ class FiberElement : public Element, public SelectorItem {
   FiberElement(const FiberElement& element, bool clone_resolved_props);
 
   void ConsumeStyleInternal(
-      const StyleMap& styles, StyleMap* inherit_styles,
+      const StyleMap& styles, const StyleMap* inherit_styles,
       std::function<bool(CSSPropertyID, const tasm::CSSValue&)> should_skip);
 
   bool ConsumeAllAttributes();

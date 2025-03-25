@@ -986,7 +986,7 @@ ParallelFlushReturn FiberElement::PrepareForCreateOrUpdate() {
   if (should_consume_trans_styles_in_advance) {
     has_transition_props_ |= ResetTransitionStylesInAdvance(reset_style_ids);
   }
-  auto update_map =
+  auto &update_map =
       force_use_current_parsed_style_map ? parsed_styles_map_ : parsed_styles;
   if (should_consume_trans_styles_in_advance) {
     has_transition_props_ |= ConsumeTransitionStylesInAdvance(update_map);
@@ -1938,7 +1938,7 @@ ElementChildrenArray FiberElement::GetChildren() {
 // in advance.
 // 3. Check every property to determine whether to intercept this update.
 void FiberElement::ConsumeStyle(const StyleMap &styles,
-                                StyleMap *inherit_styles) {
+                                const StyleMap *inherit_styles) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, "FiberElement::ConsumeStyle",
               [this](lynx::perfetto::EventContext ctx) {
                 UpdateTraceDebugInfo(ctx.event());
@@ -1970,7 +1970,7 @@ void FiberElement::ConsumeStyle(const StyleMap &styles,
 }
 
 void FiberElement::ConsumeStyleInternal(
-    const StyleMap &styles, StyleMap *inherit_styles,
+    const StyleMap &styles, const StyleMap *inherit_styles,
     std::function<bool(CSSPropertyID, const tasm::CSSValue &)> should_skip) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, "FiberElement::ConsumeStyle",
               [this](lynx::perfetto::EventContext ctx) {
@@ -1984,7 +1984,8 @@ void FiberElement::ConsumeStyleInternal(
   // Handle font-size first. Other css may use this to calc rem or em.
   SetFontSize();
 
-  inherited_styles_.reserve(styles.size() + updated_inherited_styles_.size());
+  inherited_styles_.reserve(styles.size() +
+                            (inherit_styles ? inherit_styles->size() : 0));
 
   auto consume_func = [this, should_skip = std::move(should_skip)](
                           const StyleMap &styles, bool process_inherit) {

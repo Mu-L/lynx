@@ -135,7 +135,7 @@ class RadonElement : public Element {
                              PseudoState current_status) override;
 
   void ConsumeStyle(const StyleMap& styles,
-                    StyleMap* inherit_styles = nullptr) override;
+                    const StyleMap* inherit_styles = nullptr) override;
 
   void OnPatchFinish(PipelineOptions& option) override;
 

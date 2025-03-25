@@ -702,7 +702,7 @@ void RadonElement::OnPseudoStatusChanged(PseudoState prev_status,
 // in advance.
 // 3. Check every property to determine whether to intercept this update.
 void RadonElement::ConsumeStyle(const StyleMap& styles,
-                                StyleMap* inherit_styles) {
+                                const StyleMap* inherit_styles) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, "RadonElement::ConsumeStyle");
   if (styles.empty()) {
     return;

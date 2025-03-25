@@ -151,7 +151,7 @@ class Element : public lepus::RefCounted {
 
   // For style op
   BASE_EXPORT_FOR_DEVTOOL virtual void ConsumeStyle(
-      const StyleMap& styles, StyleMap* inherit_styles = nullptr) = 0;
+      const StyleMap& styles, const StyleMap* inherit_styles = nullptr) = 0;
 
   virtual void SetStyleInternal(CSSPropertyID id, const tasm::CSSValue& value,
                                 bool force_update = false);
