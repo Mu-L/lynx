@@ -1035,6 +1035,11 @@ base::expected<piper::Value, JSINativeException> MethodInvoker::InvokeImpl(
     tasm::report::FeatureCounter::Instance()->Count(
         tasm::report::LynxFeature::CPP_USE_NATIVE_PROMISE);
 
+    delegate_->OnErrorOccurred(base::LynxError{
+        error::E_NATIVE_MODULES_COMMON_DEPRECATED,
+        LynxModuleUtils::GenerateErrorMessage(
+            module_name_, method_name_, "Use deprecated native promise.")});
+
     auto executor_function_impl =
         [self = shared_from_this(), this, jsArgs, module](
             Runtime& rt, const Value& thisVal, const Value* args,

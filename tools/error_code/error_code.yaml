@@ -375,6 +375,11 @@ sections:
             level: error
             description: 'The value returned by module method is invalid'
             fix-suggestion: 'Please file an issue to Lynx to help address it.'
+          - name: Deprecated
+            low-code: 8
+            level: warn
+            description: 'Use deprecated NativeModule API.'
+            fix-suggestion: 'Please migrate deprecated api as soon as possible.'
       - name: Network
         description: 'Error occurred while calling network module'
         mid-code: 8

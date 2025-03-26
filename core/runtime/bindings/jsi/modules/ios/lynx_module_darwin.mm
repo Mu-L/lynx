@@ -27,6 +27,8 @@ namespace lynx {
 namespace piper {
 
 namespace {
+constexpr const char *IS_NATIVE_PROMISE = "__IS_NATIVE_PROMISE__";
+
 std::string genExceptionErrorMessage(NSException *exception) {
   auto message = std::string{" throws an uncaught exception: "}
                      .append([exception.name UTF8String])
@@ -155,6 +157,10 @@ base::expected<std::unique_ptr<pub::Value>, std::string> LynxModuleDarwin::Invok
       SEL selector = NSSelectorFromString(methodLookup[jsMethodNameNSString]);
       auto invoke_res = invokeObjCMethod(method_name, start_time, selector, args.get(), count,
                                          callErrorCode, callbacks);
+      // hack native promsie
+      if (!invoke_res.has_value() && invoke_res.error() == IS_NATIVE_PROMISE) {
+        return invoke_res;
+      }
       if (!invoke_res.has_value()) {
         return base::unexpected(
             "Exception happen in LynxModuleDarwin invokeMethod: " + module_name_ + "." +
@@ -496,6 +502,13 @@ base::expected<std::unique_ptr<pub::Value>, std::string> LynxModuleDarwin::invok
   if (argumentsCount - 4 == count) {
     LOGE("LynxModule, invokeObjCMethod, module: " << module_name_ << " method: " << methodName
                                                   << " is a promise");
+    if (lock_delegate) {
+      lock_delegate->OnErrorOccurred(
+          module_name_, methodName,
+          base::LynxError(error::E_NATIVE_MODULES_COMMON_DEPRECATED,
+                          LynxModuleUtils::GenerateErrorMessage(module_name_, methodName,
+                                                                "Use deprecated native promise.")));
+    }
     tasm::report::FeatureCounter::Instance()->Count(
         tasm::report::LynxFeature::CPP_USE_NATIVE_PROMISE);
     // objc arguments: [this, _cmd, args..., resoledBlock, rejectedBlock]
@@ -531,7 +544,7 @@ base::expected<std::unique_ptr<pub::Value>, std::string> LynxModuleDarwin::invok
       scope_native_promise_rets_.push_back(
           std::optional<piper::Value>(std::move(promise_ret.value())));
       // hack here, this will be delete later.
-      return base::unexpected<std::string>("__IS_NATIVE_PROMISE__");
+      return base::unexpected<std::string>(IS_NATIVE_PROMISE);
     } else {
       return base::unexpected<std::string>(std::move(promise_ret.error()));
     }
@@ -611,7 +624,7 @@ base::expected<piper::Value, std::string> LynxModuleDarwin::createPromise(
             return;
           }
           auto lock_delegate = delegate.lock();
-          if (lock_delegate) {
+          if (!lock_delegate) {
             LOGW("Promise has been destroyed.");
             return;
           }

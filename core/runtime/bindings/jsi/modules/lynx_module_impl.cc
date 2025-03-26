@@ -232,7 +232,7 @@ LynxModuleImpl::invokeMethod(const MethodMetadata& method, Runtime* rt,
   native_module_->ExitInvokeScope();
   // hack here, this will be deleted later.
   if (!ret.has_value() && ret.error() == "__IS_NATIVE_PROMISE__") {
-    auto promise_res = native_module_->TryGetPromiseRet();
+    promise_res = native_module_->TryGetPromiseRet();
   }
 #endif
   base::expected<piper::Value, piper::JSINativeException> response;
@@ -308,8 +308,12 @@ void LynxModuleImpl::OnErrorOccurred(const std::string& module_name,
 
   auto* current_invoke_info = CurrentInvokeInfo();
   if (current_invoke_info) {
-    current_invoke_info->has_error = true;
+    auto error_level = error.error_level_;
     delegate_->OnErrorOccurred(std::move(error));
+    if (error_level == base::LynxErrorLevel::Warn) {
+      return;
+    }
+    current_invoke_info->has_error = true;
     delegate_->OnMethodInvoked(module_name, method_name, error_code);
     if (timing_error_code != NativeModuleStatusCode::SUCCESS) {
       current_invoke_info->timing_collector->OnErrorOccurred(timing_error_code);
