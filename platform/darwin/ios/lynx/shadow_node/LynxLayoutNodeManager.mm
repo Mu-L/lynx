@@ -4,7 +4,6 @@
 
 #import <Foundation/Foundation.h>
 #import <Lynx/LynxCustomMeasureDelegate+Internal.h>
-#import <Lynx/LynxEnv.h>
 #import <Lynx/LynxLayoutNode.h>
 #import <Lynx/LynxLayoutNodeManager.h>
 #import <Lynx/LynxMeasureFuncDarwin.h>
@@ -27,7 +26,6 @@ using namespace lynx::tasm;
   LayoutNodeManager *_layout_node_manager;
   NSRunLoop *_layoutRunLoop;
   id<LayoutThreadMonitor> _layoutThreadErrorCallback;
-  BOOL _enableThreadControl;
 }
 
 - (instancetype)initWithNativePtr:(void *)nativePtr
@@ -37,7 +35,6 @@ using namespace lynx::tasm;
     _layout_node_manager = static_cast<LayoutNodeManager *>(nativePtr);
     _layoutThreadErrorCallback = callback;
     _layoutRunLoop = nil;
-    _enableThreadControl = ![[LynxEnv sharedInstance] enableUnsafeCallOfLayoutMethod];
   }
   return self;
 }
@@ -177,7 +174,7 @@ using namespace lynx::tasm;
   if (_layout_node_manager == nullptr) {
     return;
   }
-  if ([NSRunLoop currentRunLoop] != _layoutRunLoop && _enableThreadControl) {
+  if ([NSRunLoop currentRunLoop] != _layoutRunLoop) {
     if (@available(iOS 10.0, *)) {
       __weak typeof(self) weakSelf = self;
       [_layoutRunLoop performBlock:^{
@@ -196,7 +193,7 @@ using namespace lynx::tasm;
   if (_layout_node_manager == nullptr) {
     return;
   }
-  if ([NSRunLoop currentRunLoop] != _layoutRunLoop && _enableThreadControl) {
+  if ([NSRunLoop currentRunLoop] != _layoutRunLoop) {
     if (@available(iOS 10.0, *)) {
       __weak typeof(self) weakSelf = self;
       [_layoutRunLoop performBlock:^{
@@ -214,7 +211,7 @@ using namespace lynx::tasm;
   if (_layout_node_manager == nullptr) {
     return;
   }
-  if ([NSRunLoop currentRunLoop] != _layoutRunLoop && _enableThreadControl) {
+  if ([NSRunLoop currentRunLoop] != _layoutRunLoop) {
     if (@available(iOS 10.0, *)) {
       __weak typeof(self) weakSelf = self;
       [_layoutRunLoop performBlock:^{
@@ -258,7 +255,7 @@ using namespace lynx::tasm;
   if (_layout_node_manager == nullptr) {
     return;
   }
-  if ([NSRunLoop currentRunLoop] != _layoutRunLoop && _enableThreadControl) {
+  if ([NSRunLoop currentRunLoop] != _layoutRunLoop) {
     if (@available(iOS 10.0, *)) {
       __weak typeof(self) weakSelf = self;
       [_layoutRunLoop performBlock:^{

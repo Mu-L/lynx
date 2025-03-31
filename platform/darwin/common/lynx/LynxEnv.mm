@@ -497,16 +497,6 @@
   return enableAnimationSyncTimeOpt;
 }
 
-- (BOOL)enableUnsafeCallOfLayoutMethod {
-  static dispatch_once_t onceToken;
-  static BOOL enableUnsafeCallOfLayoutMethod = NO;
-  dispatch_once(&onceToken, ^{
-    enableUnsafeCallOfLayoutMethod = [self boolFromExternalEnv:LynxEnvEnableUnsafeCallOfLayoutMethod
-                                                  defaultValue:NO];
-  });
-  return enableUnsafeCallOfLayoutMethod;
-}
-
 - (NSDictionary<NSString *, NSString *> *)cppEnvDebugDescription {
   std::string cppEnvJson = lynx::tasm::LynxEnv::GetInstance().GetDebugDescription();
   NSString *cppEnvJsonString = [NSString stringWithUTF8String:cppEnvJson.c_str()];
@@ -595,7 +585,6 @@
     @(LynxEnvCachesCleanupUntrackedFiles) : @"caches_cleanup_untracked_files",
     @(LynxEnvEnableTextContainerOpt) : @"enable_text_container_opt",
     @(LynxEnvEnableTextStorageDeallocFix) : @"enable_text_storage_dealloc_fix",
-    @(LynxEnvEnableUnsafeCallOfLayoutMethod) : @"enable_unsafe_call_of_layout_method",
     @(LynxEnvEnableJSGroupThreadByDefault) : @"enable_multi_js_thread_by_default",
   };
   NSString *keyString = envKeyBinding[@(key)];

@@ -56,7 +56,6 @@ typedef NS_ENUM(uint64_t, LynxEnvKey) {
   LynxEnvCachesCleanupUntrackedFiles,
   LynxEnvEnableTextContainerOpt,
   LynxEnvEnableTextStorageDeallocFix,
-  LynxEnvEnableUnsafeCallOfLayoutMethod,
   LynxEnvEnableJSGroupThreadByDefault,
 
   // Please add new enum values above
