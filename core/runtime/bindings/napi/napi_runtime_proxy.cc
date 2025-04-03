@@ -4,6 +4,7 @@
 
 #include "core/runtime/bindings/napi/napi_runtime_proxy.h"
 
+#include "core/runtime/bindings/napi/napi_runtime_proxy_jsvm_factory.h"
 #include "core/runtime/bindings/napi/napi_runtime_proxy_quickjs_factory.h"
 #include "core/runtime/bindings/napi/napi_runtime_proxy_v8_factory.h"
 #include "third_party/binding/napi/callback_helper.h"
@@ -25,6 +26,12 @@
 BASE_EXPORT void RegisterV8RuntimeProxyFactory(
     lynx::piper::NapiRuntimeProxyV8Factory *factory) {
   lynx::piper::NapiRuntimeProxy::SetFactory(factory);
+}
+
+// TODO(yangguangzhao.solace): remove this when jsvm refact finished.
+BASE_EXPORT void RegisterJSVMRuntimeProxyFactory(
+    lynx::piper::NapiRuntimeProxyJSVMFactory *factory) {
+  lynx::piper::NapiRuntimeProxy::SetJSVMRuntimeProxyFactory(factory);
 }
 
 namespace lynx {
@@ -66,6 +73,15 @@ std::unique_ptr<NapiRuntimeProxy> NapiRuntimeProxy::Create(
           NapiRuntimeProxyQuickjs::Create(qjs_context->getContext(), delegate);
       proxy_qjs->SetJSRuntime(runtime);
       return proxy_qjs;
+    }
+    case JSRuntimeType::jsvm: {
+      LOGI("Creating napi proxy using jsvm factory: " << s_jsvm_factory);
+      if (s_jsvm_factory) {
+        auto proxy_jsvm = s_jsvm_factory->Create(runtime, delegate);
+        proxy_jsvm->SetJSRuntime(runtime);
+        return proxy_jsvm;
+      }
+      return nullptr;
     }
   }
 }
@@ -169,6 +185,13 @@ NapiRuntimeProxyV8Factory *NapiRuntimeProxy::s_factory = nullptr;
 // static
 void NapiRuntimeProxy::SetFactory(NapiRuntimeProxyV8Factory *factory) {
   s_factory = factory;
+}
+
+NapiRuntimeProxyJSVMFactory *NapiRuntimeProxy::s_jsvm_factory = nullptr;
+// static
+void NapiRuntimeProxy::SetJSVMRuntimeProxyFactory(
+    NapiRuntimeProxyJSVMFactory *factory) {
+  s_jsvm_factory = factory;
 }
 
 }  // namespace piper

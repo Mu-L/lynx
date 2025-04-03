@@ -52,6 +52,9 @@ void JsCacheManagerFacade::PostCacheGenerationTask(
       PostCacheGenerationTaskQuickJs(source_url, template_url, source);
       return;
     }
+    case JSRuntimeType::jsvm:
+      LOGI("PostCacheGenerationTask for JSVM is not supported");
+      return;
   }
 }
 

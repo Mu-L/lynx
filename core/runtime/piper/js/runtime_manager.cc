@@ -34,6 +34,14 @@
 #if JS_ENGINE_TYPE == 1
 #include "core/runtime/jsi/jsc/jsc_api.h"
 #endif  // JS_ENGINE_TYPE == 1
+#if JS_ENGINE_TYPE == 3
+#include "core/runtime/bindings/napi/napi_runtime_proxy_jsvm.h"
+#include "core/runtime/bindings/napi/napi_runtime_proxy_jsvm_factory.h"
+#include "core/runtime/jsi/jsvm/jsvm_api.h"
+
+extern void RegisterJSVMRuntimeProxyFactory(
+    lynx::piper::NapiRuntimeProxyJSVMFactory* factory);
+#endif
 
 #ifdef OS_ANDROID
 #include "core/runtime/bindings/jsi/modules/android/lynx_proxy_runtime_helper.h"
@@ -467,6 +475,7 @@ std::shared_ptr<piper::Runtime> RuntimeManager::MakeRuntime(
 
   return piper::makeV8Runtime();
 #elif JS_ENGINE_TYPE == 2
+  LOGI("make quickjs runtime");
   return piper::makeQuickJsRuntime();
 #endif
 
@@ -475,7 +484,17 @@ std::shared_ptr<piper::Runtime> RuntimeManager::MakeRuntime(
 // Fit compile on other unknown platforms such as Linux.
 #if JS_ENGINE_TYPE == 2
   // desktop tests may run on Linux.
+  LOGI("make quickjs runtime");
   return piper::makeQuickJsRuntime();
+#endif
+
+#if JS_ENGINE_TYPE == 3
+#if ENABLE_NAPI_BINDING
+  static piper::NapiRuntimeProxyJSVMFactoryImpl factory;
+  RegisterJSVMRuntimeProxyFactory(&factory);
+#endif
+  LOGI("make jsvm runtime");
+  return piper::makeJSVMRuntime();
 #endif
 
   LOGW("No runtime made");

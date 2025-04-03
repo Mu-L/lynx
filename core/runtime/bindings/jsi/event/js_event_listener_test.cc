@@ -192,6 +192,8 @@ INSTANTIATE_TEST_SUITE_P(Runtimes, JSClosureEventListenerTest,
                                return "jsc";
                              case JSRuntimeType::quickjs:
                                return "quickjs";
+                             case JSRuntimeType::jsvm:
+                               return "jsvm";
                            }
                          });
 

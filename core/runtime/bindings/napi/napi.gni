@@ -11,6 +11,7 @@ napi_public_headers = rebase_path([
                                     "napi_runtime_proxy.h",
                                     "napi_runtime_proxy_quickjs_factory.h",
                                     "napi_runtime_proxy_v8_factory.h",
+                                    "napi_runtime_proxy_jsvm_factory.h",
                                   ])
 
 napi_jsc_shared_sources = rebase_path([

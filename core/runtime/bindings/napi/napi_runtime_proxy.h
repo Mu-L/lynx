@@ -19,6 +19,7 @@ namespace piper {
 
 class NapiRuntimeProxyV8Factory;
 class NapiRuntimeProxyQuickjsFactory;
+class NapiRuntimeProxyJSVMFactory;
 
 class DelegateObserver {
  public:
@@ -49,6 +50,7 @@ class BASE_EXPORT NapiRuntimeProxy {
 
   static void SetFactory(NapiRuntimeProxyV8Factory* factory);
   static void SetQuickjsFactory(NapiRuntimeProxyQuickjsFactory* factory);
+  static void SetJSVMRuntimeProxyFactory(NapiRuntimeProxyJSVMFactory* factory);
 
   void SetupLoader();
   void RemoveLoader();
@@ -63,6 +65,7 @@ class BASE_EXPORT NapiRuntimeProxy {
 
  private:
   static NapiRuntimeProxyV8Factory* s_factory;
+  static NapiRuntimeProxyJSVMFactory* s_jsvm_factory;
 };
 
 }  // namespace piper

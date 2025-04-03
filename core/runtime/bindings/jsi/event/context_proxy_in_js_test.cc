@@ -341,6 +341,8 @@ INSTANTIATE_TEST_SUITE_P(
           return "jsc";
         case JSRuntimeType::quickjs:
           return "quickjs";
+        case JSRuntimeType::jsvm:
+          return "jsvm";
       }
     });
 

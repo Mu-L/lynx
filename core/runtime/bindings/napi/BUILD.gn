@@ -50,6 +50,14 @@ lynx_core_source_set("napi_binding_quickjs") {
   }
 }
 
+lynx_core_source_set("napi_binding_jsvm") {
+  sources = [
+    "napi_runtime_proxy_jsvm.h",
+    "napi_runtime_proxy_jsvm_factory.h",
+  ]
+  public_deps = [ ":napi_binding_core" ]
+}
+
 config("napi_config") {
   include_dirs = [
     ".",

@@ -45,6 +45,8 @@ Value SystemInfo::get(Runtime *rt, const PropNameID &name) {
         return String::createFromAscii(*rt, "jsc");
       case JSRuntimeType::quickjs:
         return String::createFromAscii(*rt, "quickjs");
+      case JSRuntimeType::jsvm:
+        return String::createFromAscii(*rt, "jsvm");
     }
   } else if (methodName == "lynxSdkVersion") {
     return String::createFromAscii(*rt, tasm::Config::GetCurrentLynxVersion());

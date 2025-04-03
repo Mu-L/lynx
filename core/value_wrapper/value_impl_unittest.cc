@@ -222,6 +222,8 @@ INSTANTIATE_TEST_SUITE_P(
           return "jsc";
         case piper::JSRuntimeType::quickjs:
           return "quickjs";
+        case piper::JSRuntimeType::jsvm:
+          return "jsvm";
       }
     });
 

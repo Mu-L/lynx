@@ -155,7 +155,7 @@ enum class JSRuntimeCreatedType {
   none_vm_none_context  // create noe vm, none context
 };
 
-enum class JSRuntimeType { v8 = 0, jsc, quickjs };
+enum class JSRuntimeType { v8 = 0, jsc, quickjs, jsvm };
 
 /// Represents a JS runtime.  Movable, but not copyable.  Note that
 /// this object may not be thread-aware, but cannot be used safely from
