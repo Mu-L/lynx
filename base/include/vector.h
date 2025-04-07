@@ -180,8 +180,12 @@ struct VectorPrototype {
         reinterpret_cast<VectorPrototype<uint8_t>*>(array);
     auto old_capacity = proto_array->capacity();
     // old*2 for consistent with std::vector of libc++.
+    // But we do not use max(count, old_cap * 2).
     auto new_capacity =
-        count > 0 ? count : (old_capacity == 0 ? 4 : 2 * old_capacity);
+        count > 0
+            ? count
+            : (old_capacity == 0 ? (element_size > 4 ? 1 : 8 / element_size)
+                                 : 2 * old_capacity);
     if (new_capacity <= old_capacity) {
       return nullptr;
     }
@@ -1085,7 +1089,7 @@ struct Vector : protected VectorTemplateless, public VectorPrototype<T> {
       if constexpr (is_trivial) {
         ReallocateTrivial(this, sizeof(T));
       } else {
-        _reallocate_nontrivial(0);
+        _reallocate_nontrivial();
       }
     }
   }
