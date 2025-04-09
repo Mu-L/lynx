@@ -104,6 +104,8 @@ class TimingInfoNg {
   // GetMetricsXXXEntryIfNeeded?
   std::unique_ptr<lynx::pub::Value> GetMetricFcpEntry(
       const TimestampKey& current_key, const PipelineID& pipeline_id);
+  std::unique_ptr<lynx::pub::Value> GetMetricTtiEntry(
+      const TimestampKey& current_key, const PipelineID& pipeline_id);
   std::unique_ptr<lynx::pub::Value> GetMetricFmpEntry(
       const TimestampKey& current_key, const PipelineID& pipeline_id);
   // Send the time consumption of the Pipeline phase. They will be sent after

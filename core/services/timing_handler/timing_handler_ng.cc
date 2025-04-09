@@ -122,6 +122,7 @@ void TimingHandlerNg::DispatchPerformanceEventIfNeeded(
     DispatchInitBackgroundRuntimeEntryIfNeeded(timing_key);
   }
   DispatchMetricFcpEntryIfNeeded(timing_key, pipeline_id);
+  DispatchMetricTtiEntryIfNeeded(timing_key, pipeline_id);
   DispatchMetricFmpEntryIfNeeded(timing_key, pipeline_id);
 }
 
@@ -168,6 +169,20 @@ void TimingHandlerNg::DispatchMetricFcpEntryIfNeeded(
   }
   entry->PushStringToMap(kEntryType, kEntryTypeMetric);
   entry->PushStringToMap(kEntryName, kEntryNameFCP);
+  SendPerformanceEntry(std::move(entry));
+}
+
+void TimingHandlerNg::DispatchMetricTtiEntryIfNeeded(
+    const TimestampKey& current_key, const PipelineID& pipeline_id) {
+  if (!pipeline_id.empty() && !IsLoadBundlePipeline(pipeline_id)) {
+    return;
+  }
+  auto entry = timing_info_.GetMetricTtiEntry(current_key, pipeline_id);
+  if (entry == nullptr) {
+    return;
+  }
+  entry->PushStringToMap(kEntryType, kEntryTypeMetric);
+  entry->PushStringToMap(kEntryName, kEntryNameTTI);
   SendPerformanceEntry(std::move(entry));
 }
 
