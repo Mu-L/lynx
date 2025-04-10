@@ -1156,17 +1156,21 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
   private void updateGenericInfoURL(String url) {
     if (mLynxContext != null && url != null) {
       int instanceId = mLynxContext.getInstanceId();
-      LynxEventReporter.updateGenericInfo(LynxEventReporter.PROP_NAME_URL, url, instanceId);
       if (mGenericInfo != null) {
         mGenericInfo.updateLynxUrl(mLynxContext, url);
         String relativePath = mGenericInfo.getPropValueRelativePath();
         if (relativePath != null) {
-          LynxEventReporter.updateGenericInfo(
-              LynxEventReporter.PROP_NAME_RELATIVE_PATH, relativePath, instanceId);
+          // create hashmap only when both url and relativePath not null
+          HashMap<String, Object> propMap = new HashMap<String, Object>();
+          propMap.put(LynxEventReporter.PROP_NAME_URL, url);
+          propMap.put(LynxEventReporter.PROP_NAME_RELATIVE_PATH, relativePath);
+          LynxEventReporter.updateGenericInfo(propMap, instanceId);
           if (mReportHelper != null) {
             mReportHelper.reportLynxCrashContext(
                 LynxInfoReportHelper.KEY_LAST_LYNX_URL, relativePath);
           }
+        } else {
+          LynxEventReporter.updateGenericInfo(LynxEventReporter.PROP_NAME_URL, url, instanceId);
         }
       }
     }

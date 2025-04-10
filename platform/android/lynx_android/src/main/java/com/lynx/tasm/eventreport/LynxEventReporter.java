@@ -174,6 +174,34 @@ public class LynxEventReporter {
   }
 
   /**
+   *Update generic info of template instance.
+   * Can run on any thread.
+   * @param Map<String, String>  props map to update
+   * @param instanceId id of template instance.
+   */
+  @AnyThread
+  public static void updateGenericInfo(final Map<String, Object> props, final int instanceId) {
+    if (props == null || props.isEmpty() || instanceId < 0) {
+      return;
+    }
+    final String sectionName = UPDATE_GENERIC_INFO;
+    if (TraceEvent.enableTrace()) {
+      Map<String, String> args = new HashMap<>();
+      args.put("instanceId", instanceId + "");
+      for (Map.Entry<String, Object> entry : props.entrySet()) {
+        args.put(entry.getKey(), entry.getValue().toString());
+      }
+      TraceEvent.beginSection(sectionName, args);
+    }
+    runOnReportThread(() -> {
+      TraceEvent.beginSection(sectionName);
+      getGenericInfo(instanceId).putAll(props);
+      TraceEvent.endSection(sectionName);
+    });
+    TraceEvent.endSection(sectionName);
+  }
+
+  /**
    * Remove generic info of template instance by id.
    * @param instanceId id of template instance.
    */
