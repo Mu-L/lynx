@@ -1248,7 +1248,8 @@ void TemplateAssembler::LoadComponentWithCallbackInfo(
   auto callback_id = callback_info.callback_id;
 
   TRACE_EVENT(LYNX_TRACE_CATEGORY, LAZY_BUNDLE_LOAD,
-              [sync, url](lynx::perfetto::EventContext ctx) {
+              [sync, url,
+               instance_id = instance_id_](lynx::perfetto::EventContext ctx) {
                 ctx.event()->set_name("LoadComponentWithCallback");
                 auto* debug = ctx.event()->add_debug_annotations();
                 debug->set_name("sync");
@@ -1256,6 +1257,8 @@ void TemplateAssembler::LoadComponentWithCallbackInfo(
                 auto* url_debug = ctx.event()->add_debug_annotations();
                 url_debug->set_name("url");
                 url_debug->set_string_value(url);
+                ctx.event()->add_debug_annotations("instance_id",
+                                                   std::to_string(instance_id));
               });
 #if ENABLE_TESTBENCH_RECORDER
   tasm::recorder::TemplateAssemblerRecorder::RecordLoadComponentWithCallback(
@@ -1523,7 +1526,7 @@ void TemplateAssembler::UpdateComponentData(
                stacks = task.stacks_](lynx::perfetto::EventContext ctx) {
                 ctx.event()->add_debug_annotations(
                     "update_data_type", std::to_string(update_data_type));
-                ctx.event()->add_debug_annotations("instance_id_",
+                ctx.event()->add_debug_annotations("instance_id",
                                                    std::to_string(instance_id));
                 ctx.event()->add_debug_annotations("stacks", stacks);
               });
@@ -2104,7 +2107,7 @@ void TemplateAssembler::UpdateDataByJS(
                   lynx::perfetto::EventContext ctx) {
                 ctx.event()->add_debug_annotations(
                     "update_data_type", std::to_string(update_data_type));
-                ctx.event()->add_debug_annotations("instance_id_",
+                ctx.event()->add_debug_annotations("instance_id",
                                                    std::to_string(instance_id));
                 ctx.event()->add_debug_annotations("stacks", stacks);
               });

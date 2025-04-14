@@ -506,8 +506,14 @@ public class LynxViewBuilder {
     TraceEvent.beginSection(TraceEventDef.LYNXVIEW_BUILDER_BUILD);
     LynxViewConfigProcessor.parseForLynxViewBuilder(lynxViewConfig, this);
     LynxView lynxView = new LynxView(context, this);
-    TraceEvent.endSection(TraceEventDef.LYNXVIEW_BUILDER_BUILD);
-
+    if (TraceEvent.enableTrace()) {
+      HashMap<String, String> args = new HashMap<>();
+      if (lynxView.getLynxContext() != null) {
+        args.put("instance_id", String.valueOf(lynxView.getLynxContext().getInstanceId()));
+      }
+      TraceEvent.endSection(
+          TraceEvent.CATEGORY_DEFAULT, TraceEventDef.LYNXVIEW_BUILDER_BUILD, args);
+    }
     return lynxView;
   }
 

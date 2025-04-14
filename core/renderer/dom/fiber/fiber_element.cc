@@ -1575,8 +1575,17 @@ void FiberElement::PostResolveTaskToThreadPool(
 
   auto task_info_ptr = fml::MakeRefCounted<base::OnceTask<ParallelFlushReturn>>(
       [target = this, promise = std::move(promise)]() mutable {
-        TRACE_EVENT(LYNX_TRACE_CATEGORY,
-                    FIBER_ELEMENT_PREPARE_FOR_CRATE_OR_UPDATE_ASYNC);
+        TRACE_EVENT(
+            LYNX_TRACE_CATEGORY,
+            FIBER_ELEMENT_PREPARE_FOR_CRATE_OR_UPDATE_ASYNC,
+            [target](lynx::perfetto::EventContext ctx) {
+              if (target->element_manager()) {
+                ctx.event()->add_debug_annotations(
+                    "instance_id",
+                    std::to_string(target->element_manager()->GetInstanceId()));
+              }
+            });
+
         target->UpdateResolveStatus(AsyncResolveStatus::kResolving);
         target->parallel_flush_ = true;
         promise.set_value(target->PrepareForCreateOrUpdate());
