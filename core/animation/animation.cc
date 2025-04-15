@@ -14,6 +14,7 @@
 
 #include "base/include/log/logging.h"
 #include "base/trace/native/trace_event.h"
+#include "core/animation/animation_trace_event_def.h"
 #include "core/animation/constants.h"
 #include "core/base/lynx_trace_categories.h"
 #include "core/base/threading/vsync_monitor.h"
@@ -69,7 +70,7 @@ void Animation::Pause() {
 void Animation::Stop() { state_ = State::kStop; }
 
 void Animation::Destroy(bool need_clear_effect) {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, "Animation::Destroy");
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, ANIMATION_DESTORY);
   if (need_clear_effect) {
     keyframe_effect_->ClearEffect();
   }
@@ -137,7 +138,7 @@ bool Animation::HasFinishedAll(fml::TimePoint& time) {
 }
 
 void Animation::RequestNextFrame() {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, "Animation::RequestNextFrame");
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, ANIMATION_REQUEST_NEXT_FRAME);
   if (animation_delegate_) {
     animation_delegate_->RequestNextFrame(
         std::weak_ptr<Animation>(shared_from_this()));
@@ -145,7 +146,7 @@ void Animation::RequestNextFrame() {
 }
 
 void Animation::DoFrame(fml::TimePoint& frame_time) {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, "Animation::DoFrame",
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, ANIMATION_DOFRAME,
               [this](lynx::perfetto::EventContext ctx) {
                 auto* curveTypeInfo = ctx.event()->add_debug_annotations();
                 curveTypeInfo->set_name("animationName");

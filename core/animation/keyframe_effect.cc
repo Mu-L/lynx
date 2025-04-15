@@ -13,6 +13,7 @@
 #include "base/include/log/logging.h"
 #include "core/animation/animation.h"
 #include "core/animation/animation_curve.h"
+#include "core/animation/animation_trace_event_def.h"
 #include "core/renderer/dom/element.h"
 #include "core/renderer/dom/element_manager.h"
 
@@ -43,7 +44,7 @@ void KeyframeEffect::AddKeyframeModel(
 }
 
 void KeyframeEffect::TickKeyframeModel(fml::TimePoint monotonic_time) {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, "KeyframeEffect::TickKeyframeModel");
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, KEYFRAME_EFFECT_TICK_MODEL);
   // Collect animated style of this animation
   tasm::StyleMap style_map;
   bool should_send_start_event = false;
@@ -95,7 +96,7 @@ void KeyframeEffect::TickKeyframeModel(fml::TimePoint monotonic_time) {
 }
 
 bool KeyframeEffect::CheckHasFinished(fml::TimePoint& monotonic_time) {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, "KeyframeEffect::CheckHasFinished");
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, KEYFRAME_EFFECT_CHECK_HAS_FINISHED);
   // As all keyframe models share the same animation parameters, once one of
   // them finishes, all others will also finish. Therefore, here we only need to
   // check if the first keyframe model has finished.
@@ -110,7 +111,7 @@ bool KeyframeEffect::CheckHasFinished(fml::TimePoint& monotonic_time) {
 }
 
 void KeyframeEffect::ClearEffect() {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, "KeyframeEffect::ClearEffect");
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, KEYFRAME_EFFECT_CLEAR_EFFECT);
   if (animation_delegate_) {
     animation_delegate_->SetNeedsAnimationStyleRecalc(animation_->name());
   }

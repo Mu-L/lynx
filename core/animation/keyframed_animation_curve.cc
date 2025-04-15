@@ -13,6 +13,7 @@
 #include "base/include/float_comparison.h"
 #include "base/include/log/logging.h"
 #include "base/trace/native/trace_event.h"
+#include "core/animation/animation_trace_event_def.h"
 #include "core/renderer/dom/element.h"
 #include "core/renderer/dom/element_manager.h"
 
@@ -189,7 +190,7 @@ KeyframedLayoutAnimationCurve::Create() {
 
 tasm::CSSValue KeyframedLayoutAnimationCurve::GetValue(
     fml::TimeDelta& t) const {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, "KeyframedLayoutAnimationCurve::GetValue",
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, KEYFRAME_LAYOUT_ANIMATION_CURVE_GET_VALUE,
               [](lynx::perfetto::EventContext ctx) {
                 auto* curveTypeInfo = ctx.event()->add_debug_annotations();
                 curveTypeInfo->set_name("curveType");
@@ -321,7 +322,7 @@ KeyframedOpacityAnimationCurve::Create() {
 
 tasm::CSSValue KeyframedOpacityAnimationCurve::GetValue(
     fml::TimeDelta& t) const {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, "KeyframedOpacityAnimationCurve::GetValue",
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, KEYFRAME_OPACITY_ANIMATION_CURVE_GET_VALUE,
               [](lynx::perfetto::EventContext ctx) {
                 auto* curveTypeInfo = ctx.event()->add_debug_annotations();
                 curveTypeInfo->set_name("curveType");
@@ -406,7 +407,7 @@ KeyframedColorAnimationCurve::Create(
 }
 
 tasm::CSSValue KeyframedColorAnimationCurve::GetValue(fml::TimeDelta& t) const {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, "KeyframedColorAnimationCurve::GetValue",
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, KEYFRAME_COLOR_ANIMATION_CURVE_GET_VALUE,
               [](lynx::perfetto::EventContext ctx) {
                 auto* curveTypeInfo = ctx.event()->add_debug_annotations();
                 curveTypeInfo->set_name("curveType");
@@ -525,7 +526,7 @@ KeyframedFloatAnimationCurve::Create() {
 }
 
 tasm::CSSValue KeyframedFloatAnimationCurve::GetValue(fml::TimeDelta& t) const {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, "KeyframedFloatAnimationCurve::GetValue",
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, KEYFRAME_FONT_ANIMATION_CURVE_GET_VALUE,
               [](lynx::perfetto::EventContext ctx) {
                 auto* curveTypeInfo = ctx.event()->add_debug_annotations();
                 curveTypeInfo->set_name("curveType");
@@ -594,7 +595,7 @@ KeyframedFilterAnimationCurve::Create() {
 
 tasm::CSSValue KeyframedFilterAnimationCurve::GetValue(
     fml::TimeDelta& t) const {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, "KeyframedFilterAnimationCurve::GetValue",
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, KEYFRAME_FILTER_ANIMATION_CURVE_GET_VALUE,
               [](lynx::perfetto::EventContext ctx) {
                 auto* curveTypeInfo = ctx.event()->add_debug_annotations();
                 curveTypeInfo->set_name("curveType");

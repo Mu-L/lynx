@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "core/animation/animation_trace_event_def.h"
 #include "core/animation/keyframed_animation_curve.h"
 #include "core/renderer/dom/element.h"
 #include "core/renderer/dom/element_manager.h"
@@ -254,7 +255,7 @@ bool CSSTransitionManager::ConsumeCSSProperty(tasm::CSSPropertyID css_id,
 }
 
 void CSSTransitionManager::TickAllAnimation(fml::TimePoint& frame_time) {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, "CSSTransitionManager::TickAllAnimation");
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, TRANSITION_MANAGER_NEEDS_ANIMATION_RECALC);
   CSSKeyframeManager::TickAllAnimation(frame_time);
   // After traversing the set, the final_animator_maps_ is now assembled.
 }

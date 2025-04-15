@@ -11,6 +11,7 @@ animation_shared_sources = [
   "animation_curve.cc",
   "animation_curve.h",
   "animation_delegate.h",
+  "animation_trace_event_def.h",
   "constants.h",
   "css_keyframe_manager.cc",
   "css_keyframe_manager.h",

@@ -12,6 +12,7 @@
 
 #include "base/include/log/logging.h"
 #include "base/trace/native/trace_event.h"
+#include "core/animation/animation_trace_event_def.h"
 #include "core/animation/keyframed_animation_curve.h"
 #include "core/animation/transforms/transform_operations.h"
 #include "core/renderer/dom/element.h"
@@ -88,7 +89,7 @@ KeyframedTransformAnimationCurve::Create() {
 // blend result as the real time style of animation.
 tasm::CSSValue KeyframedTransformAnimationCurve::GetValue(
     fml::TimeDelta& t) const {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, "KeyframedTransformAnimationCurve::GetValue",
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, KEYFRAME_TRANSFORM_ANIMATION_CURVE_GET_VALUE,
               [](lynx::perfetto::EventContext ctx) {
                 auto* curveTypeInfo = ctx.event()->add_debug_annotations();
                 curveTypeInfo->set_name("curveType");

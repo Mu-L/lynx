@@ -12,6 +12,7 @@
 #include "base/include/log/logging.h"
 #include "core/animation/animation.h"
 #include "core/animation/animation_delegate.h"
+#include "core/animation/animation_trace_event_def.h"
 #include "core/animation/keyframed_animation_curve.h"
 #include "core/animation/transform_animation_curve.h"
 #include "core/animation/utils/timing_function.h"
@@ -128,7 +129,7 @@ bool CSSKeyframeManager::InitCurveAndModelAndKeyframe(
 }
 
 void CSSKeyframeManager::TickAllAnimation(fml::TimePoint& frame_time) {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, "CSSKeyframeManager::TickAllAnimation");
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, KEYFRAME_MANAGER_TICK_ALL_ANIMATION);
   auto temp_vec = std::vector<std::weak_ptr<Animation>>();
   auto& true_vec = active_animations_;
   temp_vec.swap(true_vec);
@@ -309,8 +310,7 @@ void CSSKeyframeManager::NotifyClientAnimated(tasm::StyleMap& styles,
 
 void CSSKeyframeManager::SetNeedsAnimationStyleRecalc(const std::string& name) {
   // clear effect
-  TRACE_EVENT(LYNX_TRACE_CATEGORY,
-              "CSSKeyframeManager::SetNeedsAnimationStyleRecalc");
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, KEYFRAME_MANAGER_NEEDS_ANIMATION_RECALC);
   if (element_) {
     auto iter = animations_map_.find(name);
     if (iter == animations_map_.end()) {
