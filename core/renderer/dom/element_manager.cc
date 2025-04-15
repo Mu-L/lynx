@@ -13,7 +13,6 @@
 #include "base/trace/native/trace_event.h"
 #include "core/base/lynx_trace_categories.h"
 #include "core/base/threading/vsync_monitor.h"
-#include "core/base/trace/trace_event_def.h"
 #include "core/renderer/css/computed_css_style.h"
 #include "core/renderer/css/css_color.h"
 #include "core/renderer/css/css_selector_constants.h"
@@ -614,7 +613,7 @@ void ElementManager::OnFinishUpdateProps(Element *node,
 }
 
 void ElementManager::OnPatchFinishForRadon(PipelineOptions &options) {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY_VITALS, ELEMENT_MANAGER_ON_PATCH_FINISH);
+  TRACE_EVENT(LYNX_TRACE_CATEGORY_VITALS, "ElementManager::OnPatchFinish");
   catalyzer_->painting_context()->FinishTasmOperation(options);
 
   if (options.is_reload_template) {
@@ -622,7 +621,7 @@ void ElementManager::OnPatchFinishForRadon(PipelineOptions &options) {
   }
 
   if (!need_layout_) {
-    TRACE_EVENT(LYNX_TRACE_CATEGORY, ELEMENT_MANAGER_ON_PATCH_FINISH_NO_PATCH);
+    TRACE_EVENT(LYNX_TRACE_CATEGORY, "ElementManager::OnPatchFinishNoPatch");
     LOGI("ElementManager::OnPatchFinishNoPatch!");
     catalyzer_->painting_context()->FinishLayoutOperation(options);
     delegate_->OnUpdateDataWithoutChange();

@@ -7,7 +7,6 @@
 #include <string>
 #include <utility>
 
-#include "core/base/trace/trace_event_def.h"
 #include "core/build/gen/lynx_sub_error_code.h"
 #include "core/resource/lazy_bundle/lazy_bundle_utils.h"
 #include "core/runtime/vm/lepus/lepus_value.h"
@@ -48,7 +47,7 @@ void LynxRuntimeProxyImpl::CallJSFunction(std::string module_id,
       }
 
       TRACE_EVENT(
-          LYNX_TRACE_CATEGORY, CALL_JS_FUNCTION,
+          LYNX_TRACE_CATEGORY, "CallJSFunction",
           [&](lynx::perfetto::EventContext ctx) {
             ctx.event()->add_debug_annotations("module_name", module_id);
             ctx.event()->add_debug_annotations("method_name", method_id);

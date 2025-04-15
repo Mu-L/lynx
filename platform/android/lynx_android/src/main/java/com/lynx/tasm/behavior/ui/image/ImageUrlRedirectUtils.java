@@ -8,7 +8,6 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import com.lynx.tasm.base.LLog;
 import com.lynx.tasm.base.TraceEvent;
-import com.lynx.tasm.base.trace.TraceEventDef;
 import com.lynx.tasm.behavior.ImageInterceptor;
 import com.lynx.tasm.behavior.LynxContext;
 import com.lynx.tasm.utils.ContextUtils;
@@ -88,15 +87,17 @@ public class ImageUrlRedirectUtils {
 
   private static String shouldRedirectImageUrl(
       @NonNull ImageInterceptor interceptor, String origUrl, String templateUrl) {
+    String traceEvent = "Interceptor.shouldRedirectImageUrl";
     if (TraceEvent.enableTrace()) {
       Map<String, String> props = new HashMap<>();
       props.put("url", origUrl);
-      TraceEvent.beginSection(TraceEventDef.IMAGE_SHOULD_REDIRECT_IMAGE_URL, props);
+      TraceEvent.beginSection(traceEvent, props);
     }
 
     String redirectUrl = interceptor.shouldRedirectImageUrl(origUrl);
-    TraceEvent.endSection(TraceEventDef.IMAGE_SHOULD_REDIRECT_IMAGE_URL);
-
+    if (TraceEvent.enableTrace()) {
+      TraceEvent.endSection(traceEvent);
+    }
     if (redirectUrl != null) {
       return redirectUrl;
     }

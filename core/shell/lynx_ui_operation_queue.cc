@@ -10,7 +10,6 @@
 #include "base/trace/native/trace_event.h"
 #include "core/base/lynx_trace_categories.h"
 #include "core/base/threading/task_runner_manufactor.h"
-#include "core/base/trace/trace_event_def.h"
 #include "core/services/long_task_timing/long_task_monitor.h"
 
 namespace lynx {
@@ -28,7 +27,7 @@ void LynxUIOperationQueue::Flush() {
   if (!enable_flush_) {
     return;
   }
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, UI_OPERATION_QUEUE_FLUSH);
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, "LynxUIOperationQueue.Flush");
   auto high_priority_operations = high_priority_operations_.PopAll();
   auto operations = operations_.PopAll();
   // need move, else LynxUI may invoke Flush again when Flush...
@@ -57,7 +56,7 @@ void LynxUIOperationQueue::ConsumeOperations(
   }
 
   for (auto& operation : operations) {
-    TRACE_EVENT(LYNX_TRACE_CATEGORY, UI_OPERATION_QUEUE_EXECUTE);
+    TRACE_EVENT(LYNX_TRACE_CATEGORY, "LynxUIOperationQueue::ExecuteOperation");
     operation();
   }
 

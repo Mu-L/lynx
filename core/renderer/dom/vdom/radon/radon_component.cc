@@ -10,7 +10,6 @@
 #include "base/include/string/string_utils.h"
 #include "base/trace/native/trace_event.h"
 #include "core/base/lynx_trace_categories.h"
-#include "core/base/trace/trace_event_def.h"
 #include "core/renderer/dom/component_config.h"
 #include "core/renderer/dom/vdom/radon/node_select_options.h"
 #include "core/renderer/dom/vdom/radon/node_selector.h"
@@ -824,7 +823,7 @@ void RadonComponent::UpdateRadonComponent(RenderType render_type,
                                           PipelineOptions& pipeline_options) {
   LOGI("RadonComponent::UpdateRadonComponent, name: "
        << name_.str() << ", component id: " << ComponentId());
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, RADON_COMPONENT_UPDATE_COMPONENT,
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, "RadonComponent::UpdateRadonComponent",
               [this](lynx::perfetto::EventContext ctx) {
                 UpdateTraceDebugInfo(ctx.event());
               });
@@ -1120,7 +1119,7 @@ void RadonComponent::OnSelectorChanged() {
 }
 
 void RadonComponent::DispatchForDiff(const DispatchOption& option) {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, RADON_COMPONENT_DISPATCH_FOR_DIFF,
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, "RadonComponent::DispatchForDiff",
               [this](lynx::perfetto::EventContext ctx) {
                 UpdateTraceDebugInfo(ctx.event());
               });

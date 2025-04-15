@@ -8,7 +8,6 @@
 
 #include "base/trace/native/trace_event.h"
 #include "core/base/lynx_trace_categories.h"
-#include "core/base/trace/trace_event_def.h"
 #include "core/services/event_report/event_tracker_platform_impl.h"
 
 namespace lynx {
@@ -157,7 +156,7 @@ void EventTracker::ClearCache(int32_t instance_id) {
 }
 
 void EventTracker::Flush(int32_t instance_id) {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, EVENT_TRACKER_FLUSH,
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, "EventTracker::Flush",
               [&](perfetto::EventContext ctx) {
                 auto* debug = ctx.event()->add_debug_annotations();
                 debug->set_name("instance_id");

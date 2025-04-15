@@ -15,7 +15,6 @@
 #include "base/include/value/base_string.h"
 #include "base/trace/native/trace_event.h"
 #include "core/base/lynx_trace_categories.h"
-#include "core/base/trace/trace_event_def.h"
 #include "core/renderer/css/css_decoder.h"
 #include "core/renderer/css/css_property.h"
 #include "core/renderer/css/css_selector_constants.h"
@@ -311,7 +310,7 @@ void RadonNode::OnStyleChange() {
 }
 
 void RadonNode::DispatchSelf(const DispatchOption& option) {
-  TRACE_EVENT(LYNX_TRACE_CATEGORY, RADON_DISPATCH_SELF,
+  TRACE_EVENT(LYNX_TRACE_CATEGORY, "RadonDispatchSelf",
               [this](lynx::perfetto::EventContext ctx) {
                 UpdateTraceDebugInfo(ctx.event());
               });

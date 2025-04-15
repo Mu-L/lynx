@@ -6,7 +6,6 @@
 
 #include "base/include/debug/lynx_assert.h"
 #include "core/base/threading/vsync_monitor.h"
-#include "core/base/trace/trace_event_def.h"
 #include "core/renderer/dom/vdom/radon/node_select_options.h"
 #include "core/renderer/template_assembler.h"
 #include "core/services/timing_handler/timing_mediator.h"
@@ -403,7 +402,7 @@ void RuntimeMediator::OnPipelineStart(
     const tasm::PipelineOrigin& pipeline_origin,
     tasm::timing::TimestampUs pipeline_start_timestamp) {
   TRACE_EVENT_INSTANT(
-      LYNX_TRACE_CATEGORY, TIMING_PIPELINE_START,
+      LYNX_TRACE_CATEGORY, "Timing::OnPipelineStart",
       [&pipeline_id, &pipeline_origin,
        pipeline_start_timestamp](lynx::perfetto::EventContext ctx) {
         ctx.event()->add_debug_annotations("pipeline_id", pipeline_id);

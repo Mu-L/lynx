@@ -17,7 +17,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import com.lynx.tasm.PageConfig;
 import com.lynx.tasm.base.TraceEvent;
-import com.lynx.tasm.base.trace.TraceEventDef;
 import com.lynx.tasm.behavior.LynxContext;
 import com.lynx.tasm.behavior.event.EventTarget;
 import com.lynx.tasm.behavior.ui.UIBody.UIBodyView;
@@ -197,11 +196,12 @@ public class UIBody extends UIGroup<UIBodyView> {
 
     @Override
     protected void dispatchDraw(final Canvas canvas) {
-      TraceEvent.beginSection(TraceEventDef.LYNX_TEMPLATE_RENDER_DRAW);
+      String eventName = "LynxTemplateRender.Draw";
       boolean needLongTaskMonitor = false;
       TimingCollector timingCollector = mTimingCollector.get();
-      LynxLongTaskMonitor.willProcessTask("LynxTemplateRender.Draw", mInstanceId);
+      LynxLongTaskMonitor.willProcessTask(eventName, mInstanceId);
       needLongTaskMonitor = true;
+      markTraceIfNeed(eventName, false);
       if (mDrawChildHook != null) {
         mDrawChildHook.beforeDispatchDraw(canvas);
       }
@@ -219,10 +219,23 @@ public class UIBody extends UIGroup<UIBodyView> {
       if (timingCollector != null) {
         timingCollector.markDrawEndTimingIfNeeded();
       }
+      markTraceIfNeed(eventName, true);
       if (needLongTaskMonitor) {
         LynxLongTaskMonitor.didProcessTask();
       }
-      TraceEvent.endSection(TraceEventDef.LYNX_TEMPLATE_RENDER_DRAW);
+    }
+
+    private void markTraceIfNeed(String event, boolean isEnd) {
+      if (!TraceEvent.enableTrace()) {
+        return;
+      }
+      HashMap map = new HashMap<String, String>();
+      map.put("instance_id", mInstanceId + "");
+      if (isEnd) {
+        TraceEvent.endSection(TraceEvent.CATEGORY_VITALS, event);
+      } else {
+        TraceEvent.beginSection(TraceEvent.CATEGORY_VITALS, event, map);
+      }
     }
 
     void notifyMeaningfulLayout() {
