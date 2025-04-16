@@ -134,22 +134,25 @@ git lynx check
 
 The table below shows the specific tasks performed by `git lynx check`:
 
-|Task Name|Description|
-|----|----|
-|`coding-style`|Check the coding style of files|
-|`commit-message`|Check the format of commit message|
-|`cpplint`|Check your C++ code for style violations and potential errors|
-|`java-lint`|Check your Java code for style violations and potential errors|
-|`android-check-style`|Check the import style of Android code|
-|`file-type`|Check whether there are any binary files (We do not recommend storing binary files in the repository)|
+| Task Name             | Description                                                                                           |
+| --------------------- | ----------------------------------------------------------------------------------------------------- |
+| `coding-style`        | Check the coding style of files                                                                       |
+| `commit-message`      | Check the format of commit message                                                                    |
+| `cpplint`             | Check your C++ code for style violations and potential errors                                         |
+| `java-lint`           | Check your Java code for style violations and potential errors                                        |
+| `android-check-style` | Check the import style of Android code                                                                |
+| `file-type`           | Check whether there are any binary files (We do not recommend storing binary files in the repository) |
+| `api-check`           | Check changes to public APIs and update the corresponding API files as needed                         |
+
+These tasks can also be executed individually via commands, for example, the `api-check` task can be run with `git lynx check --checkers=api-check`.
 
 The specific programming languages and tools supported by `coding-style` task:
 
-|Language|Supported|Formatting Tool|
-|----|----|----|
-|C,C++,Objective-C,Java|✅|clang-format|
-|TypeScript|✅|prettier|
-|GN|✅|gn|
+| Language               | Supported | Formatting Tool |
+| ---------------------- | --------- | --------------- |
+| C,C++,Objective-C,Java | ✅         | clang-format    |
+| TypeScript             | ✅         | prettier        |
+| GN                     | ✅         | gn              |
 
 ## Landing Pull Requests
 

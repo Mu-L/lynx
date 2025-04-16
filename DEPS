@@ -73,9 +73,9 @@ deps = {
         'type': 'git',
         'url': 'https://github.com/iqiyi/xHook.git',
         'commit': 'e59285034feadfdd4ba9b65e1eea1d381da83ed3',
-        "patches": os.path.join(root_dir, 'patches', 'xhook', '0001-Infra-Add-BUILD.gn-file-of-xhook.patch'),        
+        "patches": os.path.join(root_dir, 'patches', 'xhook', '0001-Infra-Add-BUILD.gn-file-of-xhook.patch'),
         "ignore_in_git": True,
-    },    
+    },
     'copy_root_gn_config': {
         "type": "action",
         "cwd": "../",
@@ -163,7 +163,7 @@ deps = {
         "type": "git",
         "url": "https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libcxx",
         "commit": "64d36e572d3f9719c5d75011a718f33f11126851",
-        "ignore_in_git": True,     
+        "ignore_in_git": True,
     },
     '../third_party/libcxxabi': {
         "type": "git",
@@ -183,12 +183,12 @@ deps = {
         "ignore_in_git": True,
         "decompress": False,
         "condition": system in ['linux', 'darwin'],
-    },    
+    },
     '../third_party/zlib': {
         'type': 'git',
         'url': 'https://chromium.googlesource.com/chromium/src/third_party/zlib',
         'commit': 'f5fd0ad2663e239a31184ad4c9919991dda16f46',
-        "patches": os.path.join(root_dir, 'patches', 'zlib', '0001-Adapt-zlib-to-the-Lynx-project.patch'),         
+        "patches": os.path.join(root_dir, 'patches', 'zlib', '0001-Adapt-zlib-to-the-Lynx-project.patch'),
         "ignore_in_git": True,
     },
     'third_party/NativeScript/include': {
@@ -219,9 +219,9 @@ deps = {
     "../third_party/benchmark": {
         'type': 'git',
         'url': 'https://github.com/google/benchmark.git',
-        'commit': 'f91b6b42b1b9854772a90ae9501464a161707d1e',      
+        'commit': 'f91b6b42b1b9854772a90ae9501464a161707d1e',
         "ignore_in_git": True,
-    }, 
+    },
     "third_party/quickjs/src": {
         "type": "git",
         "url": "https://github.com/lynx-family/primjs.git",
@@ -293,5 +293,11 @@ deps = {
         "commit": "271dba582cab4409de488da3fa6e6761fb2a1cdd",
         'deps_file': 'dependencies/DEPS',
         "ignore_in_git": True,
+    },
+    '../buildtools/doxygen': {
+        "type": "http",
+        "url": f"https://github.com/lynx-family/buildtools/releases/download/v1.13.2/buildtools-doxygen-{system}-{machine}.tar.gz",
+        "ignore_in_git": True,
+        "condition": system in ['linux', 'darwin']
     },
 }

@@ -127,3 +127,7 @@ js_libraries/lynx-core/src/common/feature.ts
 
 # ignore Gradle files
 **/.gradle/
+
+# api metadata
+/tools/api/android
+/tools/api/ios
