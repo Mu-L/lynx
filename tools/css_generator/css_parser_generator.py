@@ -260,7 +260,6 @@ json_obj = check_and_get_defines()
 
 string_content = json.dumps(json_obj, sort_keys=True)
 new_hash = hashlib.sha256(string_content.encode()).hexdigest()
-script_dir = os.path.dirname(os.path.abspath(__file__))
 hash_define_file = os.path.join(script_dir, "css_defines_sha256.txt")
 # Check if the hash file exists.
 # If the hash file does not exist, the hash file is generated and then executed the generate logic.
