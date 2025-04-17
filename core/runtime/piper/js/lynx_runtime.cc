@@ -738,25 +738,31 @@ void LynxRuntime::OnRuntimeReady() {
 void LynxRuntime::AddEventListeners() {
   auto core_context_proxy =
       app_->GetContextProxy(runtime::ContextProxy::Type::kCoreContext);
-  core_context_proxy->AddEventListener(
-      kMessageEventTypeOnAppEnterForeground,
-      std::make_unique<event::ClosureEventListener>([this](lepus::Value args) {
-        if (runtime_lifecycle_observer_) {
-          runtime_lifecycle_observer_->OnAppEnterForeground();
-        }
-      }));
-  core_context_proxy->AddEventListener(
-      kMessageEventTypeOnAppEnterBackground,
-      std::make_unique<event::ClosureEventListener>([this](lepus::Value args) {
-        if (runtime_lifecycle_observer_) {
-          runtime_lifecycle_observer_->OnAppEnterBackground();
-        }
-      }));
+  if (core_context_proxy != nullptr) {
+    core_context_proxy->AddEventListener(
+        kMessageEventTypeOnAppEnterForeground,
+        std::make_unique<event::ClosureEventListener>(
+            [this](lepus::Value args) {
+              if (runtime_lifecycle_observer_) {
+                runtime_lifecycle_observer_->OnAppEnterForeground();
+              }
+            }));
+    core_context_proxy->AddEventListener(
+        kMessageEventTypeOnAppEnterBackground,
+        std::make_unique<event::ClosureEventListener>(
+            [this](lepus::Value args) {
+              if (runtime_lifecycle_observer_) {
+                runtime_lifecycle_observer_->OnAppEnterBackground();
+              }
+            }));
+  }
 
   auto js_context_proxy =
       app_->GetContextProxy(runtime::ContextProxy::Type::kJSContext);
 
-  delegate_->AddEventListenersToWhiteBoard(js_context_proxy.get());
+  if (js_context_proxy != nullptr) {
+    delegate_->AddEventListenersToWhiteBoard(js_context_proxy.get());
+  }
 }
 
 void LynxRuntime::OnJSIException(const piper::JSIException& exception) {
@@ -811,7 +817,10 @@ void LynxRuntime::OnReceiveMessageEvent(runtime::MessageEvent event) {
   }
 
   QueueOrExecTask([this, event = std::move(event)]() mutable {
-    app_->GetContextProxy(event.GetOriginType())->DispatchEvent(event);
+    auto proxy = app_->GetContextProxy(event.GetOriginType());
+    if (proxy != nullptr) {
+      proxy->DispatchEvent(event);
+    }
   });
 }
 

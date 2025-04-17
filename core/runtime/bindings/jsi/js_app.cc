@@ -1716,14 +1716,21 @@ void App::SetCSSVariable(const std::string& component_id,
 }
 
 void App::Init() {
-  GetContextProxy(runtime::ContextProxy::Type::kJSContext)
-      ->AddEventListener(runtime::kMessageEventTypeForceGcJSIObjectWrapper,
-                         std::make_unique<event::ClosureEventListener>(
-                             [this](lepus::Value args) {
-                               jsi_object_wrapper_manager_->ForceGcOnJSThread();
-                             }));
+  auto js_context_proxy =
+      GetContextProxy(runtime::ContextProxy::Type::kJSContext);
+  if (js_context_proxy != nullptr) {
+    js_context_proxy->AddEventListener(
+        runtime::kMessageEventTypeForceGcJSIObjectWrapper,
+        std::make_unique<event::ClosureEventListener>(
+            [this](lepus::Value args) {
+              jsi_object_wrapper_manager_->ForceGcOnJSThread();
+            }));
+  }
   auto core_context_proxy =
       GetContextProxy(runtime::ContextProxy::Type::kCoreContext);
+  if (core_context_proxy == nullptr) {
+    return;
+  }
   core_context_proxy->AddEventListener(
       runtime::kMessageEventTypeOnAppEnterForeground,
       std::make_unique<event::ClosureEventListener>(

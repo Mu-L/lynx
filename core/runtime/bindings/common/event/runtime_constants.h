@@ -15,6 +15,8 @@ static constexpr const char* kGetDevTool = "getDevtool";
 static constexpr const char* kGetJSContext = "getJSContext";
 static constexpr const char* kGetCoreContext = "getCoreContext";
 static constexpr const char* kGetUIContext = "getUIContext";
+static constexpr const char* kGetNativeContext = "getNativeContext";
+static constexpr const char* kGetEngineContext = "getEngineContext";
 static constexpr const char* kGetCustomSectionSync = "getCustomSectionSync";
 // For Runtime Timing API
 static constexpr const char kPerformanceObject[] = "performance";
@@ -29,6 +31,8 @@ static constexpr const char* kAddTimingListener = "addTimingListener";
 static constexpr const char* kDevTool = "Devtool";
 static constexpr const char* kJSContext = "JSContext";
 static constexpr const char* kCoreContext = "CoreContext";
+static constexpr const char* kNativeContext = "NativeContext";
+static constexpr const char* kEngineContext = "EngineContext";
 static constexpr const char* kUIContext = "UIContext";
 static constexpr const char* kUnknown = "Unknown";
 

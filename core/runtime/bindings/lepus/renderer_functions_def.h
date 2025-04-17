@@ -10,6 +10,8 @@
   V(GetJSContext)                     \
   V(GetCoreContext)                   \
   V(GetUIContext)                     \
+  V(GetNativeContext)                 \
+  V(GetEngineContext)                 \
   V(RuntimeAddEventListener)          \
   V(RuntimeRemoveEventListener)       \
   V(DispatchEvent)                    \

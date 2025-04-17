@@ -794,6 +794,8 @@ export abstract class BaseApp<
         [ContextProxyType.DevTool]: () => this.lynx.getDevtool(),
         [ContextProxyType.JSContext]: () => this.lynx.getJSContext(),
         [ContextProxyType.UIContext]: () => this.lynx.getUIContext(),
+        [ContextProxyType.NativeContext]: () => this.lynx.getNativeContext(),
+        [ContextProxyType.EngineContext]: () => this.lynx.getEngineContext(),
       };
     }
 

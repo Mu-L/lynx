@@ -73,6 +73,10 @@ void Utils::RegisterMethodToLynx(lepus::Context* context, lepus::Value& lynx) {
                                  GetJSContext);
     lepus::RegisterTableFunction(context, lynx_table, runtime::kGetUIContext,
                                  GetUIContext);
+    lepus::RegisterTableFunction(context, lynx_table,
+                                 runtime::kGetNativeContext, GetNativeContext);
+    lepus::RegisterTableFunction(context, lynx_table,
+                                 runtime::kGetEngineContext, GetEngineContext);
     lepus::RegisterTableFunction(context, lynx_table, kRequestAnimationFrame,
                                  &RequestAnimationFrame);
     lepus::RegisterTableFunction(context, lynx_table, kCancelAnimationFrame,

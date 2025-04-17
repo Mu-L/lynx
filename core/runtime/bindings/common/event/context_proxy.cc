@@ -36,6 +36,10 @@ ContextProxy::Type ContextProxy::ConvertStringToContextType(
     return ContextProxy::Type::kUIContext;
   } else if (type_str == kDevTool) {
     return ContextProxy::Type::kDevTool;
+  } else if (type_str == kNativeContext) {
+    return ContextProxy::Type::kNativeContext;
+  } else if (type_str == kEngineContext) {
+    return ContextProxy::Type::kEngineContext;
   }
   return ContextProxy::Type::kUnknown;
 }

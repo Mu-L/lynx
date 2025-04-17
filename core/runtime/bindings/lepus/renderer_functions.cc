@@ -934,6 +934,26 @@ RENDERER_FUNCTION_CC(GetUIContext) {
              ->GetBinding(LEPUS_CONTEXT()));
 }
 
+RENDERER_FUNCTION_CC(GetNativeContext) {
+  auto* tasm = GET_TASM_POINTER();
+  if (tasm == nullptr) {
+    RETURN_UNDEFINED();
+  }
+
+  RETURN(tasm->GetContextProxy(runtime::ContextProxy::Type::kNativeContext)
+             ->GetBinding(LEPUS_CONTEXT()));
+}
+
+RENDERER_FUNCTION_CC(GetEngineContext) {
+  auto* tasm = GET_TASM_POINTER();
+  if (tasm == nullptr) {
+    RETURN_UNDEFINED();
+  }
+
+  RETURN(tasm->GetContextProxy(runtime::ContextProxy::Type::kEngineContext)
+             ->GetBinding(LEPUS_CONTEXT()));
+}
+
 RENDERER_FUNCTION_CC(GetCustomSectionSync) {
   CHECK_ARGC_GE(GetCustomSectionSync, 1);
   CONVERT_ARG_AND_CHECK(arg0, 0, String, GetCustomSectionSync);
