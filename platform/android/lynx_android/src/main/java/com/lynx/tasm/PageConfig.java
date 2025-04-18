@@ -106,7 +106,7 @@ public class PageConfig {
   private boolean mEnableTextRefactor;
   private boolean mEnableTextOverflow;
   private boolean mEnableTextBoringLayout;
-  private boolean mEnableNewClipMode;
+  private boolean mEnableNewClipMode = true;
   private boolean mKeyboardCallbackUseRelativeHeight;
   private boolean mEnableCSSParser;
   private boolean mDefaultTextIncludePadding = false;

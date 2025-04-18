@@ -1301,8 +1301,9 @@ class PageConfig final : public EntryConfig {
   // Enable Android text BoringLayout
   TernaryBool enable_text_boring_layout_{TernaryBool::UNDEFINE_VALUE};
 
+  // TODO(zhouzhuangzhuang): remove this config in 3.4
   // set new clip mode if true
-  bool enable_new_clip_mode_{false};
+  bool enable_new_clip_mode_{true};
 
   // user defined extraInfo.
   lepus::Value extra_info_{};
