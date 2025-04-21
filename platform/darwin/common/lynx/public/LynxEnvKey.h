@@ -52,7 +52,6 @@ typedef NS_ENUM(uint64_t, LynxEnvKey) {
   LynxEnvEnableAnimationSyncTimeOpt,
   LynxEnvFixNewImageDownSampling,
   LynxEnvCachesExpirationDurationInDays,
-  LynxEnvEnableLifecycleTimeReport,
   LynxEnvCachesCleanupUntrackedFiles,
   LynxEnvEnableTextContainerOpt,
   LynxEnvEnableTextStorageDeallocFix,

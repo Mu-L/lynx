@@ -4081,7 +4081,6 @@ public enum com::lynx::tasm::LynxEnvKey {
   public com.lynx.tasm.LynxEnvKey.ENABLE_IMAGE_ASYNC_REQUEST ENABLE_IMAGE_ASYNC_REQUEST;
   public com.lynx.tasm.LynxEnvKey.ENABLE_GENERIC_RESOURCE_FETCHER ENABLE_GENERIC_RESOURCE_FETCHER;
   public com.lynx.tasm.LynxEnvKey.ENABLE_TEXT_BORING_LAYOUT ENABLE_TEXT_BORING_LAYOUT;
-  public com.lynx.tasm.LynxEnvKey.ENABLE_LIFECYCLE_TIME_REPORT ENABLE_LIFECYCLE_TIME_REPORT;
   public com.lynx.tasm.LynxEnvKey.ENABLE_REFRESH_RATE_OPT ENABLE_REFRESH_RATE_OPT;
   public com.lynx.tasm.LynxEnvKey.ENABLE_MULTI_JS_THREAD_BY_DEFAULT ENABLE_MULTI_JS_THREAD_BY_DEFAULT;
   public  final String com.lynx.tasm.LynxEnvKey.SP_KEY_ENABLE_DEBUG_MODE SP_KEY_ENABLE_DEBUG_MODE;
@@ -6078,7 +6077,6 @@ public class abstract com::lynx::tasm::LynxViewClient : com.lynx.tasm.LynxBackgr
 public class com::lynx::tasm::LynxViewClientGroup : com.lynx.tasm.LynxViewClient {
   public void com.lynx.tasm.LynxViewClientGroup.addClient(LynxViewClient client);
   public void com.lynx.tasm.LynxViewClientGroup.removeClient(LynxViewClient client);
-  public void com.lynx.tasm.LynxViewClientGroup.setEnableLifecycleTimeReport(boolean enabled);
   public void com.lynx.tasm.LynxViewClientGroup.setInstanceId(int id);
   public void com.lynx.tasm.LynxViewClientGroup.onPageStart(String url);
   public void com.lynx.tasm.LynxViewClientGroup.onLoadSuccess();
@@ -6119,7 +6117,6 @@ public class com::lynx::tasm::LynxViewClientGroup : com.lynx.tasm.LynxViewClient
 
 public class com::lynx::tasm::LynxViewClientGroupV2 : com.lynx.tasm.LynxViewClientV2 {
   public void com.lynx.tasm.LynxViewClientGroupV2.setInstanceId(int id);
-  public void com.lynx.tasm.LynxViewClientGroupV2.setEnableLifecycleTimeReport(boolean enabled);
   public void com.lynx.tasm.LynxViewClientGroupV2.addClient(LynxViewClientV2 client);
   public void com.lynx.tasm.LynxViewClientGroupV2.removeClient(LynxViewClientV2 client);
   public void com.lynx.tasm.LynxViewClientGroupV2.onPageStarted(@Nullable LynxView lynxView, @NonNull LynxPipelineInfo info);

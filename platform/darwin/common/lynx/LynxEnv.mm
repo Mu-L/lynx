@@ -581,7 +581,6 @@
     @(LynxEnvEnableAnimationSyncTimeOpt) : @"enable_animation_sync_time_opt",
     @(LynxEnvFixNewImageDownSampling) : @"fix_new_image_downsampling",
     @(LynxEnvCachesExpirationDurationInDays) : @"caches_expiration_duration_in_days",
-    @(LynxEnvEnableLifecycleTimeReport) : @"enable_lifecycle_time_report",
     @(LynxEnvCachesCleanupUntrackedFiles) : @"caches_cleanup_untracked_files",
     @(LynxEnvEnableTextContainerOpt) : @"enable_text_container_opt",
     @(LynxEnvEnableTextStorageDeallocFix) : @"enable_text_storage_dealloc_fix",

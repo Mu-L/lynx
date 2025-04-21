@@ -5,7 +5,6 @@
 package com.lynx.tasm;
 
 import static android.view.View.MeasureSpec;
-import static com.lynx.tasm.LynxEnvKey.ENABLE_LIFECYCLE_TIME_REPORT;
 
 import android.app.Activity;
 import android.content.Context;
@@ -391,10 +390,6 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
     // }
     mClient.addClient(LynxEnv.inst().getLynxViewClient());
     mClient.addClient(new LogLynxViewClient());
-    boolean enableLifecycleTimeReport =
-        LynxEnv.getBooleanFromExternalEnv(ENABLE_LIFECYCLE_TIME_REPORT, false);
-    mClient.setEnableLifecycleTimeReport(enableLifecycleTimeReport);
-    mClientV2.setEnableLifecycleTimeReport(enableLifecycleTimeReport);
     mInitEnd = System.currentTimeMillis();
     if (mNativePtr != 0) {
       nativeSetInitTiming(mNativePtr, mNativeLifecycle, mInitStart, mInitEnd);

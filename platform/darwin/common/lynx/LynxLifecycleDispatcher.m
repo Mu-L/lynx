@@ -10,14 +10,12 @@
 
 @implementation LynxLifecycleDispatcher {
   NSHashTable<id<LynxViewBaseLifecycle>>* _innerLifecycleClients;
-  NSNumber* _enableLifecycleTimeReport;
 }
 
 - (instancetype)init {
   self = [super init];
   if (self) {
     _innerLifecycleClients = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
-    _enableLifecycleTimeReport = nil;
     _instanceId = kUnknownInstanceId;
   }
 
@@ -56,28 +54,12 @@
   return clients;
 }
 
-- (BOOL)getEnableLifecycleTimeReport {
-  // Since boolFromExternalEnv owns a pthread_mutex_lock, we get LynxEnvEnableLifecycleTimeReport
-  // only once.
-  if (_enableLifecycleTimeReport == nil) {
-    _enableLifecycleTimeReport =
-        @([[LynxEnv sharedInstance] boolFromExternalEnv:LynxEnvEnableLifecycleTimeReport
-                                           defaultValue:NO]);
-  }
-  return [_enableLifecycleTimeReport boolValue];
-}
-
 - (void)lynxView:(LynxView*)view didRecieveError:(NSError*)error {
   // Client will retrieve error info through LynxError.userInfo.
   // We invoke 'userInfo' to pre-generate the json string cache
   // for LynxError to avoid race conditions in clients.
   if (!error || !error.userInfo) {
     return;
-  }
-
-  NSTimeInterval startTime = -1;
-  if ([self getEnableLifecycleTimeReport]) {
-    startTime = [NSDate timeIntervalSinceReferenceDate];
   }
 
   NSArray* allLifecycleClients = self.lifecycleClients;
@@ -88,37 +70,10 @@
           [client lynxView:view didRecieveError:error];
         }
       }];
-
-  if (startTime != -1) {
-    [self handleClientMetricsWithStartTime:startTime blockName:@"didRecieveError"];
-  }
-}
-
-- (void)handleClientMetricsWithStartTime:(NSTimeInterval)startTime blockName:(NSString*)name {
-  NSTimeInterval endTime = [NSDate timeIntervalSinceReferenceDate];
-  NSTimeInterval duration = endTime - startTime;
-
-  NSString* threadName = @"";
-  if ([[NSThread currentThread] isMainThread]) {
-    threadName = @"main";
-  } else {
-    threadName = [NSThread currentThread].name;
-  }
-  NSDictionary* props = @{
-    @"name" : name,
-    @"duration" : @(duration * 1000),  // in milliseconds
-    @"thread" : threadName
-  };
-  [LynxEventReporter onEvent:@"lynxsdk_lifecycle_time" instanceId:_instanceId props:props];
 }
 
 - (void)forwardInvocation:(NSInvocation*)invocation {
   SEL sel = invocation.selector;
-
-  NSTimeInterval startTime = -1;
-  if ([self getEnableLifecycleTimeReport]) {
-    startTime = [NSDate timeIntervalSinceReferenceDate];
-  }
 
   NSArray* allLifecycleClients = self.lifecycleClients;
   [allLifecycleClients enumerateObjectsUsingBlock:^(id _Nonnull client, NSUInteger idx,
@@ -127,11 +82,6 @@
       [invocation invokeWithTarget:client];
     }
   }];
-
-  if (startTime != -1) {
-    NSString* functionName = NSStringFromSelector(sel);
-    [self handleClientMetricsWithStartTime:startTime blockName:functionName];
-  }
 }
 
 // issue: #1510
