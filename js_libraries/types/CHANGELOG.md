@@ -6,15 +6,14 @@
 
 - Add some missing typing of event props
 - Add type testing for objects & methods mounted in global
+- Add type testing to lynx react.JSX.IntrinsicElements 
 
 ## 3.2.2
 
 ### Patch Changes
 
 - Add some missing types of built-in element `list`
-
 - Add some missing types of built-in element `image`
-
 
 ## 3.2.1
 

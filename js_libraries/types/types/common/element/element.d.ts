@@ -19,9 +19,11 @@ export interface UIMethods {
   'image': ImageUIMethods;
 }
 
+type LynxComponentProps = ComponentProps;
+
 // add also to global.JSX.IntrinsicElements
 export interface IntrinsicElements {
-  'component': ComponentProps;
+  'component': LynxComponentProps;
   'filter-image': FilterImageProps;
   'image': ImageProps;
   'inline-image': ImageProps;
@@ -41,7 +43,7 @@ declare module 'react' {
   namespace JSX {
     // Should copy from above IntrinsicElements
     interface IntrinsicElements {
-      'component': ComponentProps;
+      'component': LynxComponentProps;
       'filter-image': FilterImageProps;
       'image': ImageProps;
       'inline-image': ImageProps;
