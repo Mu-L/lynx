@@ -91,8 +91,7 @@ public class TraceEventDef {
   public static final String LYNX_CONTEXT_UPDATE_SESSION_ID = "LynxContext.updateLynxSessionID";
   public static final String INTERSECTION_OBSERVER_MANAGER_INIT =
       "LynxIntersectionObserverManager initialized";
-  public static final String OBSERVER_MANAGER_OBSERVER_HANDLER =
-      "LynxIntersectionObserverManager initialized";
+  public static final String OBSERVER_MANAGER_OBSERVER_HANDLER = "ObserverManager.ObserverHandler";
   public static final String UI_OWNER_INIT = "LynxUIOwner initialized";
   public static final String UI_OWNER_UPDATE_PROPS = "UIOwner.updateProps.";
   public static final String UI_OWNER_UPDATE_EXTRA_DATA = "UIOwner.updateViewExtraData.";
@@ -122,7 +121,7 @@ public class TraceEventDef {
   public static final String FLATTEN_UI_DRAW = "LynxFlattenUI.draw.";
   public static final String LYNX_UI_MEASURE = "LynxUI.measure.";
   public static final String LYNX_UI_LAYOUT = "LynxUI.layout.";
-  public static final String CREATE_BITMAP_SHADER = "LynxUI.layout.";
+  public static final String CREATE_BITMAP_SHADER = "createBitmapShader";
   public static final String IMAGE_SERVICE_PROXY_FETCH_IMAGE = "LynxImageServiceProxy.fetchImage";
 
   public static final String IMAGE_MANAGER_UPDATE_PROPS_INTERVAL =
@@ -130,7 +129,7 @@ public class TraceEventDef {
   public static final String IMAGE_MANAGER_UPDATE_IMAGE_SOURCE =
       "LynxImageManager.updateImageSource";
   public static final String IMAGE_MANAGER_UPDATE_PLACEHOLDER_SOURCE =
-      "LynxImageManager.updateImageSource";
+      "LynxImageManager.updatePlaceholderSource";
   public static final String UI_LIST_MEASURE = "UIList.measure";
   public static final String UI_LIST_LAYOUT = "UIList.layout";
 
@@ -156,7 +155,7 @@ public class TraceEventDef {
   public static final String NINE_PATCH_HELPER_DRAW_NINE_PATH =
       "image.NinePatchHelper.drawNinePatch";
   public static final String NINE_PATCH_HELPER_DRAW_WITH_CAP_INSETS =
-      "image.NinePatchHelper.drawNinePatch";
+      "image.NinePatchHelper.drawWithCapInsets";
 
   public static final String FETCHER_WRAPPER_USE_RESOURCE_SERVICE =
       "Using LynxResourceServiceProvider";

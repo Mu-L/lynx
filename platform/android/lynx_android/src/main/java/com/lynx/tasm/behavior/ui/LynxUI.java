@@ -646,7 +646,7 @@ public abstract class LynxUI<T extends View> extends LynxBaseUI {
   public void handleLayout() {
     String layoutTrace = null;
     if (TraceEvent.enableTrace()) {
-      layoutTrace = TraceEventDef.LYNX_UI_MEASURE + getTagName();
+      layoutTrace = TraceEventDef.LYNX_UI_LAYOUT + getTagName();
       TraceEvent.beginSection(layoutTrace);
     }
     mView.layout(getLeft(), getTop(), getLeft() + getWidth(), getTop() + getHeight());
