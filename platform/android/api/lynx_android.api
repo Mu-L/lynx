@@ -3442,9 +3442,6 @@ public class abstract com::lynx::tasm::behavior::ui::LynxBaseUI : com.lynx.tasm.
   public void com.lynx.tasm.behavior.ui.LynxBaseUI.setPreviousDrawUI(LynxBaseUI previousDrawUI);
   public LynxBaseUI com.lynx.tasm.behavior.ui.LynxBaseUI.getNextDrawUI();
   public void com.lynx.tasm.behavior.ui.LynxBaseUI.setNextDrawUI(LynxBaseUI nextDrawUI);
-  public void com.lynx.tasm.behavior.ui.LynxBaseUI.resetTranslateZChildrenOrder();
-  public void com.lynx.tasm.behavior.ui.LynxBaseUI.setStableChildrenForTranslateZ(List< LynxBaseUI > stableChildren);
-  public List< LynxBaseUI > com.lynx.tasm.behavior.ui.LynxBaseUI.GetStableChildrenForTranslateZ();
   public float com.lynx.tasm.behavior.ui.LynxBaseUI.getSkewX();
   public void com.lynx.tasm.behavior.ui.LynxBaseUI.setSkewX(float skewX);
   public float com.lynx.tasm.behavior.ui.LynxBaseUI.getSkewY();
@@ -4085,7 +4082,6 @@ public enum com::lynx::tasm::LynxEnvKey {
   public com.lynx.tasm.LynxEnvKey.ENABLE_GENERIC_RESOURCE_FETCHER ENABLE_GENERIC_RESOURCE_FETCHER;
   public com.lynx.tasm.LynxEnvKey.ENABLE_TEXT_BORING_LAYOUT ENABLE_TEXT_BORING_LAYOUT;
   public com.lynx.tasm.LynxEnvKey.ENABLE_LIFECYCLE_TIME_REPORT ENABLE_LIFECYCLE_TIME_REPORT;
-  public com.lynx.tasm.LynxEnvKey.ENABLE_STABLE_TRANSLATE_Z_SORTING ENABLE_STABLE_TRANSLATE_Z_SORTING;
   public com.lynx.tasm.LynxEnvKey.ENABLE_REFRESH_RATE_OPT ENABLE_REFRESH_RATE_OPT;
   public com.lynx.tasm.LynxEnvKey.ENABLE_MULTI_JS_THREAD_BY_DEFAULT ENABLE_MULTI_JS_THREAD_BY_DEFAULT;
   public  final String com.lynx.tasm.LynxEnvKey.SP_KEY_ENABLE_DEBUG_MODE SP_KEY_ENABLE_DEBUG_MODE;
@@ -7947,6 +7943,7 @@ public class com::lynx::tasm::behavior::StylesDiffMap :  {
   public com.lynx.tasm.behavior.StylesDiffMap.StylesDiffMap(ReadableMap props, MapBuffer styles);
   public boolean com.lynx.tasm.behavior.StylesDiffMap.hasKey(String name);
   public boolean com.lynx.tasm.behavior.StylesDiffMap.hasKey(int key);
+  public boolean com.lynx.tasm.behavior.StylesDiffMap.isEmpty();
   public boolean com.lynx.tasm.behavior.StylesDiffMap.isNull(String name);
   public boolean com.lynx.tasm.behavior.StylesDiffMap.getBoolean(String name, boolean restoreNullToDefaultValue);
   public double com.lynx.tasm.behavior.StylesDiffMap.getDouble(String name, double restoreNullToDefaultValue);
