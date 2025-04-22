@@ -19,7 +19,7 @@
 #include "core/runtime/bindings/jsi/modules/lynx_module.h"
 #include "core/runtime/bindings/jsi/modules/lynx_module_binding.h"
 #include "core/runtime/bindings/jsi/modules/module_delegate.h"
-#include "lynx/core/runtime/bindings/jsi/modules/module_interceptor.h"
+#include "core/runtime/bindings/jsi/modules/module_interceptor.h"
 
 namespace lynx {
 namespace piper {

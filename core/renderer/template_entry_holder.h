@@ -13,9 +13,9 @@
 #include <unordered_map>
 
 #include "base/include/closure.h"
+#include "core/renderer/js_bundle_holder_impl.h"
 #include "core/renderer/template_entry.h"
 #include "core/template_bundle/lynx_template_bundle.h"
-#include "lynx/core/renderer/js_bundle_holder_impl.h"
 
 namespace lynx {
 namespace tasm {
