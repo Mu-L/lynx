@@ -32,7 +32,7 @@ struct LayoutNodeStyle {
 };
 
 // FIXME(zhixuan): Layout type flags is a mess now, we should refactor it
-enum LayoutNodeType {
+enum LayoutNodeType : unsigned char {
   // Default is UNKNOWN, indicating that the LayoutNodeType corresponding to the
   // current tag is still unknown.
   UNKNOWN = 0,

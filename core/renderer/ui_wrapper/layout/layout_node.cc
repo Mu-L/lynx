@@ -26,23 +26,20 @@ void UpdateStyleWithEnvConfig(starlight::ComputedCSSStyle& css_style,
 LayoutNode::LayoutNode(int id, const starlight::LayoutConfigs& layout_configs,
                        const tasm::LynxEnvConfig& envs,
                        const starlight::ComputedCSSStyle& init_style)
-    : type_(LayoutNodeType::COMMON),
+    : id_(id),
+      type_(LayoutNodeType::COMMON),
       css_style_(std::make_unique<starlight::ComputedCSSStyle>(init_style)),
-      id_(id) {
-  sl_node_ = std::make_unique<SLNode>(layout_configs,
-                                      css_style_->GetLayoutComputedStyle());
+      sl_node_(layout_configs, css_style_->GetLayoutComputedStyle()) {
   css_style_->SetFontScaleOnlyEffectiveOnSp(layout_configs.font_scale_sp_only_);
   css_style_->SetCssAlignLegacyWithW3c(
       layout_configs.css_align_with_legacy_w3c_);
   UpdateStyleWithEnvConfig(*css_style_, envs);
 }
 
-LayoutNode::~LayoutNode() { sl_node_ = nullptr; }
-
 void LayoutNode::ConsumeStyle(CSSPropertyID id, const tasm::CSSValue& value,
                               bool reset) {
   if (css_style_->SetValue(id, value, reset)) {
-    sl_node_->MarkDirty();
+    sl_node_.MarkDirty();
   }
 }
 
@@ -51,15 +48,15 @@ void LayoutNode::ConsumeAttribute(starlight::LayoutAttribute key,
   lepus::Value new_value = reset ? lepus::Value() : value;
   bool changed = false;
   if (key == starlight::LayoutAttribute::kScroll) {
-    changed = sl_node_->attr_map().setScroll(
+    changed = sl_node_.attr_map().setScroll(
         new_value.IsBool() ? std::optional<bool>(new_value.Bool())
                            : std::nullopt);
   } else if (key == starlight::LayoutAttribute::kColumnCount) {
-    changed = sl_node_->attr_map().setColumnCount(
+    changed = sl_node_.attr_map().setColumnCount(
         new_value.IsNumber() ? std::optional<int>(new_value.Number())
                              : std::nullopt);
   } else if (key == starlight::LayoutAttribute::kListCompType) {
-    changed = sl_node_->attr_map().setListCompType(
+    changed = sl_node_.attr_map().setListCompType(
         new_value.IsNumber() ? std::optional<int>(new_value.Number())
                              : std::nullopt);
   } else if (key == starlight::LayoutAttribute::kListContainer &&
@@ -68,10 +65,10 @@ void LayoutNode::ConsumeAttribute(starlight::LayoutAttribute key,
   }
 
   if (changed) {
-    if (sl_node_->IsList()) {
-      sl_node_->MarkChildrenDirtyWithoutTriggerLayout();
+    if (sl_node_.IsList()) {
+      sl_node_.MarkChildrenDirtyWithoutTriggerLayout();
     }
-    sl_node_->MarkDirty();
+    sl_node_.MarkDirty();
   }
 }
 
@@ -80,7 +77,7 @@ void LayoutNode::ConsumeFontSize(double cur_node_font_size,
                                  double font_scale) {
   if (css_style_->SetFontSize(cur_node_font_size, root_node_font_size) ||
       css_style_->SetFontScale(font_scale)) {
-    sl_node_->MarkDirty();
+    sl_node_.MarkDirty();
   }
 }
 
@@ -93,17 +90,17 @@ void LayoutNode::InsertNode(LayoutNode* child, int index) {
 
   if (index == -1) {
     if (!child->is_virtual() && !is_virtual()) {
-      sl_node_->AppendChild(child->slnode());
+      sl_node_.AppendChild(child->slnode());
     }
     MarkDirty();
     children_.push_back(child);
   } else {
     if (!child->is_virtual() && !is_virtual()) {
       LayoutNode* previous_non_virtual_child = FindNextNonVirtualChild(index);
-      sl_node_->InsertChildBefore(child->slnode(),
-                                  previous_non_virtual_child
-                                      ? previous_non_virtual_child->slnode()
-                                      : nullptr);
+      sl_node_.InsertChildBefore(child->slnode(),
+                                 previous_non_virtual_child
+                                     ? previous_non_virtual_child->slnode()
+                                     : nullptr);
     }
     MarkDirty();
     children_.insert(children_.begin() + index, child);
@@ -122,7 +119,7 @@ LayoutNode* LayoutNode::RemoveNodeAtIndex(unsigned int index) {
   }
 
   if (!child->is_virtual() && !is_virtual()) {
-    sl_node_->RemoveChild(children_[index]->slnode());
+    sl_node_.RemoveChild(children_[index]->slnode());
   }
   MarkDirty();
   children_.erase(children_.begin() + index);
@@ -137,12 +134,12 @@ void LayoutNode::MoveNode(LayoutNode* child, int from_index,
 }
 
 void LayoutNode::CalculateLayout(const SLNodeSet* fixed_node_set) {
-  sl_node_->ReLayout(fixed_node_set);
+  sl_node_.ReLayout(fixed_node_set);
 }
 
 void LayoutNode::CalculateLayoutWithConstraints(
     starlight::Constraints& constraints, const SLNodeSet* fixed_node_set) {
-  sl_node_->ReLayoutWithConstraints(constraints, fixed_node_set);
+  sl_node_.ReLayoutWithConstraints(constraints, fixed_node_set);
 }
 
 LayoutNode* LayoutNode::FindNonVirtualNode() {
@@ -195,10 +192,10 @@ void LayoutNode::AlignmentByPlatform(float offset_top, float offset_left) {
 void LayoutNode::SetMeasureFunc(std::unique_ptr<MeasureFunc> measure_func) {
   measure_func_ = std::move(measure_func);
 
-  sl_node_->SetContext(this);
-  sl_node_->SetSLMeasureFunc([](void* context,
-                                const starlight::Constraints& constraints,
-                                bool final_measure) {
+  sl_node_.SetContext(this);
+  sl_node_.SetSLMeasureFunc([](void* context,
+                               const starlight::Constraints& constraints,
+                               bool final_measure) {
     MeasureFunc* measure = (static_cast<LayoutNode*>(context))->measure_func();
     DCHECK(measure);
     SLMeasureMode width_mode = constraints[starlight::kHorizontal].Mode();
@@ -215,7 +212,7 @@ void LayoutNode::SetMeasureFunc(std::unique_ptr<MeasureFunc> measure_func) {
 
     return FloatSize(result.width_, result.height_, result.baseline_);
   });
-  sl_node_->SetSLAlignmentFunc([](void* context) {
+  sl_node_.SetSLAlignmentFunc([](void* context) {
     MeasureFunc* measure = (static_cast<LayoutNode*>(context))->measure_func();
     DCHECK(measure);
     measure->Alignment();
@@ -252,20 +249,18 @@ void LayoutNode::MarkDirtyInternal(bool request_layout) {
     return;
   }
   if (!is_virtual()) {
-    if (sl_node_) {
-      if (request_layout) {
-        sl_node_->MarkDirtyAndRequestLayout();
-      } else {
-        sl_node_->MarkDirty();
-      }
+    if (request_layout) {
+      sl_node_.MarkDirtyAndRequestLayout();
+    } else {
+      sl_node_.MarkDirty();
     }
   } else {
     LayoutNode* node = FindNonVirtualNode();
-    if (node && node->sl_node_) {
+    if (node) {
       if (request_layout) {
-        node->sl_node_->MarkDirtyAndRequestLayout();
+        node->sl_node_.MarkDirtyAndRequestLayout();
       } else {
-        node->sl_node_->MarkDirty();
+        node->sl_node_.MarkDirty();
       }
     }
   }
@@ -275,7 +270,7 @@ void LayoutNode::MarkDirtyInternal(bool request_layout) {
 void LayoutNode::MarkUpdated() {
   is_dirty_ = false;
   if (!is_virtual()) {
-    sl_node_->MarkUpdated();
+    sl_node_.MarkUpdated();
   }
 }
 
@@ -288,9 +283,7 @@ void LayoutNode::UpdateLynxEnv(const tasm::LynxEnvConfig& config) {
 
 void LayoutNode::SetTag(const base::String& tag) {
   tag_ = tag;
-  if (sl_node_) {
-    sl_node_->SetTag(tag.str());
-  }
+  sl_node_.SetTag(tag);
 }
 
 #undef FOREACH_LAYOUT_PROPERTY

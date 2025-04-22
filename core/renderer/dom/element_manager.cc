@@ -828,9 +828,10 @@ void ElementManager::SetConfig(const std::shared_ptr<PageConfig> &config) {
   config_ = config;
   // Apply pagewise configs
   if (config_) {
+    layout_configs_ = config_->GetLayoutConfigs();
     painting_context()->SetEnableVsyncAlignedFlush(
         config_->GetEnableVsyncAlignedFlush());
-    lynx_env_config_.SetFontScaleSpOnly(GetLayoutConfigs().font_scale_sp_only_);
+    lynx_env_config_.SetFontScaleSpOnly(layout_configs_.font_scale_sp_only_);
     delegate_->SetPageConfigForLayoutThread(config_);
   }
 }

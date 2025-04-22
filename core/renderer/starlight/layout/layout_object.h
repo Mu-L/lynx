@@ -16,7 +16,9 @@
 #include <vector>
 
 #include "base/include/position.h"
+#include "base/include/value/base_string.h"
 #include "core/renderer/starlight/event/layout_event_handler.h"
+#include "core/renderer/starlight/layout/box_info.h"
 #include "core/renderer/starlight/layout/cache_manager.h"
 #include "core/renderer/starlight/layout/container_node.h"
 #include "core/renderer/starlight/layout/layout_global.h"
@@ -39,6 +41,15 @@ class LayoutObject : public ContainerNode {
   BASE_EXPORT LayoutObject(
       const LayoutConfigs& config,
       const starlight::LayoutComputedStyle* init_style = nullptr);
+
+  // For memory and performance reasons, LayoutObject does not copy
+  // LayoutConfigs but holds a reference. To minimize the possibility of passing
+  // in temporary LayoutConfigs, this constructor is overloaded and disabled.
+  // Please ensure that the lifespan of LayoutConfigs is longer than that of
+  // LayoutObject in any usage scenario, including Testing.
+  LayoutObject(LayoutConfigs&& config,
+               const starlight::LayoutComputedStyle* init_style = nullptr) =
+      delete;
   virtual ~LayoutObject();
 
   // exports
@@ -213,7 +224,8 @@ class LayoutObject : public ContainerNode {
   LAYOUT_OBJECT_GET_RESULT(BorderBottomWidth)
 #undef LAYOUT_OBJECT_GET_RESULT
 
-  BoxInfo* GetBoxInfo() const;
+  BoxInfo* GetBoxInfo();
+  const BoxInfo* GetBoxInfo() const;
 
   float ClampExactWidth(float width) const;
   float ClampExactHeight(float height) const;
@@ -261,9 +273,9 @@ class LayoutObject : public ContainerNode {
     return inflow_sub_tree_in_sync_with_last_measurement_;
   }
 
-  void SetTag(const std::string& tag) { tag_ = tag; }
+  void SetTag(const base::String& tag) { tag_ = tag; }
+  const base::String& GetTag() const { return tag_; }
 
-  const std::string& GetTag() const { return tag_; }
   bool need_custom_layout() const { return measure_func_ != nullptr; }
   void SendLayoutEvent(LayoutEventType type,
                        const LayoutEventData& data = LayoutEventData());
@@ -293,54 +305,54 @@ class LayoutObject : public ContainerNode {
   void RemoveAlgorithmRecursive();
   bool CanReuseLayoutResultForCustomMeasureNode(bool is_horizontal) const;
 
-  base::Position measured_position_;
+  bool FetchEarlyReturnResultForMeasure(const Constraints& constraints,
+                                        bool is_trying, FloatSize& result);
 
-  SLMeasureFunc measure_func_;
-  SLRequestLayoutFunc request_layout_func_;
-  SLAlignmentFunc alignment_func_;
+  const LayoutConfigs& configs_;
+
+  base::String tag_;
+
+  SLMeasureFunc measure_func_ = nullptr;
+  SLRequestLayoutFunc request_layout_func_ = nullptr;
+  SLAlignmentFunc alignment_func_ = nullptr;
   SLCanReuseLayoutWithSameSizeAsGivenConstraintFunc can_reuse_layout_func_ =
       nullptr;
-  mutable DimensionValue<std::optional<bool>> cached_can_reuse_layout_result_;
+
   void* context_ = nullptr;
+  LayoutAlgorithm* algorithm_ = nullptr;
+  LayoutObject* root_node_ = nullptr;
+  LayoutEventHandler* event_handler_ = nullptr;
+  LayoutComputedStyle* css_style_;
 
-  float offset_top_;
-  float offset_left_;
-  float offset_width_;
-  float offset_height_;
-  // The distance from the top edge of the content bound to the baseline.
-  float offset_baseline_;
-
-  std::unique_ptr<BoxInfo> box_info_;
-  LayoutAlgorithm* algorithm_;
+  BoxInfo box_info_;
+  base::Position measured_position_;
+  mutable DimensionValue<std::optional<bool>> cached_can_reuse_layout_result_;
+  LayoutResultForRendering layout_result_;
 
   AttributesMap attr_map_;
+  CacheManager cache_manager_;
 
-  float pos_left_;
-  float pos_right_;
-  float pos_top_;
-  float pos_bottom_;
-
-  LayoutComputedStyle* css_style_;
-  bool is_dirty_;
-  bool current_node_has_new_layout_;
-  bool is_first_layout_;
+  bool is_dirty_ = false;
+  bool current_node_has_new_layout_ = false;
+  bool is_layout_occurred = false;
 
   bool final_measure_ = false;
   bool is_list_ = false;
   bool is_fixed_before_ = false;
-  const LayoutConfigs configs_;
-  LayoutObject* root_node_ = nullptr;
-
-  std::string tag_;
 
   bool inflow_sub_tree_in_sync_with_last_measurement_ = false;
 
-  bool FetchEarlyReturnResultForMeasure(const Constraints& constraints,
-                                        bool is_trying, FloatSize& result);
+  float offset_top_ = 0;
+  float offset_left_ = 0;
+  float offset_width_ = 0;
+  float offset_height_ = 0;
+  // The distance from the top edge of the content bound to the baseline.
+  float offset_baseline_ = 0;
 
-  CacheManager cache_manager_;
-  LayoutResultForRendering layout_result_;
-  LayoutEventHandler* event_handler_ = nullptr;
+  float pos_left_ = 0;
+  float pos_right_ = 0;
+  float pos_top_ = 0;
+  float pos_bottom_ = 0;
 };
 
 }  // namespace starlight

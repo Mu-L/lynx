@@ -247,13 +247,6 @@ class LayoutContext : public std::enable_shared_from_this<LayoutContext>,
                              starlight::LayoutEventType type,
                              const starlight::LayoutEventData& data) override;
 
-  starlight::LayoutConfigs GetLayoutConfigs() {
-    if (page_config_) {
-      return page_config_->GetLayoutConfigs();
-    }
-    return starlight::LayoutConfigs();
-  }
-
   // SetLayoutEarlyExitTiming needs to be called during an early return to
   // simulate layout timing when the layout is not actually executed.
   void SetLayoutEarlyExitTiming(const PipelineOptions& options);
@@ -266,11 +259,15 @@ class LayoutContext : public std::enable_shared_from_this<LayoutContext>,
   std::shared_ptr<LayoutCtxPlatformImpl> platform_impl_;
   std::unique_ptr<Delegate> delegate_;
   LayoutNode* root_;
-  bool layout_wanted_;
-  bool has_viewport_ready_;
-  bool enable_layout_;
-  bool has_layout_required_;
+  bool layout_wanted_{false};
+  bool layout_paused_{false};
+  bool enable_layout_{false};
+  bool has_viewport_ready_{false};
+  bool has_layout_required_{false};
+  bool has_first_page_layout_{false};
+
   Viewport viewport_;
+  starlight::LayoutConfigs layout_configs_;
   std::shared_ptr<HierarchyObserver> hierarchy_observer_;
   // Help to record those platform node that have been removed during diff so
   // that we can trigger destroy operation on platform
@@ -286,7 +283,6 @@ class LayoutContext : public std::enable_shared_from_this<LayoutContext>,
 #if ENABLE_TESTBENCH_RECORDER
   int64_t record_id_;
 #endif
-  bool has_first_page_layout_ = false;
 
   CalculatedViewport calculated_viewport_;
 
@@ -294,8 +290,6 @@ class LayoutContext : public std::enable_shared_from_this<LayoutContext>,
 
   LayoutContext(const LayoutContext&) = delete;
   LayoutContext& operator=(const LayoutContext&) = delete;
-
-  bool layout_paused_{false};
 
   // Stores the pipeline options of all paused layouts,
   // which will be used for layout upon resumption.

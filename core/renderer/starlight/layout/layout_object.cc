@@ -6,9 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <unordered_set>
 
-#include "core/renderer/starlight/layout/box_info.h"
 #include "core/renderer/starlight/layout/flex_layout_algorithm.h"
 #include "core/renderer/starlight/layout/grid_layout_algorithm.h"
 #include "core/renderer/starlight/layout/layout_algorithm.h"
@@ -77,26 +75,8 @@ inline float GetBoundTopOffsetFromBorderBound(const LayoutObject& target,
 
 LayoutObject::LayoutObject(const LayoutConfigs& config,
                            const starlight::LayoutComputedStyle* init_style)
-    : measure_func_(nullptr),
-      request_layout_func_(nullptr),
-      alignment_func_(nullptr),
-      offset_top_(0),
-      offset_left_(0),
-      offset_width_(0),
-      offset_height_(0),
-      offset_baseline_(0),
-      algorithm_(nullptr),
-      pos_left_(0),
-      pos_right_(0),
-      pos_top_(0),
-      pos_bottom_(0),
-      css_style_(const_cast<starlight::LayoutComputedStyle*>(init_style)),
-      is_dirty_(false),
-      current_node_has_new_layout_(false),
-      is_first_layout_(true),
-      configs_(config) {
-  box_info_ = std::make_unique<BoxInfo>();
-}
+    : configs_(config),
+      css_style_(const_cast<starlight::LayoutComputedStyle*>(init_style)) {}
 
 LayoutObject::~LayoutObject() {
   if (algorithm_) delete algorithm_;
@@ -162,7 +142,7 @@ void LayoutObject::RoundToPixelGrid(const float container_absolute_left,
       container_absolute_top +
       GetBoundTopFrom(container, BoundType::kBorder, BoundType::kBorder);
   bool layout_changed_since_root = ancestors_have_new_layout ||
-                                   is_first_layout_ ||
+                                   (!is_layout_occurred) ||
                                    current_node_has_new_layout_;
   current_node_has_new_layout_ = false;
 
@@ -292,7 +272,7 @@ void LayoutObject::RoundToPixelGrid(const float container_absolute_left,
 
     // if is first layout or has new layout result or has MeasureFunc && dirty,
     // mark and continue visit child
-    if (SetNewLayoutResult(new_layout_result) || is_first_layout_ ||
+    if (SetNewLayoutResult(new_layout_result) || (!is_layout_occurred) ||
         (GetSLMeasureFunc() && IsDirty())) {
       MarkHasNewLayout();
     }
@@ -343,7 +323,8 @@ bool LayoutObject::SetNewLayoutResult(LayoutResultForRendering new_result) {
   return false;
 }
 
-BoxInfo* LayoutObject::GetBoxInfo() const { return box_info_.get(); }
+BoxInfo* LayoutObject::GetBoxInfo() { return &box_info_; }
+const BoxInfo* LayoutObject::GetBoxInfo() const { return &box_info_; }
 
 void LayoutObject::ReLayout(const SLNodeSet* fixed_node_set) {
   Constraints constraints;
@@ -354,7 +335,7 @@ void LayoutObject::ReLayout(const SLNodeSet* fixed_node_set) {
 void LayoutObject::ReLayoutWithConstraints(Constraints& constraints,
                                            const SLNodeSet* fixed_node_set) {
   MarkDirty();
-  box_info_->InitializeBoxInfo(constraints, *this, GetLayoutConfigs());
+  box_info_.InitializeBoxInfo(constraints, *this, GetLayoutConfigs());
   MarkHasNewLayout();
   SendLayoutEvent(LayoutEventType::UpdateMeasureBegin);
   UpdateMeasure(constraints, true, fixed_node_set);
@@ -472,7 +453,7 @@ bool LayoutObject::IsDirty() { return is_dirty_; }
 void LayoutObject::MarkUpdated() {
   current_node_has_new_layout_ = false;
   is_dirty_ = false;
-  is_first_layout_ = false;
+  is_layout_occurred = true;
 }
 
 void LayoutObject::MarkHasNewLayout() {
@@ -517,14 +498,14 @@ void LayoutObject::SetBaseline(float offset_baseline) {
 }
 
 float LayoutObject::ClampExactHeight(float height) const {
-  height = std::max(height, box_info_->min_size_[kVertical]);
-  height = std::min(height, box_info_->max_size_[kVertical]);
+  height = std::max(height, box_info_.min_size_[kVertical]);
+  height = std::min(height, box_info_.max_size_[kVertical]);
   return std::max(GetPaddingAndBorderVertical(), height);
 }
 
 float LayoutObject::ClampExactWidth(float width) const {
-  width = std::max(width, box_info_->min_size_[kHorizontal]);
-  width = std::min(width, box_info_->max_size_[kHorizontal]);
+  width = std::max(width, box_info_.min_size_[kHorizontal]);
+  width = std::min(width, box_info_.max_size_[kHorizontal]);
   return std::max(GetPaddingAndBorderHorizontal(), width);
 }
 
@@ -649,7 +630,7 @@ FloatSize LayoutObject::UpdateMeasureByPlatform(const Constraints& constraints,
                                                 bool final_measure) {
   Constraints item_constraints =
       property_utils::GenerateDefaultConstraints(*this, constraints);
-  box_info_->InitializeBoxInfo(item_constraints, *this, GetLayoutConfigs());
+  box_info_.InitializeBoxInfo(item_constraints, *this, GetLayoutConfigs());
   FloatSize size = UpdateMeasure(item_constraints, final_measure);
   size.width_ += GetLayoutMarginLeft() + GetLayoutMarginRight();
   size.height_ += GetLayoutMarginTop() + GetLayoutMarginBottom();
@@ -1026,28 +1007,28 @@ void LayoutObject::Reset(LayoutObject* node) {
 }
 
 float LayoutObject::GetLayoutPaddingLeft() const {
-  return box_info_->padding_[kLeft];
+  return box_info_.padding_[kLeft];
 }
 float LayoutObject::GetLayoutPaddingTop() const {
-  return box_info_->padding_[kTop];
+  return box_info_.padding_[kTop];
 }
 float LayoutObject::GetLayoutPaddingRight() const {
-  return box_info_->padding_[kRight];
+  return box_info_.padding_[kRight];
 }
 float LayoutObject::GetLayoutPaddingBottom() const {
-  return box_info_->padding_[kBottom];
+  return box_info_.padding_[kBottom];
 }
 float LayoutObject::GetLayoutMarginLeft() const {
-  return box_info_->margin_[kLeft];
+  return box_info_.margin_[kLeft];
 }
 float LayoutObject::GetLayoutMarginTop() const {
-  return box_info_->margin_[kTop];
+  return box_info_.margin_[kTop];
 }
 float LayoutObject::GetLayoutMarginRight() const {
-  return box_info_->margin_[kRight];
+  return box_info_.margin_[kRight];
 }
 float LayoutObject::GetLayoutMarginBottom() const {
-  return box_info_->margin_[kBottom];
+  return box_info_.margin_[kBottom];
 }
 float LayoutObject::GetLayoutBorderLeftWidth() const {
   return css_style_->GetBorderFinalLeftWidth();

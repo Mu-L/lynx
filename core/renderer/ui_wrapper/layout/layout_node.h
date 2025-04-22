@@ -115,10 +115,9 @@ enum ConsumptionStatus { LAYOUT_ONLY = 0, LAYOUT_WANTED = 1, SKIP = 2 };
 
 class LayoutNode {
  public:
-  explicit LayoutNode(int id, const starlight::LayoutConfigs& layout_configs,
-                      const tasm::LynxEnvConfig& envs,
-                      const starlight::ComputedCSSStyle& init_style);
-  virtual ~LayoutNode();
+  LayoutNode(int id, const starlight::LayoutConfigs& layout_configs,
+             const tasm::LynxEnvConfig& envs,
+             const starlight::ComputedCSSStyle& init_style);
 
   static ConsumptionStatus ConsumptionTest(CSSPropertyID id);
   inline static bool IsLayoutOnly(CSSPropertyID id) {
@@ -148,7 +147,7 @@ class LayoutNode {
                         const lepus::Value& value, bool reset = false);
 
   inline LayoutNode* parent() const { return parent_; }
-  inline SLNode* slnode() { return sl_node_.get(); }
+  inline SLNode* slnode() { return &sl_node_; }
   inline const auto& children() { return children_; }
   inline bool is_virtual() { return type_ & LayoutNodeType::VIRTUAL; }
   inline bool is_common() { return type_ & LayoutNodeType::COMMON; }
@@ -171,9 +170,13 @@ class LayoutNode {
   starlight::ComputedCSSStyle* GetCSSMutableStyle() { return css_style_.get(); }
 
  protected:
-  bool is_dirty_ = false;
+  int id_;
   LayoutNodeType type_;
-  std::unique_ptr<SLNode> sl_node_;
+
+  bool is_dirty_{false};
+  // Whether node is a native list element which needs to invoke
+  // OnListElementUpdated() callback after layout.
+  bool is_list_container_{false};
 
   base::InlineVector<LayoutNode*, starlight::kChildrenInlineVectorSize>
       children_;
@@ -181,14 +184,11 @@ class LayoutNode {
   std::unique_ptr<MeasureFunc> measure_func_;
 
   base::String tag_;
-  // Whether node is a native list element which needs to invoke
-  // OnListElementUpdated() callback after layout.
-  bool is_list_container_{false};
   std::unique_ptr<starlight::ComputedCSSStyle> css_style_;
 
- private:
-  int id_;
+  SLNode sl_node_;
 
+ private:
   LayoutNode(const LayoutNode&) = delete;
   LayoutNode& operator=(const LayoutNode&) = delete;
   void MarkDirtyInternal(bool request_layout);

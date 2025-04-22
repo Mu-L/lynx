@@ -22,13 +22,19 @@ using LayoutObject = lynx::starlight::LayoutObject;
 namespace starlight {
 
 namespace {
+
+const lynx::starlight::LayoutConfigs &GetDefaultLayoutConfigs() {
+  static lynx::starlight::LayoutConfigs default_configs;
+  return default_configs;
+}
+
 class StarlightLayoutNode {
  public:
   StarlightLayoutNode(const LayoutConfig &config)
       : css_style_(std::make_unique<lynx::starlight::ComputedCSSStyle>(
             config.Density(), config.Scale())) {
     sl_node_ = std::make_unique<LayoutObject>(
-        lynx::starlight::LayoutConfigs(), css_style_->GetLayoutComputedStyle());
+        GetDefaultLayoutConfigs(), css_style_->GetLayoutComputedStyle());
     auto envs =
         lynx::tasm::LynxEnvConfig(config.ScreenWidth(), config.ScreenHeight(),
                                   config.Density(), config.Scale());

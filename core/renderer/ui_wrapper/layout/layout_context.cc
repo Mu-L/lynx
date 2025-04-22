@@ -65,10 +65,6 @@ LayoutContext::LayoutContext(
     : platform_impl_(std::move(platform_impl)),
       delegate_(std::move(delegate)),
       root_(nullptr),
-      layout_wanted_(false),
-      has_viewport_ready_(false),
-      enable_layout_(false),
-      has_layout_required_(false),
       viewport_(),
       init_css_style_(std::make_unique<starlight::ComputedCSSStyle>(
           lynx_env_config.LayoutsUnitPerPx(),
@@ -454,18 +450,17 @@ LayoutNode* LayoutContext::InitLayoutNodeWithBundle(int32_t id,
 
 LayoutNode* LayoutContext::CreateLayoutNode(int32_t id,
                                             const base::String& tag) {
-  auto layout_configs = GetLayoutConfigs();
   LayoutNode* layoutNode =
       &layout_nodes_
            .emplace(std::piecewise_construct, std::forward_as_tuple(id),
-                    std::forward_as_tuple(id, layout_configs, lynx_env_config_,
+                    std::forward_as_tuple(id, layout_configs_, lynx_env_config_,
                                           *init_css_style_))
            .first->second;
   layoutNode->SetTag(tag);
   if (tag.str() == kListNodeTag) {
     layoutNode->slnode()->MarkList();
   }
-  if (layout_configs.enable_fixed_new_ && root_) {
+  if (layout_configs_.enable_fixed_new_ && root_) {
     layoutNode->slnode()->SetRoot(root_->slnode());
   }
   layoutNode->slnode()->SetEventHandler(this);
@@ -1009,7 +1004,10 @@ void LayoutContext::SetRootInner(LayoutNode* node) {
 void LayoutContext::SetPageConfigForLayoutThread(
     const std::shared_ptr<PageConfig>& config) {
   page_config_ = config;
-  lynx_env_config_.SetFontScaleSpOnly(GetLayoutConfigs().font_scale_sp_only_);
+  if (page_config_) {
+    layout_configs_ = page_config_->GetLayoutConfigs();
+  }
+  lynx_env_config_.SetFontScaleSpOnly(layout_configs_.font_scale_sp_only_);
   delegate_->SetEnableAirStrictMode(page_config_->GetLynxAirMode() ==
                                     CompileOptionAirMode::AIR_MODE_STRICT);
 }

@@ -20,8 +20,7 @@ class ReplayLayoutTest : public ::testing::Test {
 
   std::shared_ptr<SLNode> CreateNode() {
     auto result = std::make_shared<SLNode>(
-        starlight::LayoutConfigs(),
-        layout_computed_css_->GetLayoutComputedStyle());
+        default_configs_, layout_computed_css_->GetLayoutComputedStyle());
     return result;
   }
   void SetUp() override {
@@ -29,6 +28,9 @@ class ReplayLayoutTest : public ::testing::Test {
         std::make_unique<starlight::ComputedCSSStyle>(1.f, 1.f);
     root_ = CreateNode();
   }
+
+ private:
+  starlight::LayoutConfigs default_configs_;
 };
 
 TEST_F(ReplayLayoutTest, GetLayoutTreeEmpty) {

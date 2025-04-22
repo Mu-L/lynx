@@ -355,7 +355,7 @@ class LayoutComputedStyle {
   SUPPORTED_LAYOUT_PROPERTY(SET_LAYOUT_PROPERTY)
 #undef SET_LAYOUT_PROPERTY
 
-  float PhysicalPixelsPerLayoutUnit() {
+  float PhysicalPixelsPerLayoutUnit() const {
     return physical_pixels_per_layout_unit_;
   }
 
@@ -363,7 +363,7 @@ class LayoutComputedStyle {
     physical_pixels_per_layout_unit_ = physical_pixels_per_layout_unit;
   }
 
-  float GetScreenWidth() { return screen_width_; }
+  float GetScreenWidth() const { return screen_width_; }
 
   void SetScreenWidth(float value) { screen_width_ = value; }
 

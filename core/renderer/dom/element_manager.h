@@ -516,11 +516,8 @@ class ElementManager {
     return true;
   }
 
-  starlight::LayoutConfigs GetLayoutConfigs() {
-    if (config_) {
-      return config_->GetLayoutConfigs();
-    }
-    return starlight::LayoutConfigs();
+  const starlight::LayoutConfigs &GetLayoutConfigs() const {
+    return layout_configs_;
   }
 
   bool GetRemoveComponentElement() {
@@ -1102,6 +1099,8 @@ class ElementManager {
   bool dom_tree_enabled_ = true;
   const int instance_id_;
   std::shared_ptr<PageConfig> config_;
+
+  starlight::LayoutConfigs layout_configs_;
 
   std::vector<Element *> current_insert_plug_vector_;
   bool enable_layout_only_{true};

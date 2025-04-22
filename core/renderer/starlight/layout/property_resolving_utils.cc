@@ -223,7 +223,7 @@ float ApplyMinMaxToSpecificSize(float size, const LayoutObject* item,
                                 Dimension dimension) {
   const float border_and_padding_size =
       logic_direction_utils::GetPaddingAndBorderDimensionSize(item, dimension);
-  BoxInfo* box_info = item->GetBoxInfo();
+  const BoxInfo* box_info = item->GetBoxInfo();
   const float max_size =
       box_info->max_size_[dimension] - border_and_padding_size;
   const float min_size =
