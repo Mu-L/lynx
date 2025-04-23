@@ -17,7 +17,8 @@ namespace lynx {
 namespace tasm {
 
 std::string AdapterHelper::DiffResult::ToString() const {
-  std::ostringstream oss("DiffResult: item_keys:[");
+  std::ostringstream oss;
+  oss << "DiffResult: item_keys:[";
   for (const auto& item_key : item_keys_) {
     oss << item_key << ",";
   }
