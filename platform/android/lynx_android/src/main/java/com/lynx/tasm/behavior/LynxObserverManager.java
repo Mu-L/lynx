@@ -133,6 +133,7 @@ public abstract class LynxObserverManager {
           requestCheckUI();
         }
       };
+      observer.addOnGlobalLayoutListener(mGlobalLayoutListener);
     }
     if (mScrollChangedListener == null) {
       mScrollChangedListener = new ViewTreeObserver.OnScrollChangedListener() {
@@ -141,6 +142,7 @@ public abstract class LynxObserverManager {
           requestCheckUI();
         }
       };
+      observer.addOnScrollChangedListener(mScrollChangedListener);
     }
     if (mDrawListener == null) {
       mDrawListener = new ViewTreeObserver.OnDrawListener() {
@@ -149,10 +151,8 @@ public abstract class LynxObserverManager {
           requestCheckUI();
         }
       };
+      observer.addOnDrawListener(mDrawListener);
     }
-    observer.addOnGlobalLayoutListener(mGlobalLayoutListener);
-    observer.addOnScrollChangedListener(mScrollChangedListener);
-    observer.addOnDrawListener(mDrawListener);
   }
 
   public void addToObserverTree() {
@@ -287,7 +287,6 @@ public abstract class LynxObserverManager {
 
   public void requestCheckUI() {
     if (mHandler == null) {
-      LLog.e(TAG, "LynxObserver requestCheckUI failed since mHandler is null");
       return;
     }
 
