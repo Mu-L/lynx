@@ -283,6 +283,7 @@ void LynxShell::AttachRuntime(
       [facade_actor = facade_actor_, engine_actor = engine_actor_,
        card_cached_data_mgr = card_cached_data_mgr_,
        weak_js_bundle_holder = GetWeakJsBundleHolder()](auto& runtime) mutable {
+        runtime->TransitionToFullRuntime();
         runtime->SetJsBundleHolder(weak_js_bundle_holder);
         static_cast<RuntimeMediator*>(runtime->GetDelegate())
             ->AttachToLynxShell(std::move(facade_actor),

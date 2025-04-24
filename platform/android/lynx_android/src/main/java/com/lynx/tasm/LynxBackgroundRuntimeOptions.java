@@ -27,6 +27,8 @@ public class LynxBackgroundRuntimeOptions {
   LynxGenericResourceFetcher genericResourceFetcher;
   LynxMediaResourceFetcher mediaResourceFetcher;
   LynxTemplateResourceFetcher templateResourceFetcher;
+  // Pending lynx_core.js load
+  private boolean mPendingCoreJsLoad;
 
   public LynxBackgroundRuntimeOptions() {
     mResourceProviders = new HashMap<>();
@@ -59,6 +61,16 @@ public class LynxBackgroundRuntimeOptions {
 
   public void setBytecodeSourceUrl(String mBytecodeSourceUrl) {
     this.mBytecodeSourceUrl = mBytecodeSourceUrl;
+  }
+
+  // set pending lynx_core.js load
+  public void setPendingCoreJsLoad(boolean pending) {
+    this.mPendingCoreJsLoad = pending;
+  }
+
+  // if pending lynx_core.js load
+  public boolean isPendingCoreJsLoad() {
+    return mPendingCoreJsLoad;
   }
 
   @Nullable
@@ -125,6 +137,8 @@ public class LynxBackgroundRuntimeOptions {
     this.mLynxGroup = other.mLynxGroup;
     this.mEnableUserBytecode = other.mEnableUserBytecode;
     this.mBytecodeSourceUrl = other.mBytecodeSourceUrl;
+    // LynxView doesn't pending core js load.
+    this.mPendingCoreJsLoad = false;
 
     // Merge these Fetchers only if they are unset:
     // This part of configurations are shared between runtime and platform-level of LynxView.

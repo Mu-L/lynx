@@ -118,7 +118,7 @@ public class LynxBackgroundRuntime implements ILynxErrorReceiver {
     mNativePtr = nativeCreateBackgroundRuntimeWrapper(mResourceLoader, mModuleFactory,
         mInspectorObserverPtr, whiteBoard, groupId, groupName, preloadJSPaths, false, false,
         options.useQuickJSEngine(), false, options.isEnableUserBytecode(),
-        options.getBytecodeSourceUrl(), enableJSGroupThread);
+        options.getBytecodeSourceUrl(), enableJSGroupThread, options.isPendingCoreJsLoad());
     mInspectorObserverPtr = 0;
 
     TemplateData presetData = options.getPresetData();
@@ -357,6 +357,17 @@ public class LynxBackgroundRuntime implements ILynxErrorReceiver {
     mJSProxy.addLifecycleListener(listener);
   }
 
+  /**
+   * When setting pendingCoreJsLoad, this can load lynx_core.js when the user calls it.
+   */
+  public void transitionToFullRuntime() {
+    if (mNativePtr == 0) {
+      LLog.w(TAG, "add a null lifecycle listener or runtime has been destroy.");
+      return;
+    }
+    nativeTransitionToFullRuntime(mNativePtr);
+  }
+
   private static class CleanupOnUiThread implements Runnable {
     private long mNativePtr;
     private JSProxy mJSProxy;
@@ -380,7 +391,8 @@ public class LynxBackgroundRuntime implements ILynxErrorReceiver {
       LynxModuleFactory moduleFactory, long inspectorObserverPtr, long whiteBoardPtr,
       String groupId, String groupName, String[] preloadJSPaths, boolean useProviderJsEnv,
       boolean forceReloadJSCore, boolean forceUseLightweightJSEngine, boolean enablePendingJsTask,
-      boolean enableUserBytecode, String bytecodeSourceUrl, boolean enableJSGroupThread);
+      boolean enableUserBytecode, String bytecodeSourceUrl, boolean enableJSGroupThread,
+      boolean pendingCoreJsLoad);
 
   private native void nativeSetPresetData(long nativePtr, boolean readOnly, long presetData);
 
@@ -404,4 +416,6 @@ public class LynxBackgroundRuntime implements ILynxErrorReceiver {
       long ptr, String key, PlatformCallBack callBack);
 
   private native void nativeUnsubscribeSessionStorage(long ptr, String key, double id);
+
+  private native void nativeTransitionToFullRuntime(long ptr);
 }

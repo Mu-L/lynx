@@ -30,7 +30,8 @@ static jlong CreateBackgroundRuntimeWrapper(
     jobjectArray preload_js_paths, jboolean useProviderJsEnv,
     jboolean force_reload_js_core, jboolean force_use_light_weight_js_engine,
     jboolean enable_pending_js_task, jboolean enable_user_bytecode,
-    jstring bytecode_source_url, jboolean enable_js_group_thread) {
+    jstring bytecode_source_url, jboolean enable_js_group_thread,
+    jboolean pending_core_js_load) {
   auto module_manager = std::make_shared<lynx::piper::LynxModuleManager>();
   module_manager->SetPlatformModuleFactory(
       std::make_unique<lynx::piper::ModuleFactoryAndroid>(env,
@@ -78,7 +79,7 @@ static jlong CreateBackgroundRuntimeWrapper(
       white_board, on_runtime_actor_created, std::move(paths),
       enable_js_group_thread, force_reload_js_core,
       force_use_light_weight_js_engine, enable_pending_js_task,
-      enable_user_bytecode, source_url);
+      enable_user_bytecode, source_url, pending_core_js_load);
 
   // Delete observer to decrease ref count.
   delete observer;
@@ -154,6 +155,12 @@ static void UnsubscribeSessionStorage(JNIEnv *env, jobject jcaller, jlong ptr,
       lynx::base::android::JNIConvertHelper::ConvertToString(env, key);
   reinterpret_cast<lynx::shell::LynxRuntimeWrapperAndroid *>(ptr)
       ->UnSubscribeSessionStorage(std::move(shared_key), id);
+}
+
+void TransitionToFullRuntime(JNIEnv *env, jobject jcaller, jlong ptr) {
+  auto *runtime_wrapper =
+      reinterpret_cast<lynx::shell::LynxRuntimeWrapperAndroid *>(ptr);
+  runtime_wrapper->TransitionToFullRuntime();
 }
 
 void DestroyWrapper(JNIEnv *env, jclass jcaller, jlong ptr) {
@@ -244,6 +251,11 @@ void LynxRuntimeWrapperAndroid::UnSubscribeSessionStorage(
           auto &runtime) mutable {
         delegate->UnsubscribeClientSessionStorage(std::move(key), callback_id);
       });
+}
+
+void LynxRuntimeWrapperAndroid::TransitionToFullRuntime() {
+  runtime_standalone_bundle_.runtime_actor_->Act(
+      [](auto &runtime) { runtime->TransitionToFullRuntime(); });
 }
 
 void LynxRuntimeWrapperAndroid::DestroyRuntime() {

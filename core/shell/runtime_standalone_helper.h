@@ -47,7 +47,8 @@ InitRuntimeStandaloneResult InitRuntimeStandalone(
     std::vector<std::string> preload_js_paths, bool enable_js_group_thread,
     bool force_reload_js_core, bool force_use_light_weight_js_engine = false,
     bool pending_js_task = false, bool enable_user_bytecode = false,
-    const std::string& bytecode_source_url = "");
+    const std::string& bytecode_source_url = "",
+    bool pending_core_js_load = false);
 
 }  // namespace shell
 }  // namespace lynx

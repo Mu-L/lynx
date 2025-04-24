@@ -31,7 +31,7 @@ InitRuntimeStandaloneResult InitRuntimeStandalone(
     std::vector<std::string> preload_js_paths, bool enable_js_group_thread,
     bool force_reload_js_core, bool force_use_light_weight_js_engine,
     bool pending_js_task, bool enable_user_bytecode,
-    const std::string& bytecode_source_url) {
+    const std::string& bytecode_source_url, bool pending_core_js_load) {
   auto instance_id = lynx::shell::LynxShell::NextInstanceId();
   lynx::fml::RefPtr<lynx::fml::TaskRunner> js_task_runner =
       lynx::base::TaskRunnerManufactor::GetJSRunner(group_name);
@@ -83,12 +83,13 @@ InitRuntimeStandaloneResult InitRuntimeStandalone(
   runtime_actor->ActAsync(
       [module_manager, preload_js_paths = std::move(preload_js_paths),
        runtime_observer, force_reload_js_core, force_use_light_weight_js_engine,
-       vsync_monitor](std::unique_ptr<runtime::LynxRuntime>& runtime) mutable {
+       vsync_monitor, pending_core_js_load](
+          std::unique_ptr<runtime::LynxRuntime>& runtime) mutable {
         vsync_monitor->BindToCurrentThread();
         vsync_monitor->Init();
         runtime->Init(module_manager, runtime_observer,
                       std::move(preload_js_paths), force_reload_js_core,
-                      force_use_light_weight_js_engine);
+                      force_use_light_weight_js_engine, pending_core_js_load);
       });
 
   return {runtime_actor, timing_actor, native_runtime_facade,

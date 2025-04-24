@@ -56,7 +56,7 @@ class LynxRuntime final {
       const std::shared_ptr<piper::InspectorRuntimeObserverNG>&
           runtime_observer,
       std::vector<std::string> preload_js_paths, bool force_reload_js_core,
-      bool force_use_light_weight_js_engine);
+      bool force_use_light_weight_js_engine, bool pending_core_js_load = false);
 
   void CallJSCallback(const std::shared_ptr<piper::ModuleCallback>& callback,
                       int64_t id_to_delete);
@@ -153,6 +153,8 @@ class LynxRuntime final {
   void SetJsBundleHolder(
       const std::weak_ptr<piper::JsBundleHolder>& weak_js_bundle_holder);
 
+  void TransitionToFullRuntime();
+
  private:
   enum class State {
     kNotStarted,       // only LynxRuntime created
@@ -165,8 +167,15 @@ class LynxRuntime final {
   };
 
   void Destroy();
-  std::vector<std::pair<std::string, std::string>> LoadPreloadJSSource(
-      std::vector<std::string> preload_js_paths, bool force_reload_js_core);
+  void ReadPreloadJSSource(
+      std::vector<std::string> preload_js_paths,
+      std::vector<std::pair<std::string, std::string>>& ret);
+  void ReadCoreJS(bool force_reload_js_core,
+                  std::vector<std::pair<std::string, std::string>>& ret);
+  void InitPartRuntime(std::vector<std::string> preload_js_paths);
+  void InitFullRuntime(std::vector<std::string> preload_js_paths);
+  void InitExecutor(
+      std::vector<std::pair<std::string, std::string>> preload_js_sources);
   void UpdateState(State state);
   void OnRuntimeReady();
   void OnSsrRuntimeReady();
@@ -228,6 +237,8 @@ class LynxRuntime final {
   bool enable_js_group_thread_{false};
   std::unique_ptr<RuntimeLifecycleObserverImpl> lifecycle_observer_;
   lepus::Value init_global_props_;
+  bool is_pending_core_js_{false};
+  bool force_reload_js_core_{false};
 };
 
 }  // namespace runtime

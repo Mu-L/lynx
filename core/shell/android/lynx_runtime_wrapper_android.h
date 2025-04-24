@@ -78,6 +78,8 @@ class LynxRuntimeWrapperAndroid {
     return weak_module_manager_;
   }
 
+  void TransitionToFullRuntime();
+
  private:
   const InitRuntimeStandaloneResult
       runtime_standalone_bundle_;  // keep this read-only until destruction
