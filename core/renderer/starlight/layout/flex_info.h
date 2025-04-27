@@ -31,18 +31,8 @@ struct LineInfo {
 class FlexInfo {
  public:
   friend class LayoutObject;
-  FlexInfo(int flex_count)
-      : flex_base_size_(flex_count, 0),
-        hypothetical_main_size_(flex_count, 0),
-        hypothetical_cross_size_(flex_count, 0),
-        flex_main_size_(flex_count, 0),
-        flex_cross_size_(flex_count, 0),
-        apply_stretch_later_(flex_count, false),
-        has_item_flex_grow_(0),
-        has_item_flex_shrink_(0),
-        main_gap_size_(0.f),
-        cross_gap_size_(0.f) {}
 
+  void Initialize(size_t flex_count);
   void Reset();
 
   InlineFloatArray flex_base_size_;

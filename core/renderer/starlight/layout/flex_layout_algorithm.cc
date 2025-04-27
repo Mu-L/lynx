@@ -25,10 +25,10 @@ FlexLayoutAlgorithm::FlexLayoutAlgorithm(LayoutObject* container)
     : LayoutAlgorithm(container) {}
 
 void FlexLayoutAlgorithm::InitializeAlgorithmEnv() {
-  flex_info_ = std::make_unique<FlexInfo>(inflow_items_.size());
+  flex_info_.Initialize(inflow_items_.size());
 }
 
-void FlexLayoutAlgorithm::Reset() { flex_info_->Reset(); }
+void FlexLayoutAlgorithm::Reset() { flex_info_.Reset(); }
 
 void FlexLayoutAlgorithm::SizeDeterminationByAlgorithm() {
   /*Algorithm-3
@@ -48,7 +48,7 @@ void FlexLayoutAlgorithm::SizeDeterminationByAlgorithm() {
   DetermineFlexContainerMainSize(flex_container_main_size);
 
   // Resolve each line
-  for (auto& line_info : flex_info_->line_info_) {
+  for (auto& line_info : flex_info_.line_info_) {
     // Algorithm-6 Resolve the flexible lengths of all the flex items to find
     // their used main size.
     ResolveFlexibleLengths(line_info);
@@ -69,13 +69,13 @@ void FlexLayoutAlgorithm::AlignInFlowItems() {
   CalculateAlignContent(cross_axis_start, cross_axis_interval);
   float line_cross_offset = cross_axis_start;
 
-  for (const auto& line_info : flex_info_->line_info_) {
+  for (const auto& line_info : flex_info_.line_info_) {
     // Main-Axis Alignment
     DistributeRemainingFreeSpace(line_info);
     // Cross-Axis Alignment
     CrossAxisAlignment(line_info, line_cross_offset);
     line_cross_offset += cross_axis_interval;
-    line_cross_offset += flex_info_->cross_gap_size_;
+    line_cross_offset += flex_info_.cross_gap_size_;
   }
 
   CalculateWrapReverse();
@@ -84,7 +84,7 @@ void FlexLayoutAlgorithm::AlignInFlowItems() {
 /*Algorithm-3
  * Determine the flex base size and hypothetical main size of each item:*/
 float FlexLayoutAlgorithm::DetermineFlexBaseSizeAndHypotheticalMainSize() {
-  auto& base_size = flex_info_->flex_base_size_;
+  auto& base_size = flex_info_.flex_base_size_;
   for (size_t idx = 0; idx < inflow_items_.size(); ++idx) {
     LayoutObject* item = inflow_items_[idx];
     if (base::FloatsEqual(base_size[idx], 0.0f)) {
@@ -92,20 +92,20 @@ float FlexLayoutAlgorithm::DetermineFlexBaseSizeAndHypotheticalMainSize() {
     }
 
     if (item->GetCSSStyle()->GetFlexGrow() != 0)
-      flex_info_->has_item_flex_grow_ = 1;
+      flex_info_.has_item_flex_grow_ = 1;
     if (item->GetCSSStyle()->GetFlexShrink() != 0)
-      flex_info_->has_item_flex_shrink_ = 1;
+      flex_info_.has_item_flex_shrink_ = 1;
   }
   float total_hypothetical_size = ElasticLayoutUtils::ComputeHypotheticalSizes(
-      inflow_items_, base_size, *this, flex_info_->hypothetical_main_size_);
+      inflow_items_, base_size, *this, flex_info_.hypothetical_main_size_);
   // Init the main axis gap size. When there is only one flex item, treat
   // main gap size as zero.
   if (inflow_items_.size() > 1) {
-    flex_info_->main_gap_size_ = CalculateFloatSizeFromLength(
+    flex_info_.main_gap_size_ = CalculateFloatSizeFromLength(
         GapStyle(MainAxis()), PercentBase(MainAxis()));
     // total_hypothetical_size should 'plus' the gaps between the items
     total_hypothetical_size +=
-        flex_info_->main_gap_size_ * (inflow_items_.size() - 1);
+        flex_info_.main_gap_size_ * (inflow_items_.size() - 1);
   }
   return total_hypothetical_size;
 }
@@ -191,10 +191,10 @@ float FlexLayoutAlgorithm::CalculateFlexContainerMainSize(
     }
     // judge if flex grow or not, should 'plus' the gaps between the items
     sum_hypothetical_main_size +=
-        flex_info_->main_gap_size_ * (inflow_items_.size() - 1);
+        flex_info_.main_gap_size_ * (inflow_items_.size() - 1);
     bool is_flex_grow =
         sum_hypothetical_main_size <= total_hypothetical_main_size;
-    flex_info_->line_info_.emplace_back(
+    flex_info_.line_info_.emplace_back(
         0, static_cast<int32_t>(inflow_items_.size()), 0,
         total_hypothetical_main_size - sum_flex_base_size, is_flex_grow);
     return total_hypothetical_main_size;
@@ -217,15 +217,15 @@ float FlexLayoutAlgorithm::CalculateFlexContainerMainSize(
               ? sum_hypothetical_main_size
               : max_flex_line_size;
       // should 'plus' the gaps between the items
-      sum_hypothetical_main_size += flex_info_->main_gap_size_;
-      sum_flex_base_size += flex_info_->main_gap_size_;
+      sum_hypothetical_main_size += flex_info_.main_gap_size_;
+      sum_flex_base_size += flex_info_.main_gap_size_;
       idx++;
       continue;
     }
     // It will shrink if the first item is larger than container_main_size
     // (total_hypothetical_main_size)
     if (start == idx) {
-      flex_info_->line_info_.emplace_back(
+      flex_info_.line_info_.emplace_back(
           static_cast<int>(start), static_cast<int>(start + 1), 0,
           total_hypothetical_main_size -
               GetOuterFlexBaseMainSIze(static_cast<int>(idx)),
@@ -235,10 +235,10 @@ float FlexLayoutAlgorithm::CalculateFlexContainerMainSize(
       continue;
     }
     // It will be flex-grow if more than one item in a flex line
-    flex_info_->line_info_.emplace_back(
+    flex_info_.line_info_.emplace_back(
         static_cast<int>(start), static_cast<int>(idx), 0,
         total_hypothetical_main_size -
-            (sum_flex_base_size - flex_info_->main_gap_size_),
+            (sum_flex_base_size - flex_info_.main_gap_size_),
         true);
     sum_hypothetical_main_size = 0;
     sum_flex_base_size = 0;
@@ -249,10 +249,10 @@ float FlexLayoutAlgorithm::CalculateFlexContainerMainSize(
   // larger than the container's main size, it will go wrong.
   if (start < inflow_items_.size() ||
       container_->GetLayoutConfigs().IsFlexWrapExtraLineQuirksMode()) {
-    flex_info_->line_info_.emplace_back(
+    flex_info_.line_info_.emplace_back(
         static_cast<int>(start), static_cast<int>(inflow_items_.size()), 0,
         total_hypothetical_main_size -
-            (sum_flex_base_size - flex_info_->main_gap_size_),
+            (sum_flex_base_size - flex_info_.main_gap_size_),
         true);
   }
   // Container main size will shrink to max flex line size if container main
@@ -274,9 +274,9 @@ void FlexLayoutAlgorithm::DetermineFlexContainerMainSize(
 // their used main size.
 void FlexLayoutAlgorithm::ResolveFlexibleLengths(LineInfo& line_info) {
   ElasticLayoutUtils::ElasticInfos infos(
-      inflow_items_, flex_info_->flex_base_size_,
-      flex_info_->hypothetical_main_size_, line_info.is_flex_grow_, *this,
-      line_info.start_, line_info.end_, flex_info_->main_gap_size_);
+      inflow_items_, flex_info_.flex_base_size_,
+      flex_info_.hypothetical_main_size_, line_info.is_flex_grow_, *this,
+      line_info.start_, line_info.end_, flex_info_.main_gap_size_);
 
   ElasticLayoutUtils::ElasticFactorGetter factor_getter;
   if (line_info.is_flex_grow_) {
@@ -290,7 +290,7 @@ void FlexLayoutAlgorithm::ResolveFlexibleLengths(LineInfo& line_info) {
   }
   line_info.remaining_free_space_ = ElasticLayoutUtils::ComputeElasticItemSizes(
       infos, container_constraints_[kMainAxis].Size(), factor_getter,
-      flex_info_->flex_main_size_);
+      flex_info_.flex_main_size_);
 }
 
 // Algorithm-7 Determine the hypothetical cross size of each item
@@ -298,8 +298,8 @@ void FlexLayoutAlgorithm::DetermineHypotheticalCrossSize() {
   bool is_row = IsHorizontal();
   // Init the cross axis gap size. When there is only one flex line, treat
   // cross gap size as zero.
-  if (flex_info_->line_info_.size() > 1) {
-    flex_info_->cross_gap_size_ = CalculateFloatSizeFromLength(
+  if (flex_info_.line_info_.size() > 1) {
+    flex_info_.cross_gap_size_ = CalculateFloatSizeFromLength(
         GapStyle(CrossAxis()), PercentBase(CrossAxis()));
   }
   for (size_t idx = 0; idx < inflow_items_.size(); ++idx) {
@@ -314,7 +314,7 @@ void FlexLayoutAlgorithm::DetermineHypotheticalCrossSize() {
     Constraints child_constraints =
         GenerateDefaultConstraint(*inflow_items_[idx]);
     child_constraints[MainAxis()] =
-        OneSideConstraint::Definite(flex_info_->flex_main_size_[idx]);
+        OneSideConstraint::Definite(flex_info_.flex_main_size_[idx]);
 
     if (!inflow_items_[idx]->GetLayoutConfigs().IsFullQuirksMode() ||
         length_on_main_axis.IsDefinite()) {
@@ -325,7 +325,7 @@ void FlexLayoutAlgorithm::DetermineHypotheticalCrossSize() {
       }
     }
 
-    flex_info_->apply_stretch_later_[idx] =
+    flex_info_.apply_stretch_later_[idx] =
         ShouldApplyStretchAndLayoutLater(static_cast<int>(idx));
     FlexAlignType align = item_style->GetAlignSelf();
     if (align == FlexAlignType::kAuto) {
@@ -334,7 +334,7 @@ void FlexLayoutAlgorithm::DetermineHypotheticalCrossSize() {
     const bool child_stretch = align == FlexAlignType::kStretch;
     /* RESOLVE STRETCH */
     if ((container_->GetLayoutConfigs().IsFlexAutoMarginQuirksMode() ||
-         flex_info_->apply_stretch_later_[idx]) &&
+         flex_info_.apply_stretch_later_[idx]) &&
         child_stretch && IsSLAtMostMode(child_constraints[kCrossAxis].Mode()) &&
         !logic_direction_utils::GetCSSDimensionSize(item_style, CrossAxis())
              .IsIntrinsic() &&
@@ -344,7 +344,7 @@ void FlexLayoutAlgorithm::DetermineHypotheticalCrossSize() {
           OneSideConstraint::Definite(child_constraints[CrossAxis()].Size());
     }
     FloatSize result;
-    if (flex_info_->apply_stretch_later_[idx] &&
+    if (flex_info_.apply_stretch_later_[idx] &&
         IsSLDefiniteMode(child_constraints[CrossAxis()].Mode())) {
       if (is_row) {
         result.height_ = child_constraints[CrossAxis()].Size();
@@ -356,17 +356,17 @@ void FlexLayoutAlgorithm::DetermineHypotheticalCrossSize() {
                                                  container_->GetFinalMeasure());
     }
 
-    flex_info_->hypothetical_cross_size_[idx] =
+    flex_info_.hypothetical_cross_size_[idx] =
         container_style_->IsRow(container_->GetLayoutConfigs(),
                                 container_->attr_map())
             ? result.height_
             : result.width_;
     // clamp min-max size
-    flex_info_->hypothetical_cross_size_[idx] =
+    flex_info_.hypothetical_cross_size_[idx] =
         is_row ? inflow_items_[idx]->ClampExactHeight(
-                     flex_info_->hypothetical_cross_size_[idx])
+                     flex_info_.hypothetical_cross_size_[idx])
                : inflow_items_[idx]->ClampExactWidth(
-                     flex_info_->hypothetical_cross_size_[idx]);
+                     flex_info_.hypothetical_cross_size_[idx]);
   }
 }
 
@@ -376,14 +376,14 @@ void FlexLayoutAlgorithm::CalculateCrossSizeOfEachFlexLine() {
   // cross size of the flex line is the flex container’s inner cross size.
   if (container_style_->GetFlexWrap() == FlexWrapType::kNowrap &&
       container_constraints_[kCrossAxis].Mode() == SLMeasureModeDefinite &&
-      flex_info_->line_info_.size() > 0) {
-    flex_info_->line_info_[0].line_cross_size_ =
+      flex_info_.line_info_.size() > 0) {
+    flex_info_.line_info_[0].line_cross_size_ =
         container_constraints_[kCrossAxis].Size();
     return;
   }
 
   float line_cross_size_sum = 0.0f;
-  for (auto& line_info : flex_info_->line_info_) {
+  for (auto& line_info : flex_info_.line_info_) {
     float largest_outer_hypothetical_cross_size = 0;
     float max_possible_baseline = 0.0f;
     // 8-2 Among all the items not collected by the previous step, find the
@@ -420,17 +420,17 @@ void FlexLayoutAlgorithm::CalculateCrossSizeOfEachFlexLine() {
   // Before calculating the remaining space for align-content:stretch, should
   // take into account the gaps between the flex lines.
   line_cross_size_sum +=
-      flex_info_->cross_gap_size_ * (flex_info_->line_info_.size() - 1);
+      flex_info_.cross_gap_size_ * (flex_info_.line_info_.size() - 1);
 
   // calc align-content:stretch
   if (container_style_->GetAlignContent() == AlignContentType::kStretch &&
       IsSLDefiniteMode(container_constraints_[kCrossAxis].Mode()) &&
       line_cross_size_sum < container_constraints_[kCrossAxis].Size() &&
-      flex_info_->line_info_.size() > 0) {
+      flex_info_.line_info_.size() > 0) {
     float stretch_to_distribute =
         (container_constraints_[kCrossAxis].Size() - line_cross_size_sum) /
-        (flex_info_->line_info_).size();
-    for (auto& line_info : flex_info_->line_info_) {
+        (flex_info_.line_info_).size();
+    for (auto& line_info : flex_info_.line_info_) {
       line_info.line_cross_size_ += stretch_to_distribute;
     }
   }
@@ -438,14 +438,14 @@ void FlexLayoutAlgorithm::CalculateCrossSizeOfEachFlexLine() {
 
 // Algorithm-11 Determine the used cross size of each flex item
 void FlexLayoutAlgorithm::DetermineUsedCrossSizeOfEachFlexItem() {
-  for (const auto& line_info : flex_info_->line_info_) {
+  for (const auto& line_info : flex_info_.line_info_) {
     for (int32_t idx = line_info.start_; idx < line_info.end_; ++idx) {
       // If a flex item has align-self: stretch, its computed cross size
       // property is auto, and neither of its cross-axis margins are auto, the
       // used outer cross size is the used cross size of its flex line, clamped
       // according to the item’s used min and max cross sizes.
       LayoutObject* item = inflow_items_[idx];
-      if (flex_info_->apply_stretch_later_[idx]) {
+      if (flex_info_.apply_stretch_later_[idx]) {
         Constraints child_constraint;
         // percent may become resolvable in this stage, so recompute the
         // preferred size
@@ -460,18 +460,18 @@ void FlexLayoutAlgorithm::DetermineUsedCrossSizeOfEachFlexItem() {
         child_constraint[CrossAxis()] =
             OneSideConstraint::Definite(child_cross_size);
         child_constraint[MainAxis()] =
-            OneSideConstraint::Definite(flex_info_->flex_main_size_[idx]);
+            OneSideConstraint::Definite(flex_info_.flex_main_size_[idx]);
         FloatSize result;
         result = item->UpdateMeasure(child_constraint,
                                      container_->GetFinalMeasure());
 
-        flex_info_->flex_cross_size_[idx] =
+        flex_info_.flex_cross_size_[idx] =
             logic_direction_utils::SizeDimension(result, CrossAxis());
         // TODO: clamp
       } else {
         // Otherwise, the used cross size is the item’s hypothetical cross size.
-        flex_info_->flex_cross_size_[idx] =
-            flex_info_->hypothetical_cross_size_[idx];
+        flex_info_.flex_cross_size_[idx] =
+            flex_info_.hypothetical_cross_size_[idx];
       }
     }
   }
@@ -581,7 +581,7 @@ void FlexLayoutAlgorithm::CalculateJustifyContent(const LineInfo& line_info,
   int32_t current_line_count = line_info.end_ - line_info.start_;
   bool negative_space_with_gap = false;
   if (base::FloatsLarger(0.f, line_info.remaining_free_space_) &&
-      base::FloatsLarger(flex_info_->main_gap_size_, 0.f)) {
+      base::FloatsLarger(flex_info_.main_gap_size_, 0.f)) {
     negative_space_with_gap = true;
   }
   logic_direction_utils::ResolveJustifyContent(
@@ -608,7 +608,7 @@ void FlexLayoutAlgorithm::MainAxisAlignment(LayoutItems& line_items,
 
     offset += item_size;
     // When the item is not the first one, offset should 'plus' gap.
-    offset += flex_info_->main_gap_size_;
+    offset += flex_info_.main_gap_size_;
   }
 }
 
@@ -619,19 +619,19 @@ void FlexLayoutAlgorithm::CalculateAlignContent(float& cross_axis_start,
     return;
   }
   float line_height_sum = 0.0f;
-  for (const auto& line_info : flex_info_->line_info_) {
+  for (const auto& line_info : flex_info_.line_info_) {
     line_height_sum += line_info.line_cross_size_;
   }
 
-  int32_t item_count = static_cast<int32_t>(flex_info_->line_info_.size());
+  int32_t item_count = static_cast<int32_t>(flex_info_.line_info_.size());
   // if the leftover free-space is negative and the cross gap size > 0, resolve
   // align-content in extra logic.
   float available_space = container_constraints_[kCrossAxis].Size() -
                           line_height_sum -
-                          flex_info_->cross_gap_size_ * (item_count - 1);
+                          flex_info_.cross_gap_size_ * (item_count - 1);
   bool negative_space_with_gap = false;
   if (base::FloatsLarger(0.f, available_space) &&
-      base::FloatsLarger(flex_info_->cross_gap_size_, 0.f)) {
+      base::FloatsLarger(flex_info_.cross_gap_size_, 0.f)) {
     negative_space_with_gap = true;
   }
 
@@ -739,11 +739,11 @@ void FlexLayoutAlgorithm::DetermineContainerCrossSize() {
   }
   // Otherwise, use the sum of the flex lines' cross sizes 'plus' gaps
   float cross_size_sum = 0;
-  for (const auto& line_info : flex_info_->line_info_) {
+  for (const auto& line_info : flex_info_.line_info_) {
     cross_size_sum += line_info.line_cross_size_;
   }
   cross_size_sum +=
-      flex_info_->cross_gap_size_ * (flex_info_->line_info_.size() - 1);
+      flex_info_.cross_gap_size_ * (flex_info_.line_info_.size() - 1);
 
   // clamped by the used min and max cross sizes of the flex container.
   BoxInfo* box_info = container_->GetBoxInfo();
@@ -884,17 +884,17 @@ void FlexLayoutAlgorithm::UpdateCrossSize(float container_cross_size) {
 
 float FlexLayoutAlgorithm::GetOuterHypotheticalMainSize(int32_t idx) {
   FourValue& margin = inflow_items_[idx]->GetBoxInfo()->margin_;
-  return flex_info_->hypothetical_main_size_[idx] + margin[kMainFront] +
+  return flex_info_.hypothetical_main_size_[idx] + margin[kMainFront] +
          margin[kMainBack];
 }
 float FlexLayoutAlgorithm::GetOuterFlexBaseMainSIze(int32_t idx) {
   FourValue& margin = inflow_items_[idx]->GetBoxInfo()->margin_;
-  return flex_info_->flex_base_size_[idx] + margin[kMainFront] +
+  return flex_info_.flex_base_size_[idx] + margin[kMainFront] +
          margin[kMainBack];
 }
 float FlexLayoutAlgorithm::GetOuterHypotheticalCrossSize(int32_t idx) {
   FourValue& margin = inflow_items_[idx]->GetBoxInfo()->margin_;
-  return flex_info_->hypothetical_cross_size_[idx] + margin[kCrossFront] +
+  return flex_info_.hypothetical_cross_size_[idx] + margin[kCrossFront] +
          margin[kCrossBack];
 }
 
@@ -909,7 +909,7 @@ float FlexLayoutAlgorithm::CalculateOffsetFromTopMarginEdgeToBaseline(
   }
   if (align == FlexAlignType::kBaseline) {
     return base::IsZero(item->GetBorderBoundHeight())
-               ? flex_info_->hypothetical_cross_size_[idx] +
+               ? flex_info_.hypothetical_cross_size_[idx] +
                      item->GetLayoutMarginTop()
                : item->GetOffsetFromTopMarginEdgeToBaseline();
   }
@@ -932,7 +932,7 @@ float FlexLayoutAlgorithm::CalculateFlexLineCrossSizeConsiderBaseline(
       float offset = GetOuterHypotheticalCrossSize(idx);
       offset += max_possible_baseline -
                 (base::IsZero(item->GetBorderBoundHeight())
-                     ? (flex_info_->hypothetical_cross_size_[idx] +
+                     ? (flex_info_.hypothetical_cross_size_[idx] +
                         item->GetLayoutMarginTop())
                      : item->GetOffsetFromTopMarginEdgeToBaseline());
       largest_flex_line_cross_size =
@@ -944,7 +944,7 @@ float FlexLayoutAlgorithm::CalculateFlexLineCrossSizeConsiderBaseline(
 
 void FlexLayoutAlgorithm::SetContainerBaseline() {
   if (IsHorizontal()) {
-    for (auto& line_info : flex_info_->line_info_) {
+    for (auto& line_info : flex_info_.line_info_) {
       float max_baseline_offset = 0.0f;
       float first_item_baseline_offset = 0.0f;
       for (int32_t idx = line_info.start_; idx < line_info.end_; ++idx) {
@@ -998,27 +998,27 @@ void FlexLayoutAlgorithm::SetContainerBaseline() {
                                 : max_baseline_offset;
     }
     // container's baseline is decided by the first flex line.
-    if (flex_info_->line_info_.size() > 0) {
-      container_->SetBaseline(flex_info_->line_info_[0].baseline_);
+    if (flex_info_.line_info_.size() > 0) {
+      container_->SetBaseline(flex_info_.line_info_[0].baseline_);
     }
   } else if (!container_->GetLayoutConfigs()
                   .IsBaselineSupportVerticalQuirksMode() &&
-             flex_info_->line_info_.size() > 0) {
+             flex_info_.line_info_.size() > 0) {
     if (inflow_items_.empty()) {
       return;
     }
     // If flex-direction is column, the container's baseline is only decided
     // by the first flex item
     LayoutItems line_items(
-        inflow_items_.begin() + flex_info_->line_info_[0].start_,
-        inflow_items_.begin() + flex_info_->line_info_[0].end_);
+        inflow_items_.begin() + flex_info_.line_info_[0].start_,
+        inflow_items_.begin() + flex_info_.line_info_[0].end_);
     float line_start = 0.f;
     float line_interval = 0.f;
     // TODO(yuanzhiwen): Consider margin: auto
-    CalculateJustifyContent(flex_info_->line_info_[0], line_start,
+    CalculateJustifyContent(flex_info_.line_info_[0], line_start,
                             line_interval);
     container_->SetBaseline(line_start +
-                            inflow_items_[flex_info_->line_info_[0].start_]
+                            inflow_items_[flex_info_.line_info_[0].start_]
                                 ->GetOffsetFromTopMarginEdgeToBaseline());
   }
 }

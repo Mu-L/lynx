@@ -9,6 +9,19 @@
 namespace lynx {
 namespace starlight {
 
+void FlexInfo::Initialize(size_t flex_count) {
+  flex_base_size_.resize<true>(flex_count, 0);
+  hypothetical_main_size_.resize<true>(flex_count, 0);
+  hypothetical_cross_size_.resize<true>(flex_count, 0);
+  flex_main_size_.resize<true>(flex_count, 0);
+  flex_cross_size_.resize<true>(flex_count, 0);
+  apply_stretch_later_.resize<true>(flex_count, false);
+  has_item_flex_grow_ = 0;
+  has_item_flex_shrink_ = 0;
+  main_gap_size_ = 0.f;
+  cross_gap_size_ = 0.f;
+}
+
 void FlexInfo::Reset() {
   std::fill(flex_base_size_.begin(), flex_base_size_.end(), 0);
   std::fill(hypothetical_main_size_.begin(), hypothetical_main_size_.end(), 0);

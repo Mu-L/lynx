@@ -100,7 +100,7 @@ class FlexLayoutAlgorithm : public LayoutAlgorithm {
   Position GetAbsoluteOrFixedItemMainAxisPosition(
       LayoutObject* absolute_or_fixed_item);
 
-  std::unique_ptr<FlexInfo> flex_info_;
+  FlexInfo flex_info_;
 };
 }  // namespace starlight
 }  // namespace lynx
