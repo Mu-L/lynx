@@ -313,7 +313,7 @@ public class LynxBackgroundLinearGradientDrawable : LynxBackgroundGradientDrawab
   public instancetype _Nullable LynxBackgroundLinearGradientDrawable::initWithArray:(NSArray *_Nonnull array);
 }
 
-public class LynxBackgroundManager : NSObject {
+public class LynxBackgroundManager : NSObject, <CALayerDelegate> {
   public LynxUI* LynxBackgroundManager::ui ui;
   public LynxBackgroundInfo* LynxBackgroundManager::backgroundInfo backgroundInfo;
   public CGFloat LynxBackgroundManager::opacity opacity;

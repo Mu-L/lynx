@@ -41,16 +41,10 @@ const LynxBorderRadii LynxBorderRadiiZero = {{0, 0}, {0, 0}, {0, 0}, {0, 0},
 
 #pragma mark LynxBackgroundSubLayer
 @implementation LynxBackgroundSubLayer
-- (id<CAAction>)actionForKey:(NSString*)event {
-  return (id)[NSNull null];
-}
 @end
 
 #pragma mark LynxBorderLayer
 @implementation LynxBorderLayer
-- (id<CAAction>)actionForKey:(NSString*)event {
-  return (id)[NSNull null];
-}
 @end
 
 #pragma mark LynxBackgroundManager
@@ -695,6 +689,7 @@ const LynxBorderRadii LynxBorderRadiiZero = {{0, 0}, {0, 0}, {0, 0}, {0, 0},
 - (CALayer*)autoAddBorderLayer:(LynxBgTypes)type {
   if (_borderLayer == nil) {
     _borderLayer = [[LynxBorderLayer alloc] init];
+    _borderLayer.delegate = self;
     _borderLayer.type = LynxBgTypeSimple;
     [_ui.animationManager notifyBGLayerAdded];
   }
@@ -750,6 +745,8 @@ const LynxBorderRadii LynxBorderRadiiZero = {{0, 0}, {0, 0}, {0, 0}, {0, 0},
   if (_backgroundLayer != nil) {
     [_backgroundLayer removeAllAnimations];
     [_backgroundLayer removeFromSuperlayer];
+    // set delegate to nil to remove displayLlink
+    _backgroundLayer.delegate = nil;
     _backgroundLayer = nil;
   }
 }
@@ -765,6 +762,7 @@ const LynxBorderRadii LynxBorderRadiiZero = {{0, 0}, {0, 0}, {0, 0}, {0, 0},
 - (CALayer*)addMaskLayer {
   if (!_maskLayer) {
     _maskLayer = [[LynxBackgroundSubBackgroundLayer alloc] init];
+    _maskLayer.delegate = self;
     [_ui.animationManager notifyBGLayerAdded];
   }
   _maskLayer.masksToBounds = NO;
@@ -788,6 +786,7 @@ const LynxBorderRadii LynxBorderRadiiZero = {{0, 0}, {0, 0}, {0, 0}, {0, 0},
 - (CALayer*)autoAddBackgroundLayer:(BOOL)complex {
   if (!_backgroundLayer) {
     _backgroundLayer = [[LynxBackgroundSubBackgroundLayer alloc] init];
+    _backgroundLayer.delegate = self;
     [_ui.animationManager notifyBGLayerAdded];
   }
   _backgroundLayer.masksToBounds = NO;
@@ -890,6 +889,21 @@ const LynxBorderRadii LynxBorderRadiiZero = {{0, 0}, {0, 0}, {0, 0}, {0, 0},
   };
   [self.ui displayComplexBackgroundAsynchronouslyWithDisplay:displayBlock
                                                   completion:completionBlock];
+}
+
+- (void)dealloc {
+  if (@available(iOS 13.0, *)) {
+    // Prevent modifying CALayer's delegate on a background thread.
+    return;
+  }
+
+  // The circular retain needs to be break under iOS 12. Otherwise an UAF crash will occur.
+  if (_backgroundLayer && _backgroundLayer.delegate == self) {
+    _backgroundLayer.delegate = nil;
+  }
+  if (_borderLayer && _borderLayer.delegate == self) {
+    _borderLayer.delegate = nil;
+  }
 }
 
 - (BOOL)toAddSubLayerOnBorderLayer {

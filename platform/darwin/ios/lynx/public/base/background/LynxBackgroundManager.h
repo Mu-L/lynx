@@ -107,7 +107,7 @@ static inline bool LynxHasBorderRadii(LynxBorderRadii radii) {
 //    if radius values of all corners are same, just use layer cornerRadius,
 //      else use complex mode to draw a image as layer content
 //----------------------------------------------------------
-@interface LynxBackgroundManager : NSObject
+@interface LynxBackgroundManager : NSObject <CALayerDelegate>
 @property(nonatomic, weak) LynxUI* ui;
 @property(nonatomic) LynxBackgroundInfo* backgroundInfo;
 
