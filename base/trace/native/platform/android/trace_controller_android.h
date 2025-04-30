@@ -15,6 +15,8 @@ namespace trace {
 
 class TraceControllerDelegateAndroid : public TraceController::Delegate {
  public:
+  static bool RegisterJNIUtils(JNIEnv *env);
+
   TraceControllerDelegateAndroid(JNIEnv *env, jobject owner)
       : weak_owner_(env, owner){};
 
