@@ -90,6 +90,12 @@ class {{cpp_class}}{{' : public ' + parent_cpp_class if parent_cpp_class}} {
     return {{member.name}}_{{'.get()' if member.is_dictionary}};
   }
   {% endif %}{# member.union_types #}
+  {% if needs_native_setter %}
+  void {{member.setter_name}}({{member.cpp_type}} {{member.name}}) {
+    {{member.name}}_ = std::move({{member.name}});
+    has_{{member.name}}_ = true;
+  }
+  {% endif %}
 
   {% endfor %}
 
@@ -100,7 +106,7 @@ class {{cpp_class}}{{' : public ' + parent_cpp_class if parent_cpp_class}} {
 
  private:
   {% for member in members %}
-  {% if member.cpp_default_value %}
+  {% if member.cpp_default_value and not member.union_types %}{# union types are handled in .cc #}
   bool has_{{member.name}}_ = true;
   {% else %}
   bool has_{{member.name}}_ = false;
@@ -109,12 +115,12 @@ class {{cpp_class}}{{' : public ' + parent_cpp_class if parent_cpp_class}} {
 
   {% for member in members %}
   {% if member.is_dictionary %}
-  std::unique_ptr<{{member.idl_type}}> {{member.name}}_;
+  std::unique_ptr<{{member.idl_type}}> {{member.name}}_{{' = std::make_unique<' + member.idl_type + '>()' if member.default_value}};
   {% elif member.union_types %}
   {% for union_type in member.union_types %}
 
   bool {{member.name}}_is_{{union_type.idl_type}}_ = false;
-  {% if union_type.is_dictionary %}
+  {% if union_type.is_dictionary_type %}
   std::unique_ptr<{{union_type.idl_type}}> {{member.name}}_{{union_type.idl_type}}_;
   {% else %}
   {{union_type.cpp_type}} {{member.name}}_{{union_type.idl_type}}_;

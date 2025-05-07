@@ -6,7 +6,7 @@ implementation classes that are used by blink's core/modules.
 """
 
 from blinkbuild.name_style_converter import NameStyleConverter
-from idl_types import IdlType
+from idl_types import IdlType, STRING_TYPES
 from utilities import to_snake_case
 from napi_globals import includes
 from napi_utilities import has_extended_attribute_value
@@ -84,22 +84,36 @@ def dictionary_context(dictionary, interfaces_info, component_info):
             dictionary.members, key=operator.attrgetter('name'))
     ]
 
-    header_includes = set(DICTIONARY_H_INCLUDES)
-    has_origin_trial_members = False
     for member in members:
         if member['runtime_enabled_feature_name']:
             includes.add('platform/runtime_enabled_features.h')
+            break
+
+    has_origin_trial_members = False
+    for member in members:
         if member['origin_trial_feature_name']:
             has_origin_trial_members = True
             includes.add('core/origin_trials/origin_trials.h')
             includes.add('core/execution_context/execution_context.h')
-        if member['is_required']:
-            header_includes.add('third_party/binding/common/base.h')
+            break
 
-        if member['is_dictionary']:
-            header_includes.update(napi_types.includes_for_interface(member['idl_type']))
-        elif member['is_sequence_type']:
-            header_includes.update(napi_types.includes_for_interface(member['sequence_element_type']))
+    parent_cpp_class = None
+    header_includes = set(DICTIONARY_H_INCLUDES)
+    if dictionary.parent:
+        parent_dictionary = dictionary.parent
+        IdlType(parent_dictionary).add_includes_for_type()
+        parent_cpp_class = napi_utilities.cpp_name_from_interfaces_info(
+            parent_dictionary, interfaces_info)
+        header_includes.update(napi_types.includes_for_interface(parent_dictionary))
+
+    for member in sorted(dictionary.members, key=operator.attrgetter('name')):
+        if member.idl_type.is_union_type:
+            for union_type in member.idl_type.flattened_member_types:
+                header_includes.update(napi_types.includes_for_interface(union_type.name))
+        elif member.idl_type.is_dictionary:
+            header_includes.update(napi_types.includes_for_interface(member.idl_type.name))
+        elif member.idl_type.is_sequence_type:
+            header_includes.update(napi_types.includes_for_interface(member.idl_type.native_array_element_type.base_type))
 
     cpp_class = napi_utilities.cpp_name(dictionary)
     context = {
@@ -119,6 +133,8 @@ def dictionary_context(dictionary, interfaces_info, component_info):
         'PermissiveDictionaryConversion' in dictionary.extended_attributes,
         'napi_class':
         napi_types.v8_type(cpp_class),
+        'needs_native_setter':
+        'NeedsNativeSetter' in dictionary.extended_attributes,
     }
     if dictionary.parent:
         IdlType(dictionary.parent).add_includes_for_type()
@@ -141,13 +157,25 @@ def member_context(_, member, component_info):
     cpp_type = unwrapped_idl_type.cpp_type
 
     sequence_element_type = None
+    is_sequence_element_dictionary_type = False
+    is_sequence_element_interface_type = False
     if idl_type.is_sequence_type:
-        sequence_element_type = idl_type.native_array_element_type.base_type
-        sequence_element_cpp_type = napi_types.cpp_template_type('std::unique_ptr', sequence_element_type)
-        if idl_type.native_array_element_type.is_enum:
-            sequence_element_cpp_type = 'std::string'
-        cpp_type = napi_types.cpp_template_type('std::vector', sequence_element_cpp_type)
-    elif idl_type.is_string_type or idl_type.enum_type:
+         if idl_type.native_array_element_type.is_dictionary:
+             is_sequence_element_dictionary_type = True
+             sequence_element_type = idl_type.native_array_element_type.base_type
+             sequence_element_cpp_type = napi_types.cpp_template_type('std::unique_ptr', sequence_element_type)
+             cpp_type = napi_types.cpp_template_type('std::vector', sequence_element_cpp_type)
+         elif idl_type.native_array_element_type.cpp_type_args() in STRING_TYPES:
+             sequence_element_cpp_type = 'std::string'
+             cpp_type = napi_types.cpp_template_type('std::vector', sequence_element_cpp_type)
+         elif idl_type.native_array_element_type.is_interface_type:
+             is_sequence_element_interface_type = True
+             sequence_element_type = idl_type.native_array_element_type.base_type
+             sequence_element_cpp_type = idl_type.native_array_element_type.base_type + '*'
+             cpp_type = napi_types.cpp_template_type('std::vector', sequence_element_cpp_type)
+    elif idl_type.is_union_type:
+        cpp_type += "*"
+    elif idl_type.is_string_type or idl_type.enum_type or cpp_type in STRING_TYPES:
         cpp_type = 'std::string'
 
     if member.is_required and member.default_value:
@@ -191,7 +219,20 @@ def member_context(_, member, component_info):
     has_value_or_default = snake_case_name + "_has_value_or_default"
     getter_name = getter_name_for_dictionary_member(member)
     runtime_features = component_info['runtime_enabled_features']
-    idl_type_name, native_value_traits_support, raises_exception = napi_types.native_value_traits_idl_type(idl_type)
+
+    sequence_element_idl_type = None
+    if idl_type.is_sequence_type:
+        if idl_type.native_array_element_type.is_numeric_type:
+            sequence_element_idl_type = "Number"
+        elif idl_type.native_array_element_type.is_string_type:
+            sequence_element_idl_type = "String"
+        elif idl_type.native_array_element_type.is_wrapper_type:
+            sequence_element_idl_type = "Wrapper"
+        elif idl_type.native_array_element_type.base_type == 'object' :
+            sequence_element_idl_type = "Object"
+        elif idl_type.native_array_element_type.base_type == 'ArrayBuffer':
+            sequence_element_idl_type = "ArrayBuffer"
+    idl_type_name, native_value_traits_support, raises_exception = napi_types.native_value_traits_idl_type(idl_type, sequence_element_idl_type)
 
     from functools import cmp_to_key
     def compare_dicts(d1, d2):
@@ -211,6 +252,10 @@ def member_context(_, member, component_info):
             for union_type in idl_type.flattened_member_types
         ], key=cmp_to_key(compare_dicts))
 
+    sequence_element_nullable = False
+    if idl_type.native_array_element_type:
+        sequence_element_nullable = idl_type.native_array_element_type.is_nullable
+
     return {
         'cpp_default_value':
         cpp_default_value,
@@ -228,6 +273,10 @@ def member_context(_, member, component_info):
             extended_attributes=extended_attributes),
         'deprecate_as':
         napi_utilities.deprecate_as(member),
+        'sequence_element_type':
+        sequence_element_type,
+        'sequence_element_nullable':
+        sequence_element_nullable,
         'enum_type':
         idl_type.enum_type,
         'enum_values':
@@ -258,6 +307,10 @@ def member_context(_, member, component_info):
         member.idl_type.is_sequence_type,
         'is_dictionary':
         member.idl_type.is_dictionary,
+        'is_sequence_element_interface_type':
+        is_sequence_element_interface_type,
+        'is_sequence_element_dictionary_type':
+        is_sequence_element_dictionary_type,
         'is_object':
         unwrapped_idl_type.name == 'Object',
         'is_string_type':

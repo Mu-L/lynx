@@ -132,3 +132,4 @@ DataContainer
 InOutBuffer
 DeferredSetters
 SkipForRemote
+NeedsNativeSetter

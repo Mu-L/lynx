@@ -28,6 +28,10 @@
   {{union_type.idl_type}}* arg{{argument.index}}_{{argument.name}}_{{union_type.idl_type}} = nullptr;
   {% elif union_type.is_string_type %}
   std::string arg{{argument.index}}_{{argument.name}}_{{union_type.idl_type}};
+  {% elif union_type.is_dictionary_type %}
+  std::unique_ptr<{{union_type.idl_type}}> arg{{argument.index}}_{{argument.name}}_{{union_type.idl_type}};
+  {% elif union_type.is_sequence_type %}
+  {{union_type.cpp_type}} arg{{argument.index}}_{{argument.name}}_{{union_type.idl_type}};
   {% endif %}
   {% endfor %}
   do {
@@ -43,6 +47,18 @@
     arg{{argument.index}}_{{argument.name}}_{{union_type.idl_type}} = {{literal}}.ToString().Utf8Value();
     union_branch = {{loop.index}};
     break;
+    {% elif union_type.is_dictionary_type %}
+    if (auto {{argument.name}} = NativeValueTraits<{{union_type.idl_type_name}}>::NativeValue({{literal}})) {
+      arg{{argument.index}}_{{argument.name}}_{{union_type.idl_type}} = std::move({{argument.name}});
+      union_branch = {{loop.index}};
+      break;
+    }
+    {% elif union_type.is_sequence_type %}
+    if (auto {{argument.name}} = NativeValueTraits<{{union_type.idl_type_name}}>::NativeValue({{literal}}); !{{argument.name}}.empty()) {
+      arg{{argument.index}}_{{argument.name}}_{{union_type.idl_type}} = std::move({{argument.name}});
+      union_branch = {{loop.index}};
+      break;
+    }
     {% endif %}
     {% endfor %}
     ExceptionMessage::InvalidType(info.Env(), "{{'argument ' + argument.index|string if 'index' in argument else argument.name}}", "{{argument.idl_type or argument.cpp_type}}");
@@ -127,6 +143,24 @@
     {% for union_type in method.arguments[0].union_types %}
     case {{loop.index}}: {
       {{'auto&& result = ' if method.cpp_type != 'void'}}{{callee}}{{method.camel_case_name}}({% if method.is_raises_exception %}exception_state, {% endif %}arg0_{{method.arguments[0].name}}_{{union_type.idl_type}}{% for argument in method.arguments[1:num_args] %}, {{argument | argument_literal}}{% endfor %});
+      {% if method.is_raises_exception and method.cpp_type != 'void' %}
+      if (exception_state.HadException()) {
+        return Value();
+      }
+      {% endif %}
+      {{ return_value(method) | trim | indent(4)}}
+    }
+    {% endfor %}
+    default: {
+      ExceptionMessage::FailedToCallOverloadExpecting(info.Env(), "{{method.camel_case_name}}()", "{{method.arguments[0].cpp_type}}");
+      return Value();
+    }
+  }
+  {% elif num_args and method.arguments[-1] and method.arguments[-1].union_types %}
+  switch (union_branch) {
+    {% for union_type in method.arguments[-1].union_types %}
+    case {{loop.index}}: {
+      {{'auto&& result = ' if method.cpp_type != 'void'}}{{callee}}{{method.camel_case_name}}({% if method.is_raises_exception %}exception_state, {% endif %}{% for argument in method.arguments[0:num_args-1] %}{{argument | argument_literal}}, {% endfor %}std::move(arg{{num_args-1}}_{{method.arguments[-1].name}}_{{union_type.idl_type}}));
       {% if method.is_raises_exception and method.cpp_type != 'void' %}
       if (exception_state.HadException()) {
         return Value();

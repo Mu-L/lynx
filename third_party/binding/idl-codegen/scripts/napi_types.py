@@ -755,7 +755,7 @@ def native_value_traits_idl_type(idl_type,
         idl_type_name = '%s<%s>' % ("IDLDictionary", idl_type.base_type)
     elif idl_type.is_callback_interface or idl_type.base_type == 'object':
         idl_type_name = "IDLObject"
-    elif idl_type.is_sequence_type and sequence_element_type :
+    elif idl_type.is_sequence_type and sequence_element_type:
         if sequence_element_type == "Wrapper":
             sequence_element_cpp_type = idl_type.native_array_element_type.base_type
             idl_type_name = '%s<Napi%s>' % ("IDLSequence", sequence_element_cpp_type)
@@ -771,7 +771,7 @@ def native_value_traits_idl_type(idl_type,
         else:
             raise ValueError(
                 'Sequence Element Type is %s, Not Support Yet'
-                % (idl_type.sequence_element_type))
+                % (sequence_element_type))
     elif idl_type.is_wrapper_type:
         idl_type_name = "Napi%s" % idl_type.base_type
     elif idl_type.is_typed_array:
@@ -789,16 +789,36 @@ def native_value_traits_idl_type(idl_type,
 
 
 def process_union_type(union_type):
-    idl_type_name, _, _ = native_value_traits_idl_type(union_type)
+    sequence_element_type = None
+    sequence_idl_type = None
+    if union_type.is_sequence_type:
+        if union_type.native_array_element_type.is_numeric_type:
+            sequence_element_type = "Number"
+            sequence_idl_type = "NumberArray"
+        elif union_type.native_array_element_type.is_string_type:
+            sequence_element_type = "String"
+            sequence_idl_type = "StringArray"
+        elif union_type.native_array_element_type.is_wrapper_type :
+            sequence_element_type = "Wrapper"
+            sequence_idl_type = "WrapperArray"
+        elif union_type.native_array_element_type.base_type == 'object' :
+            sequence_element_type = "Object"
+            sequence_idl_type = "ObjectArray"
+        elif union_type.native_array_element_type.base_type == 'ArrayBuffer':
+            sequence_element_type = "ArrayBuffer"
+            sequence_idl_type = "ArrayBufferArray"
+    idl_type_name, _, _ = native_value_traits_idl_type(union_type, sequence_element_type)
     return {
         'cpp_type': 'std::string' if union_type.cpp_type == 'String' else union_type.cpp_type,
         'enum_type': union_type.enum_type,
         'enum_values': union_type.enum_values,
         'idl_type_name': idl_type_name,
-        'idl_type': union_type.base_type,
+        'idl_type': sequence_idl_type or union_type.base_type,
         'is_boolean_type': union_type.base_type == 'boolean',
         'is_interface_type': union_type.is_interface_type,
         'is_string_type': union_type.is_string_type,
+        'is_sequence_type': union_type.is_sequence_type,
+        'sequence_element_type': sequence_element_type,
     }
 
 
@@ -1336,7 +1356,7 @@ def literal_cpp_value(idl_type, idl_literal):
     if idl_type.base_type in ('octet', 'unsigned short', 'unsigned long'):
         return literal_value + 'u'
     if idl_type.is_dictionary and literal_value == '{}':
-        return 'MakeGarbageCollected<{}>()'.format(idl_type.base_type)
+        return 'std::make_unique<{}>()'.format(idl_type.base_type)
     return literal_value
 
 
@@ -1356,8 +1376,7 @@ def union_literal_cpp_value(idl_type, idl_literal):
     else:
         raise ValueError('Unsupported literal type: ' + idl_literal.idl_type)
 
-    return '%s::From%s(%s)' % (idl_type.cpp_type_args(), member_type.name,
-                               member_type.literal_cpp_value(idl_literal))
+    return member_type.literal_cpp_value(idl_literal)
 
 
 def array_or_sequence_literal_cpp_value(idl_type, idl_literal):

@@ -39,8 +39,8 @@ namespace {{component}} {
 
 {% macro convert_member_union(return_type, member) %}
   do {
-    {% for union_type in member.union_types %}
-    {% if union_type.is_interface_type %}{# TODO: Handle sequence, dict, etc #}
+    {% for union_type in member.union_types | reverse %}{# TODO(yuyifei): sort as per https://webidl.spec.whatwg.org/#js-union #}
+    {% if union_type.is_interface_type %}
     if (auto* {{member.name}} = binding::SafeUnwrap<{{union_type.idl_type_name}}>({{member.name}}_val)) {
       {{member.name}}_{{union_type.idl_type}}_ = {{member.name}}->ToImplUnsafe();
       {{member.name}}_is_{{union_type.idl_type}}_ = true;
@@ -57,19 +57,26 @@ namespace {{component}} {
       }
       {% endfor %}
     }
-    {% endif %}{# member.is_wrapper_type #}
-    {% endfor %}
-    {% for union_type in member.union_types %}
-    {% if union_type.is_dictionary %}
+    {% elif union_type.is_dictionary_type %}
     if (auto {{member.name}} = NativeValueTraits<{{union_type.idl_type_name}}>::NativeValue({{member.name}}_val)) {
       {{member.name}}_{{union_type.idl_type}}_ = std::move({{member.name}});
       {{member.name}}_is_{{union_type.idl_type}}_ = true;
       break;
     }
+    {% elif union_type.is_sequence_type %}
+    if (auto {{member.name}} = NativeValueTraits<{{union_type.idl_type_name}}>::NativeValue({{member.name}}_val); !{{member.name}}.empty()) {
+      {{member.name}}_{{union_type.idl_type}}_ = std::move({{member.name}});
+      {{member.name}}_is_{{union_type.idl_type}}_ = true;
+      break;
+    }
     {% endif %}
+    // Union matching errors are 'soft'.
+    info.Env().GetAndClearPendingException();
     {% endfor %}
+    {% if not member.default_value %}
     ExceptionMessage::InvalidType(info.Env(), "{{member.name}}", "{{member.cpp_type}}");
     {{return_type}}
+    {% endif %}
   } while (false);
 {% endmacro %}
 
@@ -97,10 +104,26 @@ namespace {{component}} {
   auto {{member.name}}_len = {{member.name}}_array.Length();
   for (size_t i = 0; i < {{member.name}}_len; ++i) {
     const Value& value = {{member.name}}_array[i];
-    auto element = {{member.sequence_element_type}}::ToImpl(value);
-    if (element) {
-      {{member.name}}_.push_back(std::move(element));
+    {% if member.is_sequence_element_dictionary_type %}
+    {% if member.sequence_element_nullable %}
+    auto element = NativeValueTraits<IDLNullable<IDLDictionary<{{member.sequence_element_type}}>>>::NativeValue(value);
+    {% else %}
+    auto element = NativeValueTraits<IDLDictionary<{{member.sequence_element_type}}>>::NativeValue(value);
+    {% endif %}{# is_nullable #}
+    {% elif member.is_sequence_element_interface_type %}
+    {% if member.sequence_element_nullable %}
+    auto element = NativeValueTraits<IDLNullable<Napi{{member.sequence_element_type}}>>::NativeValue(value);
+    {% else %}
+    auto element = NativeValueTraits<Napi{{member.sequence_element_type}}>::NativeValue(value);
+    {% endif %}{# is_nullable #}
+    {% endif %}
+    {% if not member.sequence_element_nullable %}
+    if (!element) {
+      // Have exception thrown.
+      return;
     }
+    {% endif %}
+    {{member.name}}_.push_back(std::move(element));
   }
   {% elif member.enum_type %}
   do {
@@ -143,6 +166,12 @@ namespace {{component}} {
   obj["{{name}}"] = Number::New(env, {{name}}_);
   {% elif member.is_dictionary %}
   obj["{{name}}"] = {{name}}_->ToJsObject(env);
+  {% elif member.is_sequence_type and member.sequence_element_type == 'Number' %}
+  auto array = Array::New(env, {{name}}_.size());
+  for (size_t i = 0; i < {{name}}_.size(); ++i) {
+    array[i] = Number::New(env, {{name}}_[i]);
+  }
+  obj["{{name}}"] = array;
   {% elif member.is_sequence_type and member.enum_type %}
   auto array = Array::New(env, {{name}}_.size());
   for (size_t i = 0; i < {{name}}_.size(); ++i) {
@@ -152,7 +181,11 @@ namespace {{component}} {
   {% elif member.is_sequence_type %}
   auto array = Array::New(env, {{name}}_.size());
   for (size_t i = 0; i < {{name}}_.size(); ++i) {
+    {% if member.is_sequence_element_dictionary_type %}
     array[i] = {{name}}_[i]->ToJsObject(env);
+    {% elif member.is_sequence_element_interface_type %}
+    array[i] = {{name}}_[i]->IsNapiWrapped() ? {{name}}_[i]->NapiObject() : Napi{{member.sequence_element_type}}::Wrap(std::unique_ptr<{{member.sequence_element_type}}>({{name}}_[i]), env);
+    {% endif %}
   }
   obj["{{name}}"] = std::move(array);
   {% elif member.is_string_type or member.enum_type %}
@@ -216,9 +249,19 @@ Object {{cpp_class}}::ToJsObject(Napi::Env env) {
   {% for member in members %}
   if (obj.Has("{{member.name}}").FromMaybe(false)) {
     Value {{member.name}}_val = obj.Get("{{member.name}}");
-    {{ convert_member('return;', member) | trim | indent(2) }}
+    if (!{{member.name}}_val.IsUndefined()) {
+      {{ convert_member('return;', member) | trim | indent(4) }}
+      has_{{member.name}}_ = true;
+    }
+  }
+  {% if member.union_types and member.default_value %}{# Treating the 1st type as default for now #}
+  if (!has_{{member.name}}_) {
+    // Default value.
+    {{member.name}}_{{member.union_types[0].idl_type}}_ = {{member.cpp_default_value}};
+    {{member.name}}_is_{{member.union_types[0].idl_type}}_ = true;
     has_{{member.name}}_ = true;
   }
+  {% endif %}
 
   {% endfor %}
   {% endif %}
