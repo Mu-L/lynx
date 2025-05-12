@@ -195,7 +195,8 @@ void RadonNodeSelector::SelectByElementId(SelectorItem* root,
 
   auto element = static_cast<RadonBase*>(root)
                      ->component()
-                     ->page_proxy_->element_manager()
+                     ->page_proxy()
+                     ->element_manager()
                      ->node_manager()
                      ->Get(id);
   if (element) {

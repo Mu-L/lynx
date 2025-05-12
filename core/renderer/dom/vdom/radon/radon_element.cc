@@ -544,7 +544,10 @@ int32_t RadonElement::IndexOf(const Element* child) const {
 bool RadonElement::GetPageElementEnabled() {
   EXEC_EXPR_FOR_INSPECTOR({
     if (!data_model()) return false;
-    return data_model()->radon_node_ptr()->page_proxy_->GetPageElementEnabled();
+    return data_model()
+        ->radon_node_ptr()
+        ->page_proxy()
+        ->GetPageElementEnabled();
   });
   return false;
 }
@@ -554,7 +557,8 @@ bool RadonElement::GetRemoveCSSScopeEnabled() {
     if (!data_model()) return false;
     return data_model()
         ->radon_node_ptr()
-        ->page_proxy_->GetRemoveCSSScopeEnabled();
+        ->page_proxy()
+        ->GetRemoveCSSScopeEnabled();
   });
   return false;
 }

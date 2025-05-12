@@ -32,9 +32,9 @@
 namespace lynx {
 namespace tasm {
 
-RadonNode::RadonNode(PageProxy* const page_proxy_, const base::String& tag_name,
+RadonNode::RadonNode(PageProxy* page_proxy, const base::String& tag_name,
                      uint32_t node_index)
-    : RadonBase(kRadonNode, tag_name, node_index), page_proxy_{page_proxy_} {
+    : RadonBase(kRadonNode, tag_name, node_index), page_proxy_(page_proxy) {
   attribute_holder_ = fml::MakeRefCounted<AttributeHolder>();
   attribute_holder_->set_radon_node_ptr(this);
   attribute_holder_->set_tag(tag());
@@ -49,10 +49,10 @@ RadonNode::RadonNode(PageProxy* const page_proxy_, const base::String& tag_name,
 RadonNode::RadonNode(const RadonNode& node, PtrLookupMap& map)
     : RadonBase{node, map},
       page_proxy_{node.page_proxy_},
+      raw_inline_styles_{node.raw_inline_styles_},
       has_dynamic_class_{node.has_dynamic_class_},
       has_dynamic_inline_style_{node.has_dynamic_inline_style_},
       has_dynamic_attr_{node.has_dynamic_attr_},
-      raw_inline_styles_{node.raw_inline_styles_},
       force_calc_new_style_{node.force_calc_new_style_} {
   if (node.attribute_holder_) {
     attribute_holder_ =
@@ -324,14 +324,13 @@ void RadonNode::DispatchSelf(const DispatchOption& option) {
     InsertElementIntoParent(ParentElement());
     option.has_patched_ = true;
   }
-  if (!class_transmit_option_.IsEmpty()) {
-    auto& removed = class_transmit_option_.removed_classes();
+  if (class_transmit_option_ && !class_transmit_option_->IsEmpty()) {
+    const auto& removed = class_transmit_option_->removed_classes();
     option.class_transmit_.RemoveClass(removed.begin(), removed.end());
-    for (auto iter : class_transmit_option_.added_classes()) {
+    for (const auto& iter : class_transmit_option_->added_classes()) {
       option.class_transmit_.AddClass(iter);
     }
-    class_transmit_option_.removed_classes().clear();
-    class_transmit_option_.added_classes().clear();
+    class_transmit_option_ = nullptr;
   }
 }
 
@@ -808,8 +807,11 @@ bool RadonNode::ShouldFlushStyle(RadonNode* old_radon_node,
   }
   // TODO: check external class.
   if (need_transmit_class_dirty_) {
-    for (auto& clazz : classes()) {
-      class_transmit_option_.AddClass(clazz);
+    if (class_transmit_option_ == nullptr) {
+      class_transmit_option_ = std::make_unique<ClassTransmitOption>();
+    }
+    for (const auto& clazz : classes()) {
+      class_transmit_option_->AddClass(clazz);
     }
   }
 
@@ -824,11 +826,11 @@ bool RadonNode::ShouldFlushStyle(RadonNode* old_radon_node,
     style_updated |= OptimizedShouldFlushStyle(old_radon_node, option);
   }
 
-  if (!class_transmit_option_.IsEmpty()) {
-    for (auto iter : class_transmit_option_.added_classes()) {
+  if (class_transmit_option_ && !class_transmit_option_->IsEmpty()) {
+    for (const auto& iter : class_transmit_option_->added_classes()) {
       option.class_transmit_.AddClass(iter);
     }
-    class_transmit_option_.added_classes().clear();
+    class_transmit_option_->added_classes().clear();
   }
   if (!page_proxy_->element_manager()->GetEnableFiberElementForRadonDiff()) {
     ApplyDynamicCSSWhenParentIsReady(

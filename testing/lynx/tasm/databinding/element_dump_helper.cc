@@ -394,7 +394,8 @@ rapidjson::Value ElementDumpHelper::DumpAttributeToJSON(
              holder->radon_node_ptr()->raw_inline_styles().size() > 0) {
     StyleMap new_styles;
     auto& configs = holder->radon_node_ptr()
-                        ->page_proxy_->element_manager()
+                        ->page_proxy()
+                        ->element_manager()
                         ->GetCSSParserConfigs();
     for (const auto& style : holder->radon_node_ptr()->raw_inline_styles()) {
       UnitHandler::Process(style.first, style.second, new_styles, configs);

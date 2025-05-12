@@ -4,12 +4,12 @@
 #ifndef CORE_RENDERER_DOM_VDOM_RADON_RADON_TYPES_H_
 #define CORE_RENDERER_DOM_VDOM_RADON_RADON_TYPES_H_
 
-#include <string>
+#include <cstdint>
 
 namespace lynx {
 namespace tasm {
 
-enum RadonNodeType {
+enum RadonNodeType : int8_t {
   kRadonUnknown = -1,
   kRadonNode = 0,
   kRadonComponent,

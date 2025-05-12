@@ -26,7 +26,7 @@ class PageProxy;
 
 class RadonNode : public RadonBase {
  public:
-  RadonNode(PageProxy* const page_proxy_, const base::String& tag_name,
+  RadonNode(PageProxy* page_proxy, const base::String& tag_name,
             uint32_t node_index);
   RadonNode(const RadonNode& node, PtrLookupMap& map);
   virtual ~RadonNode() {
@@ -88,6 +88,8 @@ class RadonNode : public RadonBase {
 
   void UpdateIdSelector(const base::String& id_selector);
 
+  PageProxy* page_proxy() const { return page_proxy_; }
+
   const base::String& tag() const { return RadonBase::tag_name_; }
 
   virtual CSSFragment* ParentStyleSheet() const;
@@ -113,8 +115,6 @@ class RadonNode : public RadonBase {
   // node add/remove/move event
   virtual void OnElementRemoved(int idx) {}
   virtual void OnElementMoved(int fromIdx, int toIdx) {}
-
-  PageProxy* const page_proxy_;
 
   virtual bool NeedsElement() const override { return true; }
 
@@ -383,15 +383,12 @@ class RadonNode : public RadonBase {
 
   RadonNodeIndexType GetOriginalNodeIndex();
 
+  PageProxy* const page_proxy_;
   // TODO(wangyifei.20010605): rename it to data_model_;
   fml::RefPtr<AttributeHolder> attribute_holder_;
   fml::RefPtr<Element> element_;
 
  private:
-  bool has_dynamic_class_{false};
-  bool has_dynamic_inline_style_{false};
-  bool has_dynamic_attr_{false};
-  RawLepusStyleMap raw_inline_styles_{kCSSStyleMapFuzzyAllocationSize};
   friend class RadonElement;
 
   RadonNode* Sibling(int offset) const;
@@ -404,19 +401,22 @@ class RadonNode : public RadonBase {
 
   bool HydrateNode(const DispatchOption& option);
 
+  RawLepusStyleMap raw_inline_styles_{kCSSStyleMapFuzzyAllocationSize};
   StyleMap cached_styles_;
 
+  bool has_dynamic_class_{false};
+  bool has_dynamic_inline_style_{false};
+  bool has_dynamic_attr_{false};
   bool has_external_class_{false};
-
   bool id_dirty_{false};
   bool class_dirty_{false};
-
   bool need_transmit_class_dirty_{false};
   bool css_variables_changed_{false};
-  bool force_calc_new_style_{true};
   // Used for CSS invalidation
-  bool style_invalidated_ = false;
-  ClassTransmitOption class_transmit_option_;
+  bool style_invalidated_{false};
+  bool force_calc_new_style_{true};
+
+  std::unique_ptr<ClassTransmitOption> class_transmit_option_;
 };
 
 }  // namespace tasm

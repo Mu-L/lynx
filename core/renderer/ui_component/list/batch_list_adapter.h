@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+#include "base/include/string/string_utils.h"
 #include "core/renderer/ui_component/list/list_adapter.h"
 
 namespace lynx {

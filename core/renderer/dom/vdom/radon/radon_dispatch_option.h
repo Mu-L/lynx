@@ -5,11 +5,8 @@
 #ifndef CORE_RENDERER_DOM_VDOM_RADON_RADON_DISPATCH_OPTION_H_
 #define CORE_RENDERER_DOM_VDOM_RADON_RADON_DISPATCH_OPTION_H_
 
-#include <string>
-#include <unordered_set>
-#include <vector>
-
-#include "core/renderer/dom/attribute_holder.h"
+#include "base/include/value/base_string.h"
+#include "base/include/vector.h"
 
 namespace lynx {
 namespace tasm {
@@ -35,14 +32,13 @@ class ClassTransmitOption {
 
   bool IsEmpty() { return removed_classes_.empty() && added_classes_.empty(); }
 
-  std::unordered_set<base::String> &removed_classes() {
-    return removed_classes_;
-  }
-  std::unordered_set<base::String> &added_classes() { return added_classes_; }
+  const auto &removed_classes() const { return removed_classes_; }
+  const auto &added_classes() const { return added_classes_; }
+  auto &added_classes() { return added_classes_; }
 
  private:
-  std::unordered_set<base::String> removed_classes_;
-  std::unordered_set<base::String> added_classes_;
+  base::InlineOrderedFlatSet<base::String, 4> removed_classes_;
+  base::InlineOrderedFlatSet<base::String, 4> added_classes_;
 };
 
 class DispatchOption {

@@ -181,8 +181,8 @@ void RadonBase::RemoveElementFromParent() {
 
 bool RadonBase::GetDevToolFlag() {
   RadonNode* root = root_node();
-  return root && root->page_proxy_->element_manager()->GetDevToolFlag() &&
-         root->page_proxy_->element_manager()->IsDomTreeEnabled();
+  return root && root->page_proxy()->element_manager()->GetDevToolFlag() &&
+         root->page_proxy()->element_manager()->IsDomTreeEnabled();
 }
 
 Element* RadonBase::PreviousSiblingElement() {
@@ -278,7 +278,7 @@ RadonComponent* RadonBase::GetRootEntryNode() {
 Element* RadonBase::GetRootElement() {
   if (root_element_ == nullptr) {
     RadonPage* radon_page = root_node();
-    if (!radon_page->page_proxy_->GetPageElementEnabled()) {
+    if (!radon_page->page_proxy()->GetPageElementEnabled()) {
       root_element_ = radon_page->element();
     } else if (!radon_page->radon_children_.empty() &&
                radon_page->radon_children_.front()->tag_name_.IsEqual(
@@ -323,7 +323,7 @@ void RadonBase::Visit(bool including_self,
 }
 
 bool RadonBase::SetLynxKey(const base::String& key, const lepus::Value& value) {
-  if (key.IsEqual(kLynxKey)) {
+  if (key.IsEqual("lynx-key")) {
     lynx_key_ = value;
     return true;
   }
