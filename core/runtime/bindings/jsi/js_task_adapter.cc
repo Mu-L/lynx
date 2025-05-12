@@ -4,6 +4,7 @@
 
 #include "core/runtime/bindings/jsi/js_task_adapter.h"
 
+#include <memory>
 #include <utility>
 
 #include "base/include/closure.h"
@@ -46,6 +47,9 @@ JsTaskAdapter::JsTaskAdapter(const std::weak_ptr<Runtime>& rt,
                              const std::string& group_id,
                              const tasm::PageOptions& page_options)
     : manager_(std::make_unique<base::TimedTaskManager>()),
+      micro_tasks_(
+          std::make_shared<std::unordered_map<uint64_t, base::closure>>()),
+      current_micro_task_id_(0),
       runner_(fml::MessageLoop::GetCurrent().GetTaskRunner()),
       rt_(rt),
       page_options_(page_options) {}
@@ -66,11 +70,19 @@ piper::Value JsTaskAdapter::SetInterval(Function func, int32_t delay) {
 
 void JsTaskAdapter::QueueMicrotask(Function func) {
   auto task = MakeTask(std::move(func), TaskType::kQueueMicrotask);
+  auto current_id = current_micro_task_id_++;
+  micro_tasks_->emplace(current_id, std::move(task));
   runner_->PostMicroTask(fml::MakeCopyable(
-      [weak_this = weak_from_this(), task = std::move(task)]() mutable {
-        auto lock_this = weak_this.lock();
-        if (lock_this) {
-          task();
+      [current_id,
+       weak_tasks = std::weak_ptr<std::unordered_map<uint64_t, base::closure>>(
+           micro_tasks_)]() mutable {
+        auto tasks = weak_tasks.lock();
+        if (tasks) {
+          auto it = tasks->find(current_id);
+          if (it != tasks->end()) {
+            it->second();
+            tasks->erase(it);
+          }
         }
       }));
 }

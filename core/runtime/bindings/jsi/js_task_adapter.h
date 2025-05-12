@@ -20,7 +20,7 @@ namespace lynx {
 namespace piper {
 
 // Ownered by js_app
-class JsTaskAdapter : public std::enable_shared_from_this<JsTaskAdapter> {
+class JsTaskAdapter {
  public:
   explicit JsTaskAdapter(const std::weak_ptr<Runtime>& rt,
                          const std::string& group_id,
@@ -53,6 +53,8 @@ class JsTaskAdapter : public std::enable_shared_from_this<JsTaskAdapter> {
   base::closure MakeTask(Function func, TaskType task_type);
 
   std::unique_ptr<base::TimedTaskManager> manager_;
+  std::shared_ptr<std::unordered_map<uint64_t, base::closure>> micro_tasks_;
+  uint64_t current_micro_task_id_;
 
   // bind to thread which JsTaskAdapter created.
   fml::RefPtr<fml::TaskRunner> runner_;

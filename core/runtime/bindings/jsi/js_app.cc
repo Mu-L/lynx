@@ -1863,6 +1863,7 @@ void App::CallDestroyLifetimeFun() {
   // when destroy, internal js api callbacks, timed task callbacks, and
   // animation frame callbacks are not necessory to handle.
   api_callback_manager_.Destroy();
+  // stop all js timer task
   js_task_adapter_.reset();
   // destroy raf
   if (animation_frame_handler_) {
@@ -2397,20 +2398,30 @@ void App::CallFunction(const std::string& module_id,
 }
 
 void App::InvokeApiCallBack(ApiCallBack id) {
-  api_callback_manager_.InvokeWithValue(rt_.lock().get(), id);
+  auto rt = rt_.lock();
+  if (rt) {
+    api_callback_manager_.InvokeWithValue(rt.get(), id);
+  }
 }
 
 void App::InvokeApiCallBackWithValue(ApiCallBack id, const lepus::Value& value,
                                      bool persist) {
+  auto rt = rt_.lock();
+  if (!rt) {
+    return;
+  }
   if (persist) {
-    api_callback_manager_.InvokeWithValuePersist(rt_.lock().get(), id, value);
+    api_callback_manager_.InvokeWithValuePersist(rt.get(), id, value);
   } else {
-    api_callback_manager_.InvokeWithValue(rt_.lock().get(), id, value);
+    api_callback_manager_.InvokeWithValue(rt.get(), id, value);
   }
 }
 
 void App::InvokeApiCallBackWithValue(ApiCallBack id, piper::Value value) {
-  api_callback_manager_.InvokeWithValue(rt_.lock().get(), id, std::move(value));
+  auto rt = rt_.lock();
+  if (rt) {
+    api_callback_manager_.InvokeWithValue(rt.get(), id, std::move(value));
+  }
 }
 
 ApiCallBack App::CreateCallBack(piper::Function func) {

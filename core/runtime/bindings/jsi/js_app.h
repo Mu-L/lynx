@@ -275,7 +275,7 @@ class App : public std::enable_shared_from_this<App> {
         delegate_(delegate),
         exception_handler_(exception_handler),
         js_task_adapter_(
-            std::make_shared<JsTaskAdapter>(rt, group_id, page_options)),
+            std::make_unique<JsTaskAdapter>(rt, group_id, page_options)),
         nativeModuleProxy_(std::move(nativeModuleProxy)),
         api_handler_(std::move(api_handler)),
         jsi_object_wrapper_manager_(
@@ -314,8 +314,7 @@ class App : public std::enable_shared_from_this<App> {
   piper::Value js_app_;
   runtime::TemplateDelegate* const delegate_;
   std::shared_ptr<JSIExceptionHandler> exception_handler_;
-  // Owning js_task_adapter_
-  std::shared_ptr<piper::JsTaskAdapter> js_task_adapter_;
+  std::unique_ptr<piper::JsTaskAdapter> js_task_adapter_;
   piper::Object nativeModuleProxy_;
   ApiCallBackManager api_callback_manager_;
   std::unique_ptr<lynx::runtime::LynxApiHandler> api_handler_;
