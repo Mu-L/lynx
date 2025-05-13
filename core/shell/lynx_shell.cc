@@ -319,14 +319,18 @@ bool LynxShell::IsDestroyed() { return is_destroyed_; }
 
 void LynxShell::LoadTemplate(
     const std::string& url, std::vector<uint8_t> source,
+    std::shared_ptr<tasm::PipelineOptions> pipeline_options,
     const std::shared_ptr<tasm::TemplateData>& template_data,
     const bool enable_pre_painting, bool enable_recycle_template_bundle) {
-  auto pipeline_options = std::make_shared<tasm::PipelineOptions>();
-  pipeline_options->need_timestamps = true;
-  pipeline_options->pipeline_origin = tasm::timing::kLoadBundle;
-  OnPipelineStart(pipeline_options->pipeline_id,
-                  pipeline_options->pipeline_origin,
-                  pipeline_options->pipeline_start_timestamp);
+  // TODO(zhangkaijie.9): remove pipeline_option and create it in TemplateRender
+  if (!pipeline_options) {
+    pipeline_options = std::make_shared<tasm::PipelineOptions>();
+    pipeline_options->need_timestamps = true;
+    pipeline_options->pipeline_origin = tasm::timing::kLoadBundle;
+    OnPipelineStart(pipeline_options->pipeline_id,
+                    pipeline_options->pipeline_origin,
+                    pipeline_options->pipeline_start_timestamp);
+  }
   ThreadModeAutoSwitch auto_switch(thread_mode_manager_);
 
   bool need_to_merge_back = false;
@@ -393,14 +397,18 @@ void LynxShell::LoadTemplate(
 
 void LynxShell::LoadTemplateBundle(
     const std::string& url, tasm::LynxTemplateBundle template_bundle,
+    std::shared_ptr<tasm::PipelineOptions> pipeline_options,
     const std::shared_ptr<tasm::TemplateData>& template_data,
     const bool enable_pre_painting, bool enable_dump_element_tree) {
-  auto pipeline_options = std::make_shared<tasm::PipelineOptions>();
-  pipeline_options->need_timestamps = true;
-  pipeline_options->pipeline_origin = tasm::timing::kLoadBundle;
-  OnPipelineStart(pipeline_options->pipeline_id,
-                  pipeline_options->pipeline_origin,
-                  pipeline_options->pipeline_start_timestamp);
+  // TODO(zhangkaijie.9): remove pipeline_option and create it in TemplateRender
+  if (!pipeline_options) {
+    pipeline_options = std::make_shared<tasm::PipelineOptions>();
+    pipeline_options->need_timestamps = true;
+    pipeline_options->pipeline_origin = tasm::timing::kLoadBundle;
+    OnPipelineStart(pipeline_options->pipeline_id,
+                    pipeline_options->pipeline_origin,
+                    pipeline_options->pipeline_start_timestamp);
+  }
   ThreadModeAutoSwitch auto_switch(thread_mode_manager_);
 
   EnsureTemplateDataThreadSafe(template_data);
@@ -568,16 +576,20 @@ void LynxShell::UnSubscribeSessionStorage(const std::string& key,
   });
 }
 
-void LynxShell::ReloadTemplate(const std::shared_ptr<tasm::TemplateData>& data,
-                               const lepus::Value& global_props) {
-  timing_actor_->ActAsync(
-      [](auto& timing_handler) { timing_handler->ResetTimingBeforeReload(); });
-  auto pipeline_options = std::make_shared<tasm::PipelineOptions>();
-  pipeline_options->need_timestamps = true;
-  pipeline_options->pipeline_origin = tasm::timing::kReloadBundleFromNative;
-  OnPipelineStart(pipeline_options->pipeline_id,
-                  pipeline_options->pipeline_origin,
-                  pipeline_options->pipeline_start_timestamp);
+void LynxShell::ReloadTemplate(
+    const std::shared_ptr<tasm::TemplateData>& data,
+    std::shared_ptr<tasm::PipelineOptions> pipeline_options,
+    const lepus::Value& global_props) {
+  // TODO(zhangkaijie.9): remove pipeline_option and create it in TemplateRender
+  if (!pipeline_options) {
+    ResetTimingBeforeReload();
+    pipeline_options = std::make_shared<tasm::PipelineOptions>();
+    pipeline_options->need_timestamps = true;
+    pipeline_options->pipeline_origin = tasm::timing::kReloadBundleFromNative;
+    OnPipelineStart(pipeline_options->pipeline_id,
+                    pipeline_options->pipeline_origin,
+                    pipeline_options->pipeline_start_timestamp);
+  }
   ThreadModeAutoSwitch auto_switch(thread_mode_manager_);
 
   EnsureTemplateDataThreadSafe(data);
@@ -1192,6 +1204,11 @@ void LynxShell::OnPipelineStart(
     timing_handler->OnPipelineStart(pipeline_id, pipeline_origin,
                                     pipeline_start_timestamp);
   });
+}
+
+void LynxShell::ResetTimingBeforeReload() const {
+  timing_actor_->ActAsync(
+      [](auto& timing_handler) { timing_handler->ResetTimingBeforeReload(); });
 }
 
 void LynxShell::BindLynxEngineToUIThread() {

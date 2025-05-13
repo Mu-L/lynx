@@ -57,6 +57,7 @@
 #include "base/include/debug/backtrace.h"
 #include "core/base/darwin/lynx_env_darwin.h"
 #include "core/public/lynx_extension_delegate.h"
+#include "core/public/pipeline_option.h"
 #include "core/renderer/data/ios/platform_data_darwin.h"
 #include "core/renderer/dom/ios/lepus_value_converter.h"
 #include "core/renderer/lynx_global_pool.h"
@@ -817,6 +818,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
   __weak LynxTemplateRender* weakSelf = self;
   [self
       executeNativeOpSafely:^() {
+        std::shared_ptr<lynx::tasm::PipelineOptions> pipeline_options = nullptr;
         [self prepareForLoadTemplateWithUrl:url initData:data];
         lynx::lepus::Value value;
         std::shared_ptr<lynx::tasm::TemplateData> ptr(nullptr);
@@ -837,8 +839,8 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
         }
         [self->_devTool attachDebugBridge:url];
         self->shell_->LoadTemplateBundle(lynx::base::SafeStringConvert([url UTF8String]),
-                                         std::move(copied_bundle), ptr, _enablePrePainting,
-                                         _enableDumpElement);
+                                         std::move(copied_bundle), pipeline_options, ptr,
+                                         _enablePrePainting, _enableDumpElement);
         _hasStartedLoad = YES;
       }
       withErrorCallback:^(NSString* msg, NSString* stack) {
@@ -852,6 +854,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
   __weak LynxTemplateRender* weakSelf = self;
   [self
       executeNativeOpSafely:^() {
+        std::shared_ptr<lynx::tasm::PipelineOptions> pipeline_options = nullptr;
         [self prepareForLoadTemplateWithUrl:url initData:data];
         lynx::lepus::Value value;
         std::shared_ptr<lynx::tasm::TemplateData> ptr(nullptr);
@@ -866,7 +869,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
         if (securityService == nil) {
           [self->_devTool attachDebugBridge:url];
           // if securityService is nil, Skip Security Check.
-          self->shell_->LoadTemplate([url UTF8String], ConvertNSBinary(tem), ptr,
+          self->shell_->LoadTemplate([url UTF8String], ConvertNSBinary(tem), pipeline_options, ptr,
                                      _enablePrePainting, _enableRecycleTemplateBundle);
           _hasStartedLoad = YES;
         } else {
@@ -876,8 +879,8 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
                                                                         type:LynxTASMTypeTemplate];
           if (verification.verified) {
             [self->_devTool attachDebugBridge:url];
-            self->shell_->LoadTemplate([url UTF8String], ConvertNSBinary(tem), ptr,
-                                       _enablePrePainting, _enableRecycleTemplateBundle);
+            self->shell_->LoadTemplate([url UTF8String], ConvertNSBinary(tem), pipeline_options,
+                                       ptr, _enablePrePainting, _enableRecycleTemplateBundle);
             _hasStartedLoad = YES;
           } else {
             [self reportError:ECLynxAppBundleVerifyInvalidSignature
@@ -1053,6 +1056,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
     }
 
     [self executeUpdateDataSafely:^() {
+      std::shared_ptr<lynx::tasm::PipelineOptions> pipeline_options = nullptr;
       auto template_data = ConvertLynxTemplateDataToTemplateData(data);
       template_data->SetPlatformData(std::make_unique<lynx::tasm::PlatformDataDarwin>(data));
       [self resetLayoutStatus];
@@ -1063,12 +1067,12 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
        * Empty globalProps -> Table Value;
        */
       if (globalProps == nil) {
-        self->shell_->ReloadTemplate(template_data);
+        self->shell_->ReloadTemplate(template_data, pipeline_options);
       } else {
         self->_globalProps = globalProps;
         auto props_value = LynxGetLepusValueFromTemplateData(globalProps);
         self->shell_->ReloadTemplate(
-            template_data,
+            template_data, pipeline_options,
             props_value ? *props_value : lynx::lepus::Value(lynx::lepus::Dictionary::Create()));
       }
     }];

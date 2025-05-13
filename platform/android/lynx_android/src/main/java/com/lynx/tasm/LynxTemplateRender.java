@@ -1596,7 +1596,7 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
        * native know what kind of props Java is passing
        */
       nativeReloadTemplate(mNativePtr, mNativeLifecycle, data.getNativePtr(), propsNativePtr,
-          data.processorName(), data.isReadOnly(), newGlobalProps, data);
+          data.processorName(), data.isReadOnly(), newGlobalProps, data, new JavaOnlyMap());
     }
     postRenderOrUpdateData(data);
     LLog.i(TAG, formatLynxMessage("reload"));
@@ -2906,7 +2906,7 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
     }
     nativeLoadTemplateBundleByPreParsedData(mNativePtr, mNativeLifecycle, url,
         bundle.getNativePtr(), isPrePainting ? 1 : 0, nativePtr, read_only, processorName, initData,
-        enableDumpElementTree);
+        enableDumpElementTree, new JavaOnlyMap());
   }
 
   private void loadSSRData(byte[] ssr, TemplateData templateData, NativeFacade.Callback callback) {
@@ -2991,7 +2991,8 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
     // SecurityService is null, or Verified;
     long nativePtr = templateData == null ? 0 : templateData.getNativePtr();
     nativeLoadTemplateByPreParsedData(mNativePtr, mNativeLifecycle, url, template, isPrePainting,
-        enableRecycleTemplateBundle, nativePtr, readOnly, processorName, templateData);
+        enableRecycleTemplateBundle, nativePtr, readOnly, processorName, templateData,
+        new JavaOnlyMap());
   }
 
   public boolean registerLazyBundle(String url, TemplateBundle bundle) {
@@ -3425,12 +3426,13 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
   // FIXME(songshourui.null): only use templateData later
   private static native void nativeLoadTemplateByPreParsedData(long ptr, long lifecycle, String url,
       byte[] temp, int isPrePainting, boolean enableRecycleTemplateBundle, long data,
-      boolean readOnly, String processorName, TemplateData templateData);
+      boolean readOnly, String processorName, TemplateData templateData, ReadableMap timingOption);
 
   // FIXME(songshourui.null): only use templateData later
   private static native void nativeLoadTemplateBundleByPreParsedData(long ptr, long lifecycle,
       String url, long bundlePtr, int isPrePainting, long data, boolean readOnly,
-      String processorName, TemplateData templateData, boolean enableDumpElementTree);
+      String processorName, TemplateData templateData, boolean enableDumpElementTree,
+      ReadableMap timingOption);
 
   private static native void nativePreloadLazyBundles(long ptr, long lifecycle, String[] urls);
 
@@ -3452,7 +3454,7 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
   // FIXME(songshourui.null): only use templateData later
   private static native void nativeReloadTemplate(long ptr, long lifecycle, long dataPtr,
       long propPtr, String dataProcessorName, boolean dataReadOnly, Object globalProps,
-      TemplateData templateData);
+      TemplateData templateData, ReadableMap timingOption);
 
   private static native void nativeUpdateConfig(
       long ptr, long lifecycle, ByteBuffer buffer, int length);

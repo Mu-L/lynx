@@ -111,12 +111,14 @@ class LynxShell {
   bool IsDestroyed();
 
   void LoadTemplate(const std::string& url, std::vector<uint8_t> source,
+                    std::shared_ptr<tasm::PipelineOptions> pipeline_options,
                     const std::shared_ptr<tasm::TemplateData>& template_data,
                     const bool enable_pre_painting = false,
                     bool enable_recycle_template_bundle = false);
 
   void LoadTemplateBundle(
       const std::string& url, tasm::LynxTemplateBundle template_bundle,
+      std::shared_ptr<tasm::PipelineOptions> pipeline_options,
       const std::shared_ptr<tasm::TemplateData>& template_data,
       const bool enable_pre_painting = false,
       bool enable_dump_element_tree = false);
@@ -141,6 +143,7 @@ class LynxShell {
   void ResetDataByParsedData(const std::shared_ptr<tasm::TemplateData>& data);
 
   void ReloadTemplate(const std::shared_ptr<tasm::TemplateData>& data,
+                      std::shared_ptr<tasm::PipelineOptions> pipeline_options,
                       const lepus::Value& global_props = lepus::Value());
 
   void SetSessionStorageItem(const std::string& key,
@@ -329,6 +332,7 @@ class LynxShell {
   void OnPipelineStart(const tasm::PipelineID& pipeline_id,
                        const tasm::PipelineOrigin& pipeline_origin,
                        tasm::timing::TimestampUs pipeline_start_timestamp);
+  void ResetTimingBeforeReload() const;
 
   // TODO(heshan): The temporarily added API will be removed
   // once the overall design for dynamically switching thread modes is
