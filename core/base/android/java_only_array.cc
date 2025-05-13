@@ -271,8 +271,8 @@ JavaValue JavaOnlyArray::JavaOnlyArrayGetJavaValueAtIndex(JNIEnv* env,
                        JavaValue::JavaValueType::LynxObject);
     }
     case PiperData: {
-      // TODO(wujintian): Support PiperData
-      return JavaValue();
+      return JavaValue(JavaOnlyArrayGetObjectAtIndex(env, array, index),
+                       JavaValue::JavaValueType::Transfer);
     }
   }
 }

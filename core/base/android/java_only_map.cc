@@ -329,8 +329,8 @@ JavaValue JavaOnlyMap::JavaOnlyMapGetJavaValueAtIndex(JNIEnv* env, jobject map,
                        JavaValue::JavaValueType::LynxObject);
     }
     case PiperData: {
-      // TODO(wujintian): Support PiperData
-      return JavaValue();
+      return JavaValue(JavaOnlyMapGetMapAtIndex(env, map, key),
+                       JavaValue::JavaValueType::Transfer);
     }
   }
 }
