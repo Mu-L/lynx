@@ -57,7 +57,7 @@ namespace {{component}} {
       }
       {% endfor %}
     }
-    {% elif union_type.is_dictionary_type %}
+    {% elif union_type.is_dictionary %}
     if (auto {{member.name}} = NativeValueTraits<{{union_type.idl_type_name}}>::NativeValue({{member.name}}_val)) {
       {{member.name}}_{{union_type.idl_type}}_ = std::move({{member.name}});
       {{member.name}}_is_{{union_type.idl_type}}_ = true;
@@ -152,53 +152,53 @@ namespace {{component}} {
   do {
     {% for union_type in member.union_types %}
     if ({{member.name}}_is_{{union_type.idl_type}}_) {
-      {{ attach_member(union_type, member.name + '_' + union_type.idl_type) | trim | indent(6) }}
+      {{ attach_member(union_type, member.name + '_' + union_type.idl_type, member.name) | trim | indent(6) }}
       break;
     }
     {% endfor %}
   } while (false);
 {% endmacro %}
 
-{% macro attach_member(member, name) %}
+{% macro attach_member(member, member_name, name) %}
   {% if member.is_boolean_type %}
-  obj["{{name}}"] = Napi::Boolean::New(env, {{name}}_);
+  obj["{{name}}"] = Napi::Boolean::New(env, {{member_name}}_);
   {% elif member.is_numeric_type %}
-  obj["{{name}}"] = Number::New(env, {{name}}_);
+  obj["{{name}}"] = Number::New(env, {{member_name}}_);
   {% elif member.is_dictionary %}
-  obj["{{name}}"] = {{name}}_->ToJsObject(env);
+  obj["{{name}}"] = {{member_name}}_->ToJsObject(env);
   {% elif member.is_sequence_type and member.sequence_element_type == 'Number' %}
-  auto array = Array::New(env, {{name}}_.size());
-  for (size_t i = 0; i < {{name}}_.size(); ++i) {
-    array[i] = Number::New(env, {{name}}_[i]);
+  auto array = Array::New(env, {{member_name}}_.size());
+  for (size_t i = 0; i < {{member_name}}_.size(); ++i) {
+    array[i] = Number::New(env, {{member_name}}_[i]);
   }
   obj["{{name}}"] = array;
   {% elif member.is_sequence_type and member.enum_type %}
-  auto array = Array::New(env, {{name}}_.size());
-  for (size_t i = 0; i < {{name}}_.size(); ++i) {
-    array[i] = String::New(env, {{name}}_[i]);
+  auto array = Array::New(env, {{member_name}}_.size());
+  for (size_t i = 0; i < {{member_name}}_.size(); ++i) {
+    array[i] = String::New(env, {{member_name}}_[i]);
   }
   obj["{{name}}"] = std::move(array);
   {% elif member.is_sequence_type %}
-  auto array = Array::New(env, {{name}}_.size());
-  for (size_t i = 0; i < {{name}}_.size(); ++i) {
+  auto array = Array::New(env, {{member_name}}_.size());
+  for (size_t i = 0; i < {{member_name}}_.size(); ++i) {
     {% if member.is_sequence_element_dictionary_type %}
-    array[i] = {{name}}_[i]->ToJsObject(env);
+    array[i] = {{member_name}}_[i]->ToJsObject(env);
     {% elif member.is_sequence_element_interface_type %}
-    array[i] = {{name}}_[i]->IsNapiWrapped() ? {{name}}_[i]->NapiObject() : Napi{{member.sequence_element_type}}::Wrap(std::unique_ptr<{{member.sequence_element_type}}>({{name}}_[i]), env);
+    array[i] = {{member_name}}_[i]->IsNapiWrapped() ? {{member_name}}_[i]->NapiObject() : Napi{{member.sequence_element_type}}::Wrap(std::unique_ptr<{{member.sequence_element_type}}>({{member_name}}_[i]), env);
     {% endif %}
   }
   obj["{{name}}"] = std::move(array);
   {% elif member.is_string_type or member.enum_type %}
-  obj["{{name}}"] = String::New(env, {{name}}_);
+  obj["{{name}}"] = String::New(env, {{member_name}}_);
   {% elif member.is_wrapper_type or member.is_interface_type %}
   {% if member.is_nullable %}
-  if ({{name}}_) {
-    obj["{{name}}"] = {{name}}_->IsNapiWrapped() ? {{name}}_->NapiObject() : Napi{{member.idl_type}}::Wrap(std::unique_ptr<{{member.idl_type}}>({{name}}_), env);
+  if ({{member_name}}_) {
+    obj["{{name}}"] = {{member_name}}_->IsNapiWrapped() ? {{member_name}}_->NapiObject() : Napi{{member.idl_type}}::Wrap(std::unique_ptr<{{member.idl_type}}>({{member_name}}_), env);
   } else {
     obj["{{name}}"] = env.Null();
   }
   {% else %}
-  obj["{{name}}"] = {{name}}_->IsNapiWrapped() ? {{name}}_->NapiObject() : Napi{{member.idl_type}}::Wrap(std::unique_ptr<{{member.idl_type}}>({{name}}_), env);
+  obj["{{name}}"] = {{member_name}}_->IsNapiWrapped() ? {{member_name}}_->NapiObject() : Napi{{member.idl_type}}::Wrap(std::unique_ptr<{{member.idl_type}}>({{member_name}}_), env);
   {% endif %}{# member.is_nullable #}
   {% endif %}{# member.is_boolean_type #}
 {% endmacro %}
@@ -230,7 +230,7 @@ Object {{cpp_class}}::ToJsObject(Napi::Env env) {
     {% if member.union_types %}
     {{ attach_member_union(member) | trim | indent(2) }}
     {% else %}
-    {{ attach_member(member, member.name) | trim | indent(2) }}
+    {{ attach_member(member, member.name, member.name) | trim | indent(2) }}
     {% endif %}
   }
   {% endfor %}

@@ -815,6 +815,7 @@ def process_union_type(union_type):
         'idl_type_name': idl_type_name,
         'idl_type': sequence_idl_type or union_type.base_type,
         'is_boolean_type': union_type.base_type == 'boolean',
+        'is_dictionary': union_type.is_dictionary,
         'is_interface_type': union_type.is_interface_type,
         'is_string_type': union_type.is_string_type,
         'is_sequence_type': union_type.is_sequence_type,

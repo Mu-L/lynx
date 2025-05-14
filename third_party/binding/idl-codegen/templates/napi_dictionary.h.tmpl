@@ -75,7 +75,12 @@ class {{cpp_class}}{{' : public ' + parent_cpp_class if parent_cpp_class}} {
   bool {{member.name}}Is{{union_type.idl_type}}() const {
     return {{member.name}}_is_{{union_type.idl_type}}_;
   }
+  {% if union_type.is_sequence_type %}
+  const {{union_type.cpp_type}}& {{member.getter_name}}As{{union_type.idl_type}}() const {
+  {% else %}
   {{union_type.cpp_type}} {{member.getter_name}}As{{union_type.idl_type}}() const {
+  {% endif %}
+
     {% if member.is_required %}
     BINDING_DCHECK({{member.has_method_name}}() && {{member.name}}Is{{union_type.idl_type}}());
     {% endif %}
@@ -120,7 +125,7 @@ class {{cpp_class}}{{' : public ' + parent_cpp_class if parent_cpp_class}} {
   {% for union_type in member.union_types %}
 
   bool {{member.name}}_is_{{union_type.idl_type}}_ = false;
-  {% if union_type.is_dictionary_type %}
+  {% if union_type.is_dictionary %}
   std::unique_ptr<{{union_type.idl_type}}> {{member.name}}_{{union_type.idl_type}}_;
   {% else %}
   {{union_type.cpp_type}} {{member.name}}_{{union_type.idl_type}}_;
