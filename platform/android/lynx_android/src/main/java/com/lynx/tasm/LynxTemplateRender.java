@@ -742,6 +742,7 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
 
       mResourceLoader = new LynxResourceLoader(mLynxRuntimeOptions, mLynxViewBuilder.fetcher, this,
           mLynxContext.getTemplateResourceFetcher(), mLynxContext.getGenericResourceFetcher());
+      setUpExtensionModules();
       if (mRuntime != null) {
         // In LynxbakcgroundRuntime Standalone, we create and init a LynxRuntime without LynxShell.
         // During LynxTemplateRender creation, this runtime is used to create LynxShell.
@@ -757,8 +758,6 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
         initPiper(mModuleFactory, mResourceLoader, mLynxRuntimeOptions.useQuickJSEngine(), false,
             mEnableBytecode, mBytecodeSourceUrl, mEnablePendingJsTask, lynxUIRenderer);
       }
-      // extension dependent on piper, should init after piper init.
-      setUpExtensionModules();
       if (mDevTool != null) {
         mDevTool.onRegisterModule(mModuleFactory);
       }
@@ -782,7 +781,7 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
   }
 
   private void setUpExtensionModules() {
-    if (mLynxView == null || mEnableAirStrictMode) {
+    if (mLynxView == null) {
       return;
     }
     Map<String, LynxExtensionModule> modules = mLynxContext.getExtensionModules();
