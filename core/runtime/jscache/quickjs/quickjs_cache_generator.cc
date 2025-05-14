@@ -78,7 +78,9 @@ bool QuickjsCacheGenerator::GenerateCacheImpl(
     LEPUS_SetRuntimeInfo(rt, "Lynx_JS");
   }
   if (trig_mem_info_event_) {
-    RegisterGCInfoCallback(rt, trig_mem_info_event_);
+    RegisterGCInfoCallback(
+        rt, reinterpret_cast<void (*)(LEPUSContext *, const char *, int)>(
+                trig_mem_info_event_));
   }
   LEPUSContext *ctx = LEPUS_NewContext(rt);
   if (!ctx) {

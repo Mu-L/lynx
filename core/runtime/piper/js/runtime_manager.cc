@@ -143,7 +143,7 @@ std::shared_ptr<piper::VMInstance> VMInstancePool::DoCreateVMInstance(
 
 }  // namespace
 
-void TrigMemInfoEvent(const char* mem_info, int size) {
+void TrigMemInfoEvent(void* ctx, const char* mem_info, int size) {
   std::string info(mem_info);
   for (int i = 0; i < size; i++) {
     tasm::report::EventTracker::OnEvent(

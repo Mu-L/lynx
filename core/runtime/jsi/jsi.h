@@ -1592,7 +1592,7 @@ class JSIExceptionHandler {
   virtual void Destroy() {}
 };
 
-typedef void (*report_func)(const char*, int);
+typedef void (*report_func)(void* ctx, const char*, int);
 
 class VMInstance {
   // VMInstance createVM(StartupData data);

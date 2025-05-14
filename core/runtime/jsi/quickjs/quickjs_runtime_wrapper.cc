@@ -61,7 +61,9 @@ void QuickjsRuntimeInstance::InitQuickjsRuntime(bool is_sync) {
     LEPUS_SetRuntimeInfo(rt, "Lynx_JS");
   }
   if (trig_mem_info_event_) {
-    RegisterGCInfoCallback(rt, trig_mem_info_event_);
+    RegisterGCInfoCallback(
+        rt, reinterpret_cast<void (*)(LEPUSContext*, const char*, int)>(
+                trig_mem_info_event_));
   }
   rt_ = rt;
 

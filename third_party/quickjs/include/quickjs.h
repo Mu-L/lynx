@@ -688,7 +688,8 @@ typedef struct LEPUSLepusRef {
 void RegisterLepusType(LEPUSRuntime *rt, int32_t array_typeid,
                        int32_t table_typeid);
 
-void RegisterGCInfoCallback(LEPUSRuntime *rt, void (*func)(const char *, int));
+void RegisterGCInfoCallback(LEPUSRuntime *rt,
+                            void (*func)(LEPUSContext *, const char *, int));
 
 void RegisterLepusRefCallbacks(LEPUSRuntime *rt, LEPUSLepusRefCallbacks *funcs);
 
