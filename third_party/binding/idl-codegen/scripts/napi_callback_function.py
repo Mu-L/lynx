@@ -12,6 +12,7 @@ import napi_types
 CALLBACK_FUNCTION_H_INCLUDES = frozenset([
     'third_party/binding/napi/napi_bridge.h',
     "third_party/binding/napi/callback_helper.h",
+    "third_party/binding/napi/native_value_traits.h",
 ])
 CALLBACK_FUNCTION_CPP_INCLUDES = frozenset([
     # 'base/stl_util.h',
@@ -102,7 +103,7 @@ def arguments_context(arguments, context):
         if idl_type.is_string_type:
             this_cpp_type = 'std::string'
         if idl_type.is_wrapper_type:
-            this_cpp_type = 'std::unique_ptr<%s>' % (this_cpp_type[:-1])
+            this_cpp_type = '%s*' % (this_cpp_type[:-1])
         elif idl_type.is_nullable or argument.is_optional:
             this_cpp_type = 'std::optional<%s>' % (this_cpp_type)
             impl_as_std_optional = True
@@ -115,11 +116,9 @@ def arguments_context(arguments, context):
                     isolate='GetIsolate()',
                     creation_context='argument_creation_context'),
             'declaration_name':
-                '%s arg%s%s' % (this_cpp_type, index, ' = {}' if argument.is_optional else ''),
-            'definition_name':
-                '%s arg%s%s' % (this_cpp_type, index, '_optional' if impl_as_std_optional else ''),
+                '%s arg%s%s' % ('T' + str(index) if idl_type.is_wrapper_type else this_cpp_type, index, '_optional = {}' if impl_as_std_optional else ''),
             'call_name' :
-                'arg%s_%s' %(index,argument.name),
+                'arg%s_%s' %(index, argument.name),
             'enum_type':
                 idl_type.enum_type,
             'enum_values':
@@ -178,5 +177,7 @@ def arguments_context(arguments, context):
         'argument_declarations': argument_declarations,
         'arguments': [argument_context(argument,index,context) for index,argument in enumerate(arguments)],
         'number_of_arguments': len(arguments),
+        'has_wrapper_arguments':
+            any(argument.idl_type.is_wrapper_type for argument in arguments),
     }
 

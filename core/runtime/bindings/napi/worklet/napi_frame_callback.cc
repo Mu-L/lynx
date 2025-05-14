@@ -39,31 +39,7 @@ using Napi::DataView;
 
 namespace lynx {
 namespace worklet {
-namespace {
-  const uint64_t kNapiFrameCallbackClassID = reinterpret_cast<uint64_t>(&kNapiFrameCallbackClassID);
-}
-
-void NapiFrameCallback::Invoke(int64_t arg0) {
-  bool valid;
-  Napi::Env env = Env(&valid);
-  if (!valid) {
-    return;
-  }
-
-  Napi::ContextScope cs(env);
-  Napi::HandleScope hs(env);
-
-  HolderStorage *storage = reinterpret_cast<HolderStorage*>(env.GetInstanceData(kNapiFrameCallbackClassID));
-  DCHECK(storage);
-
-  auto cb = storage->PopHolder(reinterpret_cast<uintptr_t>(this));
-
-  Napi::Value arg0_status;
-  arg0_status = Napi::Number::New(env, arg0);
-
-  // The JS callback object is stolen after the call.
-  binding::CallbackHelper::Invoke(std::move(cb), result_, exception_handler_, { arg0_status });
-}
+const uint64_t kNapiFrameCallbackClassID = reinterpret_cast<uint64_t>(&kNapiFrameCallbackClassID);
 
 NapiFrameCallback::NapiFrameCallback(Napi::Function callback) {
   Napi::Env env = callback.Env();

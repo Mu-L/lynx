@@ -329,6 +329,21 @@ struct NativeValueTraits<IDLNullable<T>,
   }
 };
 
+template <typename T>
+auto ToRawPtr(T&& ptr) -> decltype(ptr.get()) {
+  static_assert(std::is_same_v<T, std::unique_ptr<typename T::element_type>>, "Type must be std::unique_ptr or raw pointer");
+  return ptr.release();
+}
+
+template <typename T>
+T* ToRawPtr(T* ptr) {
+  return ptr;
+}
+
+inline std::nullptr_t ToRawPtr(std::nullptr_t ptr) {
+  return nullptr;
+}
+
 }  // namespace binding
 }  // namespace lynx
 

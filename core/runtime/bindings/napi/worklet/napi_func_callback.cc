@@ -39,30 +39,7 @@ using Napi::DataView;
 
 namespace lynx {
 namespace worklet {
-namespace {
-  const uint64_t kNapiFuncCallbackClassID = reinterpret_cast<uint64_t>(&kNapiFuncCallbackClassID);
-}
-
-void NapiFuncCallback::Invoke(Napi::Value arg0) {
-  bool valid;
-  Napi::Env env = Env(&valid);
-  if (!valid) {
-    return;
-  }
-
-  Napi::ContextScope cs(env);
-  Napi::HandleScope hs(env);
-
-  HolderStorage *storage = reinterpret_cast<HolderStorage*>(env.GetInstanceData(kNapiFuncCallbackClassID));
-  DCHECK(storage);
-
-  const auto& cb = storage->PeekHolder(reinterpret_cast<uintptr_t>(this));
-
-  Napi::Value arg0_param;
-  arg0_param = arg0;
-
-  binding::CallbackHelper::Invoke(cb, result_, exception_handler_, { arg0_param });
-}
+const uint64_t kNapiFuncCallbackClassID = reinterpret_cast<uint64_t>(&kNapiFuncCallbackClassID);
 
 NapiFuncCallback::NapiFuncCallback(Napi::Function callback) {
   Napi::Env env = callback.Env();

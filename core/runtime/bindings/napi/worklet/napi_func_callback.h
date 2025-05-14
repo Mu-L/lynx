@@ -16,6 +16,7 @@
 
 #include "third_party/binding/napi/callback_helper.h"
 #include "third_party/binding/napi/napi_bridge.h"
+#include "third_party/binding/napi/native_value_traits.h"
 
 #include "base/include/log/logging.h"
 
@@ -25,6 +26,8 @@ namespace worklet {
 using binding::HolderStorage;
 using binding::InstanceGuard;
 
+extern const uint64_t kNapiFuncCallbackClassID;
+
 class NapiFuncCallback {
  public:
   NapiFuncCallback(Napi::Function callback);
@@ -33,7 +36,26 @@ class NapiFuncCallback {
 
   ~NapiFuncCallback();
 
-  void Invoke(Napi::Value arg0);
+  void Invoke(Napi::Value arg0) {
+    bool valid;
+    Napi::Env env = Env(&valid);
+    if (!valid) {
+      return;
+    }
+
+    Napi::ContextScope cs(env);
+    Napi::HandleScope hs(env);
+
+    HolderStorage *storage = reinterpret_cast<HolderStorage*>(env.GetInstanceData(kNapiFuncCallbackClassID));
+    DCHECK(storage);
+
+    const auto& cb = storage->PeekHolder(reinterpret_cast<uintptr_t>(this));
+
+    Napi::Value arg0_param;
+    arg0_param = arg0;
+
+    binding::CallbackHelper::Invoke(cb, result_, exception_handler_, { arg0_param });
+  }
 
   Napi::Value GetResult() { return result_; }
   Napi::Env Env(bool *valid);
