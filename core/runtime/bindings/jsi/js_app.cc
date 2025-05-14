@@ -2428,7 +2428,8 @@ void App::NotifyUpdatePageData() {
     auto updated_card_data = delegate_->FetchUpdatedCardData();
 
     // for react, don't need update data, react use "onReactCardRender"
-    if (app_dsl_ == tasm::PackageInstanceDSL::REACT) {
+    if (app_dsl_ == tasm::PackageInstanceDSL::REACT ||
+        app_dsl_ == tasm::PackageInstanceDSL::REACT_NODIFF) {
       return;
     }
 
