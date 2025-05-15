@@ -217,7 +217,8 @@ TemplateAssembler::TemplateAssembler(Delegate& delegate,
       is_loading_template_(false),
       font_scale_(1.0),
       component_loader_(nullptr),
-      pipeline_context_manager_(std::make_unique<PipelineContextManager>()) {
+      pipeline_context_manager_(std::make_unique<PipelineContextManager>(
+          LynxEnv::GetInstance().EnableUnifiedPixelPipeline())) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, TEMPLATE_ASSEMBLER_CONSTRUCTOR);
   page_proxy()->element_manager()->SetElementManagerDelegate(
       &element_manager_delegate_);

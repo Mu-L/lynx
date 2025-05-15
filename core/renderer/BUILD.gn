@@ -41,6 +41,7 @@ lynx_core_source_set("tasm") {
     "//lynx/core/renderer/data",
     "//lynx/core/renderer/dom/vdom/radon",
     "//lynx/core/renderer/events",
+    "//lynx/core/renderer/pipeline",
     "//lynx/core/renderer/signal:signal",
     "//lynx/core/renderer/starlight",
     "//lynx/core/renderer/trace:renderer_trace",
