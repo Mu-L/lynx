@@ -3575,16 +3575,17 @@ void FiberElement::AsyncResolveSubtreeProperty() {
 
 void FiberElement::CreateListItemScheduler(
     list::BatchRenderStrategy batch_render_strategy,
-    ElementContextDelegate *parent_context) {
+    ElementContextDelegate *parent_context, bool continuous_resolve_tree) {
   if (LynxEnv::GetInstance().EnableBatchLayoutTaskWithSyncLayout()) {
     std::shared_ptr<ElementContextDelegate> element_context_delegate_ptr =
         std::make_shared<ListItemSchedulerAdapter>(this, batch_render_strategy,
-                                                   parent_context);
+                                                   parent_context,
+                                                   continuous_resolve_tree);
     element_context_delegate_ = element_context_delegate_ptr.get();
     parent_context->OnChildElementContextAdded(element_context_delegate_ptr);
   } else {
     scheduler_adapter_ = std::make_shared<ListItemSchedulerAdapter>(
-        this, batch_render_strategy, parent_context);
+        this, batch_render_strategy, parent_context, continuous_resolve_tree);
   }
 }
 

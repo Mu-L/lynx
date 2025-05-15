@@ -69,7 +69,7 @@ void ListElement::OnNodeAdded(FiberElement* child) {
   if (UseNewResolveStrategy()) {
     child->CreateListItemScheduler(
         list_container_delegate()->GetBatchRenderStrategy(),
-        element_context_delegate_);
+        element_context_delegate_, continuous_resolve_tree_);
     // Mark inserted child as render_root of its subtree
     // TODO: Override UpdateRenderRootElementIfNecessary when list-item-element
     // concept is introduced.
@@ -333,6 +333,12 @@ ParallelFlushReturn ListElement::PrepareForCreateOrUpdate() {
       FiberElement::SetAttributeInternal(
           BASE_STATIC_STRING(list::kExperimentalBatchRenderStrategy),
           lepus::Value(static_cast<int>(batch_render_strategy)));
+    }
+    // Handle experimental-continuous-resolve-tree
+    it = attr_map.find(
+        BASE_STATIC_STRING(list::kExperimentalContinuousResolveTree));
+    if (it != attr_map.end() && it->second.IsBool()) {
+      continuous_resolve_tree_ = it->second.Bool();
     }
   }
   return FiberElement::PrepareForCreateOrUpdate();

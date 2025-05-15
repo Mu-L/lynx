@@ -182,6 +182,7 @@ class ListElement : public FiberElement,
   ResolveBatchRenderStrategyFromPipelineSchedulerConfig(
       uint64_t pipeline_scheduler_config, bool enable_parallel_element);
 
+  bool continuous_resolve_tree_{false};
   tasm::TemplateAssembler* tasm_{nullptr};
   lepus::Value component_at_index_{};
   lepus::Value enqueue_component_{};

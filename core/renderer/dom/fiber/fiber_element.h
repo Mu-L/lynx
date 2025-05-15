@@ -815,7 +815,8 @@ class FiberElement : public Element, public SelectorItem {
   void MarkAttrDirtyForPseudoElement() { dirty_ |= kDirtyAttr; }
 
   void CreateListItemScheduler(list::BatchRenderStrategy batch_render_strategy,
-                               ElementContextDelegate* parent_context);
+                               ElementContextDelegate* parent_context,
+                               bool continuous_resolve_tree);
 
   void RecursivelyMarkRenderRootElement(FiberElement* render_root);
 

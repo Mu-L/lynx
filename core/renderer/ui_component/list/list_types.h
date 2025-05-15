@@ -76,6 +76,8 @@ static constexpr const char* const kEnablePreloadSection =
     "experimental-enable-preload-section";
 static constexpr const char* const kScrollOrientation = "scroll-orientation";
 static constexpr const char* const kPreloadBufferCount = "preload-buffer-count";
+static constexpr const char kExperimentalContinuousResolveTree[] =
+    "experimental-continuous-resolve-tree";
 
 // constant value
 static constexpr int kInvalidIndex = -1;

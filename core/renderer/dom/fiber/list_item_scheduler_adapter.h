@@ -23,7 +23,8 @@ class ListItemSchedulerAdapter : public ElementContextDelegate {
  public:
   ListItemSchedulerAdapter(FiberElement* sub_root,
                            list::BatchRenderStrategy batch_render_strategy,
-                           ElementContextDelegate* parent_context);
+                           ElementContextDelegate* parent_context,
+                           bool continuous_resolve_tree);
 
   std::list<base::OnceTaskRefptr<base::closure>>& resolve_property_queue() {
     return resolve_property_queue_;
@@ -43,8 +44,8 @@ class ListItemSchedulerAdapter : public ElementContextDelegate {
 
   void ConsumeResolveElementTreeReduceTasks();
 
-  void PostResolveElementTree(std::list<base::OnceTaskRefptr<base::closure>>&
-                                  parallel_resolve_element_tree_queue);
+  void ResolveElementTree(std::list<base::OnceTaskRefptr<base::closure>>&
+                              parallel_resolve_element_tree_queue);
 
   bool IsBatchResolvingTree() { return batch_resolving_tree_; }
 
@@ -54,6 +55,7 @@ class ListItemSchedulerAdapter : public ElementContextDelegate {
   FiberElement* render_root_;
   list::BatchRenderStrategy batch_render_strategy_{
       list::BatchRenderStrategy::kDefault};
+  bool continuous_resolve_tree_{false};
 
   std::list<base::OnceTaskRefptr<base::closure>> resolve_property_queue_{};
 

@@ -16,10 +16,11 @@ namespace tasm {
 
 ListItemSchedulerAdapter::ListItemSchedulerAdapter(
     FiberElement* sub_root, list::BatchRenderStrategy batch_render_strategy,
-    ElementContextDelegate* parent_context)
-    : ElementContextDelegate(parent_context, sub_root) {
-  render_root_ = sub_root;
-  batch_render_strategy_ = batch_render_strategy;
+    ElementContextDelegate* parent_context, bool continuous_resolve_tree)
+    : ElementContextDelegate(parent_context, sub_root),
+      render_root_(sub_root),
+      batch_render_strategy_(batch_render_strategy),
+      continuous_resolve_tree_(continuous_resolve_tree) {
   element_context_task_queue_ =
       std::make_unique<ElementContextTaskQueue>([this]() {
         return (render_root_ && render_root_->element_manager())
@@ -60,10 +61,8 @@ base::closure ListItemSchedulerAdapter::GenerateReduceTaskForResolveProperty() {
             list::BatchRenderStrategy::kAsyncResolvePropertyAndElementTree) {
       ConsumeResolvePropertyReduceTasks();
     }
-
-    // post flush the flushAction task in the thread pool and
-    // collect the subtree adjustment tasks recursively.
-    PostResolveElementTree(
+    // Execute resolve element tree.
+    ResolveElementTree(
         render_root_->element_manager()->ParallelResolveTreeTasks());
   });
 }
@@ -99,7 +98,7 @@ void ListItemSchedulerAdapter::ConsumeResolvePropertyReduceTasks() {
   }
 }
 
-void ListItemSchedulerAdapter::PostResolveElementTree(
+void ListItemSchedulerAdapter::ResolveElementTree(
     std::list<base::OnceTaskRefptr<base::closure>>&
         parallel_resolve_element_tree_queue) {
   if (batch_render_strategy_ ==
@@ -126,6 +125,13 @@ void ListItemSchedulerAdapter::PostResolveElementTree(
         base::ConcurrentTaskType::HIGH_PRIORITY);
     parallel_resolve_element_tree_queue.emplace_back(std::move(task_info_ptr));
   } else {
+    if (continuous_resolve_tree_ &&
+        batch_render_strategy_ ==
+            list::BatchRenderStrategy::kAsyncResolveProperty) {
+      // Invoke resolve element tree directly after consuming resolve property
+      // reduce tasks.
+      render_root_->FlushActions();
+    }
     FlushEnqueuedTasks();
   }
 }
