@@ -5,6 +5,7 @@
 #ifndef CORE_SHELL_LYNX_ENGINE_PROXY_IMPL_H_
 #define CORE_SHELL_LYNX_ENGINE_PROXY_IMPL_H_
 
+#include <list>
 #include <memory>
 #include <string>
 
@@ -72,6 +73,8 @@ class LynxEngineProxyImpl : public LynxEngineProxy {
                        int64_t operation_id) override;
 
   tasm::ListData GetListData(int view_id) override;
+
+  std::list<int32_t> GetAncestorElements(int32_t tag) override;
 
   void MarkLayoutDirty(int sign) override;
 

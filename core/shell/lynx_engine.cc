@@ -370,6 +370,24 @@ tasm::ListNode* LynxEngine::GetListNode(int32_t tag) {
   return element->GetListNode();
 }
 
+std::list<int32_t> LynxEngine::GetAncestorElements(int32_t tag) {
+  // client maybe nullptr
+  if (tasm_ == nullptr) {
+    return {};
+  }
+  auto& client = tasm_->page_proxy()->element_manager();
+  if (client == nullptr) {
+    return {};
+  }
+  std::list<int32_t> elements;
+  lynx::tasm::Element* element = client->node_manager()->Get(tag);
+  while (element != nullptr) {
+    elements.emplace_back(element->impl_id());
+    element = element->parent();
+  }
+  return elements;
+}
+
 // (TODO)fangzhou.fz: Putting these list-related methods here directly is
 // inappropriate.
 void LynxEngine::ScrollByListContainer(int32_t tag, float content_offset_x,

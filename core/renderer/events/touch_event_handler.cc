@@ -445,12 +445,20 @@ void TouchEventHandler::HandleBubbleEvent(TemplateAssembler *tasm,
   if (name.compare("mousedown") == 0) {
     long_press_consumed_ = false;
   }
+  bool bubbles = true;
+  // According to the W3C specification, the `mouseenter` and `mouseleave`
+  // events do not bubble. Therefore, bubbling needs to be disabled. See:
+  // https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseenter_event
+  // https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseleave_event
+  if (name.compare("mouseenter") == 0 || name.compare("mouseleave") == 0) {
+    bubbles = false;
+  }
 
   EventContext context = {
       .event_type = EventType::kBubble,
       .event_name = name,
       .page_name = page_name,
-      .option = {.bubbles_ = true,
+      .option = {.bubbles_ = bubbles,
                  .composed_ = true,
                  .capture_phase_ = true,
                  .lepus_event_ = false,

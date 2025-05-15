@@ -5,6 +5,7 @@
 #ifndef CORE_PUBLIC_LYNX_ENGINE_PROXY_H_
 #define CORE_PUBLIC_LYNX_ENGINE_PROXY_H_
 
+#include <list>
 #include <memory>
 #include <string>
 
@@ -74,6 +75,12 @@ class LynxEngineProxy {
                                int64_t operation_id) = 0;
 
   virtual tasm::ListData GetListData(int view_id) = 0;
+
+  // This function constructs and returns a list of element tags synchronized
+  // that represent the specified element and its ancestor elements in the DOM
+  // hierarchy. The elements should not affected by the z-index attribute.
+  // Do not call this function when using async tasm.
+  virtual std::list<int32_t> GetAncestorElements(int32_t tag) = 0;
 
   virtual void MarkLayoutDirty(int sign) = 0;
 

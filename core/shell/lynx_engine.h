@@ -5,6 +5,7 @@
 #ifndef CORE_SHELL_LYNX_ENGINE_H_
 #define CORE_SHELL_LYNX_ENGINE_H_
 
+#include <list>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -169,6 +170,11 @@ class LynxEngine {
   lepus::Value GetPageDataByKey(const std::vector<std::string>& keys);
 
   tasm::ListNode* GetListNode(int32_t tag);
+
+  // This function constructs and returns a list of element tags synchronized
+  // that represent the specified element and its ancestor elements in the DOM
+  // hierarchy. The elements should not affected by the z-index attribute.
+  std::list<int32_t> GetAncestorElements(int32_t tag);
 
   void ScrollByListContainer(int32_t tag, float content_offset_x,
                              float content_offset_y, float original_x,

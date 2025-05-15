@@ -292,6 +292,21 @@ tasm::ListData LynxEngineProxyImpl::GetListData(int view_id) {
   return result;
 }
 
+std::list<int32_t> LynxEngineProxyImpl::GetAncestorElements(int32_t tag) {
+  if (engine_actor_ == nullptr) {
+    LOGE("GetAncestorElements failed since engine_actor_ is nullptr");
+    return {};
+  }
+  DCHECK(engine_actor_->CanRunNow());
+  if (!engine_actor_->CanRunNow()) {
+    LOGE(
+        "GetAncestorElements failed since current thread is not on engine "
+        "thread");
+    return {};
+  }
+  return engine_actor_->Impl()->GetAncestorElements(tag);
+}
+
 void LynxEngineProxyImpl::MarkLayoutDirty(int sign) {
   if (engine_actor_ == nullptr) {
     LOGE(
