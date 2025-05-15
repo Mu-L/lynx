@@ -607,7 +607,7 @@ event::DispatchEventResult MockTasmDelegate::DispatchMessageEvent(
     const auto& params = args->GetValue(kParams).StdString();
     ss_ << "PrintMsgToJS " << func_name << " " << params << std::endl;
   }
-  return event::DispatchEventResult::kNotCanceled;
+  return {event::EventCancelType::kNotCanceled, false};
 }
 
 void MockTasmDelegate::OnGlobalPropsUpdated(const lepus::Value& props) {
