@@ -40,6 +40,13 @@ class TaskRunnerWin32 : public TaskRunner,
   void PostTask(base::closure closure) override;
 
   // |TaskRunner|
+  void PostTaskForTime(base::closure closure,
+                       fml::TimePoint target_time) override;
+
+  // |TaskRunner|
+  void PostDelayedTask(base::closure closure, fml::TimeDelta delay) override;
+
+  // |TaskRunner|
   bool RunsTasksOnCurrentThread() override;
 
   // |TaskRunnerWin32Window::Delegate|

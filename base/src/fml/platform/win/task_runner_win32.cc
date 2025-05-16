@@ -28,8 +28,15 @@ TaskRunnerWin32::~TaskRunnerWin32() {
 }
 
 void TaskRunnerWin32::PostTask(base::closure closure) {
+  PostTaskForTime(std::move(closure), fml::TimePoint::Now());
+}
+
+void TaskRunnerWin32::PostTaskForTime(base::closure closure,
+                                      fml::TimePoint target_time) {
   Task task;
-  task.fire_time = GetCurrentTimeForTask();
+  TaskTimePoint fire_time = TaskTimePoint(
+      std::chrono::nanoseconds(target_time.ToEpochDelta().ToNanoseconds()));
+  task.fire_time = fire_time;
   task.closure = std::move(closure);
 
   static std::atomic_uint64_t sGlobalTaskOrder(0);
@@ -46,6 +53,11 @@ void TaskRunnerWin32::PostTask(base::closure closure) {
   }
 
   task_runner_window_->WakeUp();
+}
+
+void TaskRunnerWin32::PostDelayedTask(base::closure closure,
+                                      fml::TimeDelta delay) {
+  PostTaskForTime(std::move(closure), fml::TimePoint::Now() + delay);
 }
 
 bool TaskRunnerWin32::RunsTasksOnCurrentThread() {
