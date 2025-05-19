@@ -36,6 +36,9 @@ class ContextProxyInJS : public HostObject, public runtime::ContextProxy {
                    const Value& value) override;
   virtual std::vector<PropNameID> getPropertyNames(Runtime& rt) override;
 
+  // clear js object
+  void Destroy();
+
  protected:
   std::weak_ptr<App> native_app_;
 };

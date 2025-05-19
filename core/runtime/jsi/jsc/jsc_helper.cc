@@ -291,7 +291,7 @@ bool JSCHelper::smellsLikeES6Symbol(JSGlobalContextRef ctx, JSValueRef ref) {
 std::optional<Value> JSCHelper::call(JSGlobalContextRef ctx, JSCRuntime& rt,
                                      const Function& f, const Value& jsThis,
                                      const Value* args, size_t nArgs) {
-  if (nullptr == ctx) {
+  if (!ctx || !rt.Valid()) {
 #if defined(DEBUG) || (defined(LYNX_UNIT_TEST) && LYNX_UNIT_TEST)
     LOGF("Error: " << __FILE__ << ":" << __LINE__ << ":"
                    << "JSCRuntime destroyed with a nullptr ctx.");
@@ -318,7 +318,7 @@ std::optional<Value> JSCHelper::callAsConstructor(JSGlobalContextRef ctx,
                                                   const Function& f,
                                                   const Value* args,
                                                   size_t nArgs) {
-  if (nullptr == ctx) {
+  if (!ctx || !rt.Valid()) {
 #if defined(DEBUG) || (defined(LYNX_UNIT_TEST) && LYNX_UNIT_TEST)
     LOGF("Error: " << __FILE__ << ":" << __LINE__ << ":"
                    << "JSCRuntime destroyed with a nullptr ctx.");

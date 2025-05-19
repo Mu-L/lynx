@@ -252,5 +252,7 @@ std::vector<PropNameID> ContextProxyInJS::getPropertyNames(Runtime &rt) {
   return vec;
 }
 
+void ContextProxyInJS::Destroy() { event_listener_map_.reset(); }
+
 }  // namespace piper
 }  // namespace lynx
