@@ -395,7 +395,7 @@ TEST_P(AppTest, CreateAppTest) { EXPECT_TRUE(app); }
 TEST_P(AppTest, NativeLynxContextProxyTest) {
   EXPECT_TRUE(app);
 
-  auto lynx_proxy = std::make_shared<piper::LynxProxy>(runtime, app);
+  auto lynx_proxy = std::make_shared<piper::LynxProxy>(app);
   Object obj = Object::createFromHostObject(rt, lynx_proxy);
 
   auto res1 =
@@ -894,7 +894,7 @@ TEST_P(AppTest, GetCustomSectionSyncTest) {
                tasm::PackageInstanceBundleModuleMode::EVAL_REQUIRE_MODE, "url");
 
   // `lynx.getCustomSectionSync` func
-  auto lynx_proxy = std::make_shared<piper::LynxProxy>(runtime, app);
+  auto lynx_proxy = std::make_shared<piper::LynxProxy>(app);
   auto get_custom_section_sync = [this, &rt = this->rt,
                                   &lynx_proxy](const std::string& param) {
     Object obj = Object::createFromHostObject(rt, lynx_proxy);

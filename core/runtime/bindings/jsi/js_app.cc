@@ -2055,7 +2055,7 @@ void App::loadApp(tasm::TasmRuntimeBundle bundle,
     return;
   }
 
-  lynx_proxy_ = std::make_shared<piper::LynxProxy>(rt, shared_from_this());
+  lynx_proxy_ = std::make_shared<piper::LynxProxy>(shared_from_this());
   piper::Object lynx_object =
       piper::Object::createFromHostObject(*rt, lynx_proxy_);
 

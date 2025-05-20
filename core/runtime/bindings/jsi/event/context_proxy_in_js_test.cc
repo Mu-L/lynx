@@ -54,7 +54,7 @@ void ContextProxyInJSTest::SetUp() {
 
   app_->setJsAppObj(Object::createFromHostObject(*runtime, mock_js_app_));
 
-  lynx_proxy_ = std::make_shared<piper::LynxProxy>(runtime, app_);
+  lynx_proxy_ = std::make_shared<piper::LynxProxy>(app_);
   Object lynx_obj = Object::createFromHostObject(rt, lynx_proxy_);
   function(R"--(
     function registerLynx(lynx) {
