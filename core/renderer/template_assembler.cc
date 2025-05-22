@@ -567,6 +567,8 @@ void TemplateAssembler::RenderTemplate(
   if (EnableFiberArch()) {
     RenderTemplateForFiber(card, data, pipeline_options);
   } else if (EnableLynxAir()) {
+    // TODO(nihao.royal): as render template for air is not used now, it's no
+    // need to migrate to `RunPixelPipeline` we may delete it later;
     RenderTemplateForAir(card, data.GetValue(), pipeline_options);
   } else {
     UpdatePageOption update_page_option;
@@ -692,10 +694,17 @@ void TemplateAssembler::RenderTemplateForFiber(
   tasm::TimingCollector::Instance()->Mark(tasm::timing::kMtsRenderEnd);
 
   pipeline_options->is_first_screen = true;
-  page_proxy()->element_manager()->OnPatchFinish(pipeline_options);
 
-  if (page_proxy()->element_manager()->GetEnableDumpElementTree()) {
-    DumpElementTree(card);
+  // TODO(nihao.royal): use `enable_unified_pixel_pipeline` to switch multi
+  // behaviours. After `RunPixelPipeline` is unified, we may remove the
+  // redundant logic here.
+  if (pipeline_options->enable_unified_pixel_pipeline) {
+    this->GetCurrentPipelineContext()->RequestResolve();
+  } else {
+    page_proxy()->element_manager()->OnPatchFinish(pipeline_options);
+    if (page_proxy()->element_manager()->GetEnableDumpElementTree()) {
+      DumpElementTree(card);
+    }
   }
 }
 
@@ -906,6 +915,8 @@ void TemplateAssembler::LoadTemplateInternal(
 #endif
 
   Scope scope(this);
+  pipeline_context_manager_->CreateAndUpdateCurrentPipelineContext(
+      pipeline_options);
 
   // Before exec load template, do some preparation
   // 1. exec timing actions
@@ -1001,6 +1012,9 @@ void TemplateAssembler::LoadTemplateInternal(
 
     // render template
     RenderTemplate(card, data, pipeline_options);
+
+    // starts to run pixel pipeline;
+    this->RunPixelPipeline();
 
     // After render template, exec some aftercare
     // 1. ssr actions

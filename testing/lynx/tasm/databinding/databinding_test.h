@@ -206,7 +206,7 @@ class DataBindingShell {
 
   void SetOptimizedStyleDiff();
 
-  void ResetTasm();
+  virtual void ResetTasm();
 
   void Replay(std::string replay_file_name, bool use_ark_source = false);
 
@@ -414,6 +414,23 @@ class RadonFiberDataBindingTemplateBundleRecycleTest
 
 class RadonFiberDataBindingDynamicComponentWithTemplateBundleTest
     : public DataBindingDynamicComponentWithTemplateBundleTest,
+      public RadonFiberTest {};
+
+// Test for UnifiedPipeline.
+class UnifiedPipelineDataBindingShell : public DataBindingShell {
+ public:
+  UnifiedPipelineDataBindingShell();
+  ~UnifiedPipelineDataBindingShell();
+  void ResetTasm() override;
+};
+
+class UnifiedPipelineDataBindingTest : public DataBindingTest {
+ public:
+  UnifiedPipelineDataBindingTest();
+};
+
+class RadonFiberDataBindingWithUnifiedPipelineTest
+    : public UnifiedPipelineDataBindingTest,
       public RadonFiberTest {};
 
 }  // namespace test
