@@ -164,6 +164,7 @@ public class TestBenchActionManager {
   private boolean mReplayGesture;
   private boolean mPreDecode;
   private boolean mDisableOptPushStyleToBundle;
+  private boolean mEnableNativeScheduleCreateViewAsync;
   private int mDelayEndInterval;
   private TestBenchReplayStateView mStateView;
   private int mScreenWidth;
@@ -485,6 +486,9 @@ public class TestBenchActionManager {
     mCreateWhenReload = queryMap.getBoolean("createWhenReload", false);
 
     mDisableOptPushStyleToBundle = queryMap.getInt("disable_opt_push_style_to_bundle", 0) == 1;
+
+    mEnableNativeScheduleCreateViewAsync =
+        queryMap.getInt("enable_native_schedule_create_view_async", 0) == 1;
 
     int[] colorValues = {255, 255, 255, 255};
 
@@ -1042,6 +1046,9 @@ public class TestBenchActionManager {
           if (mDisableOptPushStyleToBundle) {
             nativeConfig.put("enableOptPushStyleToBundle", false);
           }
+          if (mEnableNativeScheduleCreateViewAsync) {
+            nativeConfig.put("enableNativeScheduleCreateViewAsync", true);
+          }
           Map lynxConfig = new HashMap<>();
           lynxConfig.put(LynxViewBuilderProperty.PLATFORM_CONFIG.getKey(), nativeConfig.toString());
           builder.setLynxViewConfig(lynxConfig);
@@ -1151,6 +1158,9 @@ public class TestBenchActionManager {
         JSONObject nativeConfig = new JSONObject();
         if (mDisableOptPushStyleToBundle) {
           nativeConfig.put("enableOptPushStyleToBundle", false);
+        }
+        if (mEnableNativeScheduleCreateViewAsync) {
+          nativeConfig.put("enableNativeScheduleCreateViewAsync", true);
         }
         Map lynxConfig = new HashMap<>();
         lynxConfig.put(LynxViewBuilderProperty.PLATFORM_CONFIG.getKey(), nativeConfig.toString());

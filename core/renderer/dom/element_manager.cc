@@ -841,10 +841,9 @@ void ElementManager::SetConfig(const std::shared_ptr<PageConfig> &config) {
     lynx_env_config_.SetFontScaleSpOnly(layout_configs_.font_scale_sp_only_);
     delegate_->SetPageConfigForLayoutThread(config_);
     if (catalyzer() && catalyzer()->painting_context()) {
-      // TODO(songshourui.null): set enable_native_schedule_create_view_async
-      // accroding to page config or native config
       catalyzer()->painting_context()->SetConfig(
-          {.enable_native_schedule_create_view_async = false});
+          {.enable_native_schedule_create_view_async =
+               config_->GetEnableNativeScheduleCreateViewAsyncAsBool()});
     }
   }
 }

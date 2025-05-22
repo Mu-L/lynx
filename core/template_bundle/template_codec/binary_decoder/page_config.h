@@ -81,6 +81,8 @@ class EntryConfig {
 };
 
 static constexpr const char kEnableSignalAPI[] = "enableSignalAPI";
+static constexpr const char kEnableNativeScheduleCreateViewAsync[] =
+    "enableNativeScheduleCreateViewAsync";
 
 /**
  * PageConfig hold overall configs of a page.
@@ -1112,6 +1114,24 @@ class PageConfig final : public EntryConfig {
     enable_microtask_promise_polyfill_ = enable;
   }
 
+  TernaryBool GetEnableNativeScheduleCreateViewAsync() const {
+    return enable_native_schedule_create_view_async_;
+  }
+
+  void SetEnableNativeScheduleCreateViewAsync(TernaryBool enable) {
+    enable_native_schedule_create_view_async_ = enable;
+  }
+
+  bool GetEnableNativeScheduleCreateViewAsyncAsBool() const {
+    if (enable_native_schedule_create_view_async_ ==
+        TernaryBool::UNDEFINE_VALUE) {
+      return LynxEnv::GetInstance().EnableNativeCreateViewAsync();
+    } else {
+      return enable_native_schedule_create_view_async_ ==
+             TernaryBool::TRUE_VALUE;
+    }
+  }
+
   TernaryBool GetEnableSignalAPI() const { return enable_signal_api_; }
 
   bool GetEnableSignalAPIBoolValue() {
@@ -1413,6 +1433,9 @@ class PageConfig final : public EntryConfig {
 
   // enable microtask promise polyfill
   TernaryBool enable_microtask_promise_polyfill_{TernaryBool::UNDEFINE_VALUE};
+
+  TernaryBool enable_native_schedule_create_view_async_{
+      TernaryBool::UNDEFINE_VALUE};
 
   // disable tracing gc mode in quick context
   bool disable_quick_tracing_gc_{false};

@@ -54,6 +54,9 @@ const PageConfig::PageConfigMap<TernaryBool>& PageConfig::GetFuncBoolMap() {
           {"enableOptPushStyleToBundle",
            {&PageConfig::SetEnableOptPushStyleToBundle,
             &PageConfig::GetEnableOptPushStyleToBundle}},
+          {kEnableNativeScheduleCreateViewAsync,
+           {&PageConfig::SetEnableNativeScheduleCreateViewAsync,
+            &PageConfig::GetEnableNativeScheduleCreateViewAsync}},
       }};
   return *kPageConfigFuncBoolMap;
 }

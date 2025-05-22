@@ -90,6 +90,19 @@ TEST(PageConfigTest, GetEnableParallelElement) {
   EXPECT_EQ(page_config.GetEnableParallelElement(), false);
 }
 
+TEST(PageConfigTest, EnableNativeScheduleCreateViewAsync) {
+  PageConfig page_config;
+  EXPECT_EQ(page_config.GetEnableNativeScheduleCreateViewAsyncAsBool(), false);
+  EXPECT_EQ(page_config.GetEnableNativeScheduleCreateViewAsync(),
+            TernaryBool::UNDEFINE_VALUE);
+
+  page_config.DecodePageConfigFromJsonStringWhileUndefined(
+      "{\n  \"enableNativeScheduleCreateViewAsync\" : false\n}");
+  EXPECT_EQ(page_config.GetEnableNativeScheduleCreateViewAsyncAsBool(), false);
+  EXPECT_EQ(page_config.GetEnableNativeScheduleCreateViewAsync(),
+            TernaryBool::FALSE_VALUE);
+}
+
 #undef CHECK_CONFIG_VALUE
 
 }  // namespace test

@@ -1119,6 +1119,14 @@ bool LynxBinaryConfigDecoder::DecodePageConfig(
                                         : TernaryBool::FALSE_VALUE);
   }
 
+  if (doc.HasMember(kEnableNativeScheduleCreateViewAsync) &&
+      doc[kEnableNativeScheduleCreateViewAsync].IsBool()) {
+    page_config->SetEnableNativeScheduleCreateViewAsync(
+        doc[kEnableNativeScheduleCreateViewAsync].GetBool()
+            ? TernaryBool::TRUE_VALUE
+            : TernaryBool::FALSE_VALUE);
+  }
+
   config_helper_.HandlePageConfig(doc, page_config);
 
   ReportGlobalFeatureSwitch(page_config);

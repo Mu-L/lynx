@@ -403,7 +403,7 @@ void PaintingContextAndroid::CreatePaintingNode(
     const std::shared_ptr<PropBundle>& painting_data, bool flatten,
     bool create_node_async, uint32_t node_index) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, PAINTING_CONTEXT_ANDROID_CREAT_NODE);
-  if (!LynxEnv::GetInstance().EnableNativeCreateViewAsync()) {
+  if (!config_.enable_native_schedule_create_view_async) {
     JNIEnv* env = base::android::AttachCurrentThread();
     base::android::ScopedLocalJavaRef<jobject> local_ref(*impl_);
     if (local_ref.IsNull()) {
@@ -809,7 +809,7 @@ void PaintingContextAndroid::FinishTasmOperation(
     const std::shared_ptr<PipelineOptions>& options) {
   // Reset iterable container and iterator
   {
-    if (LynxEnv::GetInstance().EnableNativeCreateViewAsync()) {
+    if (config_.enable_native_schedule_create_view_async) {
       Enqueue([this]() mutable {
         TRACE_EVENT(LYNX_TRACE_CATEGORY,
                     PAINTING_CONTEXT_ANDROID_RESET_PAINTING_NODE_CONTAINER);
@@ -1131,7 +1131,7 @@ void PaintingContextAndroid::EnqueueHighPriorityUIOperation(
 void PaintingContextAndroid::BeforeFlush() {
   // Pop all scheduled AsyncCreateUI tasks and initialize iterable container
   {
-    if (LynxEnv::GetInstance().EnableNativeCreateViewAsync() &&
+    if (config_.enable_native_schedule_create_view_async &&
         !scheduled_create_node_async_task_queue_.Empty()) {
       EnqueueHighPriorityUIOperation(
           [this, iterable_container = scheduled_create_node_async_task_queue_
