@@ -34,6 +34,7 @@ class LynxGetUIResult;
 class TemplateAssembler;
 struct NodeSelectOptions;
 struct NodeSelectRoot;
+class PipelineContext;
 
 struct UpdatePageOption {
   lepus::Value ToLepusValue() const;
@@ -87,6 +88,8 @@ class PageProxy {
     virtual lepus::Value &GetComponentPathMap(
         const std::string &entry_name) = 0;
     virtual bool SupportComponentJS() const = 0;
+
+    virtual PipelineContext *GetCurrentPipelineContext() = 0;
   };
 
   PageProxy(TasmDelegate *tasm_delegate,
@@ -386,6 +389,9 @@ class PageProxy {
   }
 
   void OnSsrScriptReady(std::string script);
+
+  // used for unified pipeline;
+  void RequestResolve(std::shared_ptr<PipelineOptions> &pipeline_options);
 
  private:
   TasmDelegate *tasm_delegate_{nullptr};
