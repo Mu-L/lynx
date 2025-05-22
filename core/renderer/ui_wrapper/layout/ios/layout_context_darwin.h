@@ -36,7 +36,7 @@ class LayoutContextDarwin : public LayoutCtxPlatformImpl {
                 const std::array<float, 4>& paddings,
                 const std::array<float, 4>& borders) override;
   void Destroy() override;
-  void SetFontFaces(const FontFacesMap& fontFaces) override;
+  void SetFontFaces(const CSSFontFaceRuleMap& fontFaces) override;
   void UpdateRootSize(float width, float height) override;
   std::unique_ptr<PlatformExtraBundle> GetPlatformExtraBundle(
       int32_t signature) override;

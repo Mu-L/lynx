@@ -39,14 +39,14 @@ namespace lynx {
 namespace tasm {
 
 static inline lepus::Value ResolveFontFaceToken(
-    const std::vector<std::shared_ptr<FontFaceToken>>& tokenList) {
+    const std::vector<std::shared_ptr<CSSFontFaceRule>>& tokenList) {
   lepus::Value result;
   auto dict = lepus::Dictionary::Create();
   if (tokenList.size() == 0) {
     return result;
   }
   auto token = tokenList[0];
-  const FontFaceAttrsMap& map = token->second;
+  const CSSFontFaceAttrsMap& map = token->second;
   for (const auto& iter : map) {
     dict->SetValue(iter.first, iter.second);
   }
@@ -205,7 +205,7 @@ void LayoutContextAndroid::Destroy() {
   Java_LayoutContext_detachNativePtr(env, local_ref.Get());
 }
 
-void LayoutContextAndroid::SetFontFaces(const FontFacesMap& fontfaces) {
+void LayoutContextAndroid::SetFontFaces(const CSSFontFaceRuleMap& fontfaces) {
   JNIEnv* env = base::android::AttachCurrentThread();
   base::android::ScopedLocalJavaRef<jobject> local_ref(impl_);
   if (local_ref.IsNull()) {

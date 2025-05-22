@@ -107,10 +107,10 @@ std::unique_ptr<PlatformExtraBundleHolder> LayoutContextDarwin::ReleasePlatformB
   return std::unique_ptr<PlatformExtraBundleHolder>();
 }
 
-void LayoutContextDarwin::SetFontFaces(const FontFacesMap& fontFaces) {
+void LayoutContextDarwin::SetFontFaces(const CSSFontFaceRuleMap& fontFaces) {
   for (auto fontfaceIter = fontFaces.begin(); fontfaceIter != fontFaces.end(); ++fontfaceIter) {
     NSMutableDictionary<NSString*, NSString*>* dict = [NSMutableDictionary new];
-    const FontFaceAttrsMap& map = fontfaceIter->second[0].get()->second;
+    const CSSFontFaceAttrsMap& map = fontfaceIter->second[0].get()->second;
     for (auto iter = map.begin(); iter != map.end(); iter++) {
       NSString* dictValue = [NSString stringWithUTF8String:iter->second.c_str()];
       NSString* dictKey = [NSString stringWithUTF8String:iter->first.c_str()];

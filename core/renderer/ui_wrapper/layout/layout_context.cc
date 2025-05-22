@@ -696,7 +696,7 @@ void LayoutContext::CheckFixed(LayoutNode* node) {
   }
 }
 
-void LayoutContext::SetFontFaces(const FontFacesMap& fontfaces) {
+void LayoutContext::SetFontFaces(const CSSFontFaceRuleMap& fontfaces) {
   platform_impl_->SetFontFaces(fontfaces);
 }
 

@@ -38,7 +38,7 @@ class LayoutContextAndroid : public LayoutCtxPlatformImpl {
   void ScheduleLayout(base::closure callback) override;
   void DestroyLayoutNodes(const std::unordered_set<int>& ids) override;
   void Destroy() override;
-  void SetFontFaces(const FontFacesMap& fontfaces) override;
+  void SetFontFaces(const CSSFontFaceRuleMap& fontfaces) override;
   void SetLayoutNodeManager(LayoutNodeManager* layout_node_manager) override;
   std::unique_ptr<PlatformExtraBundle> GetPlatformExtraBundle(
       int32_t id) override;

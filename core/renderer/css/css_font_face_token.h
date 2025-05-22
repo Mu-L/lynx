@@ -5,19 +5,16 @@
 #ifndef CORE_RENDERER_CSS_CSS_FONT_FACE_TOKEN_H_
 #define CORE_RENDERER_CSS_CSS_FONT_FACE_TOKEN_H_
 
+#include <cstdint>
 #include <string>
-#include <unordered_map>
-#include <utility>
 
-#include "core/renderer/css/css_parser_token.h"
+#include "core/public/layout_ctx_platform_impl.h"
+#include "core/runtime/vm/lepus/lepus_value.h"
 
-#define CSS_BINARY_FONT_FACE_TYPE 0x01
+static constexpr uint8_t CSS_BINARY_FONT_FACE_TYPE = 0x01;
 
 namespace lynx {
 namespace tasm {
-
-typedef std::unordered_map<std::string, std::string> CSSFontFaceAttrsMap;
-typedef std::pair<std::string, CSSFontFaceAttrsMap> CSSFontFaceRule;
 
 CSSFontFaceRule* MakeCSSFontFaceToken(lepus::Value value);
 void CSSFontTokenAddAttribute(CSSFontFaceRule* token, const std::string& name,

@@ -37,10 +37,6 @@ using CSSParserTokenMap =
 using CSSKeyframesTokenMap =
     std::unordered_map<base::String, std::shared_ptr<CSSKeyframesToken>>;
 
-using CSSFontFaceRuleMap =
-    std::unordered_map<std::string,
-                       std::vector<std::shared_ptr<CSSFontFaceRule>>>;
-
 struct PseudoNotStyle {
   PseudoClassStyleMap pseudo_not_for_tag;
   PseudoClassStyleMap pseudo_not_for_class;

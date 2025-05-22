@@ -4,8 +4,9 @@
 
 #include "core/renderer/css/css_font_face_token.h"
 
+#include <utility>
+
 #include "core/renderer/utils/value_utils.h"
-#include "core/runtime/vm/lepus/table.h"
 
 constexpr const static char* FONT_FAMILY = "font-family";
 

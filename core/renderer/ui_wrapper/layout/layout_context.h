@@ -155,7 +155,7 @@ class LayoutContext : public std::enable_shared_from_this<LayoutContext>,
     return static_cast<const SLNodeSet*>(&fixed_node_set_);
   }
 
-  void SetFontFaces(const FontFacesMap& fontfaces);
+  void SetFontFaces(const CSSFontFaceRuleMap& fontfaces);
 
   // Thread safe
   void Layout(const std::shared_ptr<PipelineOptions>& options =

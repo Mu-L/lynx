@@ -24,13 +24,13 @@ class LynxShell;
 }  // namespace shell
 namespace tasm {
 
-using FontFaceAttrsMap = std::unordered_map<std::string, std::string>;
+using CSSFontFaceAttrsMap = std::unordered_map<std::string, std::string>;
 
-using FontFaceToken = std::pair<std::string, FontFaceAttrsMap>;
+using CSSFontFaceRule = std::pair<std::string, CSSFontFaceAttrsMap>;
 
-using FontFacesMap =
+using CSSFontFaceRuleMap =
     std::unordered_map<std::string,
-                       std::vector<std::shared_ptr<FontFaceToken>>>;
+                       std::vector<std::shared_ptr<CSSFontFaceRule>>>;
 
 class LayoutCtxPlatformImpl {
  public:
@@ -50,7 +50,7 @@ class LayoutCtxPlatformImpl {
                         const std::array<float, 4>& borders) = 0;
   virtual void Destroy() = 0;
 
-  virtual void SetFontFaces(const FontFacesMap& fontfaces) = 0;
+  virtual void SetFontFaces(const CSSFontFaceRuleMap& fontfaces) = 0;
   virtual void SetLynxShell(shell::LynxShell* shell) {}
   virtual void UpdateRootSize(float width, float height) {}
   virtual std::unique_ptr<PlatformExtraBundle> GetPlatformExtraBundle(
