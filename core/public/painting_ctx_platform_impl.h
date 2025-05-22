@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "base/include/lynx_actor.h"
@@ -66,9 +67,18 @@ class PaintingCtxPlatformRef {
       const tasm::PipelineID& pipeline_id) {}
 };
 
+struct PaintingCtxPlatformImplConfig {
+  bool enable_native_schedule_create_view_async;
+};
+
 class PaintingCtxPlatformImpl {
  public:
   virtual ~PaintingCtxPlatformImpl() {}
+
+  void SetConfig(PaintingCtxPlatformImplConfig&& config) {
+    config_ = std::move(config);
+  }
+
   virtual void SetUIOperationQueue(
       const std::shared_ptr<shell::DynamicUIOperationQueue>& queue){};
   virtual void SetInstanceId(const int32_t instance_id){};
@@ -169,6 +179,7 @@ class PaintingCtxPlatformImpl {
  protected:
   std::shared_ptr<PaintingCtxPlatformRef> platform_ref_;
   std::shared_ptr<shell::TimingCollectorPlatform> timing_collector_platform_;
+  PaintingCtxPlatformImplConfig config_;
 };
 }  // namespace tasm
 }  // namespace lynx

@@ -44,6 +44,10 @@ class PaintingContext {
 
   PaintingCtxPlatformImpl* impl() { return platform_impl_.get(); }
 
+  void SetConfig(PaintingCtxPlatformImplConfig&& config) {
+    platform_impl_->SetConfig(std::move(config));
+  }
+
   inline void GetAbsolutePosition(int id, float* position) {
     platform_impl_->getAbsolutePosition(id, position);
   }
