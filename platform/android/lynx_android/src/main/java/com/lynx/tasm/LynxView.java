@@ -1314,6 +1314,9 @@ public class LynxView extends UIBodyView {
   }
 
   public void setTimingCollector(TimingCollector timingCollector, ILynxUIRenderer lynxUIRenderer) {
+    if (timingCollector == null) {
+      return;
+    }
     if ((lynxUIRenderer != null) && !lynxUIRenderer.enableTimingCollector()) {
       return;
     }

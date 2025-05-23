@@ -163,6 +163,14 @@ public abstract class LynxContext extends LynxBaseContext implements ExceptionHa
   }
 
   /**
+   * @brief check whether enable TimingAPI
+   * @return false if and only if embedMode is open
+   */
+  public boolean enableTiming() {
+    return !isEmbeddedModeOn();
+  }
+
+  /**
    * @brief check whether embedMode is open
    */
   public boolean isEmbeddedModeOn() {
