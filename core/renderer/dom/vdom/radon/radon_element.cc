@@ -32,8 +32,6 @@ RadonElement::RadonElement(const base::String& tag,
           manager ? manager->GetDynamicCSSConfigs()
                   : DynamicCSSConfigs::GetDefaultDynamicCSSConfigs(),
           manager ? manager->GetLynxEnvConfig().DefaultFontSize() : 0) {
-  css_patching_.SetEnableFiberArch(false);
-
   if (node) {
     SetAttributeHolder(node);
   }

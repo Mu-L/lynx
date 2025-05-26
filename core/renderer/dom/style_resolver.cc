@@ -2,7 +2,7 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "core/renderer/dom/css_patching.h"
+#include "core/renderer/dom/style_resolver.h"
 
 #include <algorithm>
 #include <utility>
@@ -44,26 +44,32 @@ inline std::string GetIDSelectorRule(const std::string& value) {
 }
 }  // namespace
 
-thread_local CSSPatching::MatchedVector<const StyleMap*>
-    CSSPatching::matched_style_map;
-thread_local CSSPatching::MatchedVector<const CSSVariableMap*>
-    CSSPatching::matched_variable_map;
+thread_local StyleResolver::MatchedVector<const StyleMap*>
+    StyleResolver::matched_style_map;
+thread_local StyleResolver::MatchedVector<const CSSVariableMap*>
+    StyleResolver::matched_variable_map;
 
-CSSPatching::CSSPatching(Element* element, ElementManager* manager)
-    : element_(element), manager_(manager) {}
-
-void CSSPatching::SetEnableFiberArch(bool enable) {
-  css_var_handler_.SetEnableFiberArch(enable);
+Element* StyleResolver::element() const {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+  return reinterpret_cast<Element*>(
+      reinterpret_cast<uintptr_t>(this) -
+      offsetof(Element, style_resolver_));  // NOLINT
+#pragma GCC diagnostic pop
 }
 
-void CSSPatching::ResolveStyle(StyleMap& result, CSSFragment* fragment,
-                               CSSVariableMap* changed_css_vars) {
+ElementManager* StyleResolver::manager() const {
+  return element()->element_manager();
+}
+
+void StyleResolver::ResolveStyle(StyleMap& result, CSSFragment* fragment,
+                                 CSSVariableMap* changed_css_vars) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, CSS_PATCH_RESOLVE_STYLE);
 
-  if (element_ == nullptr || element_->data_model() == nullptr) {
-    LOGE(
-        "CSSPatching::ResolveStyle failed since element or data_model is "
-        "nullptr.");
+  Element* element_ = element();
+
+  if (element_->data_model() == nullptr) {
+    LOGE("StyleResolver::ResolveStyle failed since data_model is null.");
     return;
   }
 
@@ -99,8 +105,9 @@ void CSSPatching::ResolveStyle(StyleMap& result, CSSFragment* fragment,
   element_->DidResolveStyle(result);
 }
 
-void CSSPatching::HandlePseudoElement(CSSFragment* fragment) {
-  if (!fragment || !element_ || !element_->is_fiber_element()) {
+void StyleResolver::HandlePseudoElement(CSSFragment* fragment) {
+  Element* element_ = element();
+  if (!fragment || !element_->is_fiber_element()) {
     return;
   }
   // Determine whether there are pseudo-elements according to the rule set when
@@ -125,10 +132,10 @@ void CSSPatching::HandlePseudoElement(CSSFragment* fragment) {
   }
 }
 
-void CSSPatching::ResolvePseudoElement(PseudoState pseudo_state,
-                                       CSSFragment* fragment,
-                                       FiberElement* fiber_element,
-                                       const char* pseudo_selector) {
+void StyleResolver::ResolvePseudoElement(PseudoState pseudo_state,
+                                         CSSFragment* fragment,
+                                         FiberElement* fiber_element,
+                                         const char* pseudo_selector) {
   StyleMap result;
   if (fragment->enable_css_selector()) {
     AttributeHolder attribute_holder;
@@ -147,10 +154,10 @@ void CSSPatching::ResolvePseudoElement(PseudoState pseudo_state,
   fiber_element->PrepareOrUpdatePseudoElement(pseudo_state, result);
 }
 
-void CSSPatching::DidCollectMatchedRules(AttributeHolder* holder,
-                                         StyleMap& result,
-                                         CSSVariableMap* changed_css_vars,
-                                         size_t base_reserving_size) {
+void StyleResolver::DidCollectMatchedRules(AttributeHolder* holder,
+                                           StyleMap& result,
+                                           CSSVariableMap* changed_css_vars,
+                                           size_t base_reserving_size) {
   {
     auto& tls_matched_style_map = matched_style_map;
 
@@ -180,41 +187,44 @@ void CSSPatching::DidCollectMatchedRules(AttributeHolder* holder,
   }
 }
 
-void CSSPatching::HandleCSSVariables(StyleMap& styles) {
-  if (element_ == nullptr || element_->data_model() == nullptr) {
-    LOGE(
-        "CSSPatching::HandleCSSVariables failed since element or data_model is "
-        "nullptr.");
+void StyleResolver::HandleCSSVariables(StyleMap& styles) {
+  Element* element_ = element();
+  if (element_->data_model() == nullptr) {
+    LOGE("StyleResolver::HandleCSSVariables failed since data_model is null.");
     return;
   }
-  if (element_->is_fiber_element() && element_->is_parallel_flush()) {
-    if (css_var_handler_.HasCSSVariableInStyleMap(styles)) {
+  bool is_fiber_arch = element_->is_fiber_element();
+  CSSVariableHandler handler(is_fiber_arch);
+  if (is_fiber_arch && element_->is_parallel_flush()) {
+    if (handler.HasCSSVariableInStyleMap(styles)) {
       // mark need refresh style in parallel flush with css variables in
       // StyleMap
       static_cast<FiberElement*>(element_)->MarkRefreshCSSStyles();
     }
   } else {
-    css_var_handler_.HandleCSSVariables(styles, element_->data_model(),
-                                        GetCSSParserConfigs());
+    handler.HandleCSSVariables(styles, element_->data_model(),
+                               GetCSSParserConfigs());
   }
 }
 
-void CSSPatching::MergeHigherPriorityCSSStyle(const StyleMap& matched) {
+void StyleResolver::MergeHigherPriorityCSSStyle(const StyleMap& matched) {
   if (matched.empty()) {
     return;
   }
   matched_style_map.emplace_back(&matched);
 }
 
-void CSSPatching::SetCSSVariableToNode(const CSSVariableMap& matched) {
+void StyleResolver::SetCSSVariableToNode(const CSSVariableMap& matched) {
   if (matched.empty()) {
     return;
   }
   matched_variable_map.emplace_back(&matched);
 }
 
-void CSSPatching::GetCSSStyleCompatible(Element* element,
-                                        CSSFragment* style_sheet) {
+void StyleResolver::GetCSSStyleCompatible(Element* element,
+                                          CSSFragment* style_sheet) {
+  ElementManager* manager_ = manager();
+
   auto* node = element->data_model();
   // absort the selector styles in :not(), then store the correspond selector
   // and scope the InitPseudoNotStyle function only judge once
@@ -327,7 +337,7 @@ static bool CompareRules(const css::MatchedRule& matched_rule1,
   return matched_rule1.Position() < matched_rule2.Position();
 }
 
-CSSPatching::MatchedVector<css::MatchedRule> CSSPatching::GetCSSMatchedRule(
+StyleResolver::MatchedVector<css::MatchedRule> StyleResolver::GetCSSMatchedRule(
     AttributeHolder* node, CSSFragment* style_sheet) {
   MatchedVector<css::MatchedRule> matched_rules;
   if (style_sheet && style_sheet->rule_set()) {
@@ -338,8 +348,8 @@ CSSPatching::MatchedVector<css::MatchedRule> CSSPatching::GetCSSMatchedRule(
   return matched_rules;
 }
 
-void CSSPatching::GetCSSStyleNew(AttributeHolder* node,
-                                 CSSFragment* style_sheet) {
+void StyleResolver::GetCSSStyleNew(AttributeHolder* node,
+                                   CSSFragment* style_sheet) {
   auto matched_rules = GetCSSMatchedRule(node, style_sheet);
 
   for (const auto& matched : matched_rules) {
@@ -355,7 +365,7 @@ void CSSPatching::GetCSSStyleNew(AttributeHolder* node,
 /**
    Preset Global :not() Styles
  */
-void CSSPatching::PreSetGlobalPseudoNotCSS(
+void StyleResolver::PreSetGlobalPseudoNotCSS(
     CSSSheet::SheetType type, const std::string& rule,
     const std::unordered_map<int, PseudoClassStyleMap>& pseudo_not_global_map,
     CSSFragment* style_sheet, AttributeHolder* node) {
@@ -413,7 +423,7 @@ void CSSPatching::PreSetGlobalPseudoNotCSS(
   }
 }
 
-void CSSPatching::ApplyPseudoNotCSSStyle(
+void StyleResolver::ApplyPseudoNotCSSStyle(
     AttributeHolder* node, const PseudoClassStyleMap& pseudo_not_map,
     CSSFragment* style_sheet, const std::string& selector_key) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, CSS_PATCH_APPLY_PSEUDO_NOT_STYLE);
@@ -465,7 +475,7 @@ void CSSPatching::ApplyPseudoNotCSSStyle(
   }
 }
 
-void CSSPatching::ApplyPseudoClassChildSelectorStyle(
+void StyleResolver::ApplyPseudoClassChildSelectorStyle(
     Element* current_node, CSSFragment* style_sheet,
     const std::string& selector_key) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY,
@@ -495,6 +505,7 @@ void CSSPatching::ApplyPseudoClassChildSelectorStyle(
   if (!parent) {
     return;
   }
+  ElementManager* manager_ = manager();
   for (const auto& it : child_pseudo) {
     if (it.second && it.second->IsPseudoStyleToken() &&
         it.first.compare(0, selector_key.size(), selector_key) == 0) {
@@ -531,9 +542,10 @@ void CSSPatching::ApplyPseudoClassChildSelectorStyle(
  *       The selectors are stored as a linked list in css_parse_token within
  *       sheets_.
  */
-void CSSPatching::GetCSSByRule(CSSSheet::SheetType type,
-                               CSSFragment* style_sheet, AttributeHolder* node,
-                               const std::string& rule) {
+void StyleResolver::GetCSSByRule(CSSSheet::SheetType type,
+                                 CSSFragment* style_sheet,
+                                 AttributeHolder* node,
+                                 const std::string& rule) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, CSS_PATCH_GET_CSS_BY_RULE,
               [&](lynx::perfetto::EventContext ctx) {
                 ctx.event()->add_debug_annotations("rule", rule);
@@ -573,10 +585,9 @@ void CSSPatching::GetCSSByRule(CSSSheet::SheetType type,
   }
 }
 
-void CSSPatching::MergeHigherCascadeStyles(const std::string& current_selector,
-                                           const std::string& parent_selector,
-                                           AttributeHolder* node,
-                                           CSSFragment* style_sheet) {
+void StyleResolver::MergeHigherCascadeStyles(
+    const std::string& current_selector, const std::string& parent_selector,
+    AttributeHolder* node, CSSFragment* style_sheet) {
   std::string integrated_selector =
       MergeCSSSelector(current_selector, parent_selector);
   CSSParseToken* token_parent =
@@ -587,9 +598,9 @@ void CSSPatching::MergeHigherCascadeStyles(const std::string& current_selector,
   }
 }
 
-void CSSPatching::ApplyCascadeStyles(CSSFragment* style_sheet,
-                                     AttributeHolder* node,
-                                     const std::string& rule) {
+void StyleResolver::ApplyCascadeStyles(CSSFragment* style_sheet,
+                                       AttributeHolder* node,
+                                       const std::string& rule) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, CSS_PATCH_APPLY_CASCADE_STYLES);
   if (node == nullptr) {
     return;
@@ -637,9 +648,9 @@ void CSSPatching::ApplyCascadeStyles(CSSFragment* style_sheet,
   }
 }
 
-void CSSPatching::GetPseudoClassStyle(PseudoClassType pseudo_type,
-                                      CSSFragment* style_sheet,
-                                      AttributeHolder* node) {
+void StyleResolver::GetPseudoClassStyle(PseudoClassType pseudo_type,
+                                        CSSFragment* style_sheet,
+                                        AttributeHolder* node) {
   std::string pseudo_class_name;
   switch (pseudo_type) {
     case PseudoClassType::kFocus:
@@ -679,17 +690,16 @@ void CSSPatching::GetPseudoClassStyle(PseudoClassType pseudo_type,
   }
 }
 
-void CSSPatching::ResolvePlaceHolder() {
-  if (element_ == nullptr || element_->data_model() == nullptr) {
-    LOGE(
-        "CSSPatching::ResolvePlaceHolder failed since element or data_model is "
-        "nullptr.");
+void StyleResolver::ResolvePlaceHolder() {
+  Element* element_ = element();
+  if (element_->data_model() == nullptr) {
+    LOGE("CSSPatching::ResolvePlaceHolder failed since data_model is null.");
     return;
   }
 
   CSSFragment* fragment = element_->GetRelatedCSSFragment();
   if (fragment == nullptr) {
-    LOGE("CSSPatching::ResolvePlaceHolder failed since fragment is nullptr.");
+    LOGE("StyleResolver::ResolvePlaceHolder failed since fragment is nullptr.");
     return;
   }
 
@@ -726,8 +736,9 @@ void CSSPatching::ResolvePlaceHolder() {
   }
 }
 
-void CSSPatching::GetCSSStyleForFiber(FiberElement* node,
-                                      CSSFragment* style_sheet) {
+void StyleResolver::GetCSSStyleForFiber(FiberElement* node,
+                                        CSSFragment* style_sheet) {
+  ElementManager* manager_ = manager();
   style_sheet->InitPseudoNotStyle();
   // If has_pseudo_not_style means the pseudo_not_style is not empty
   const auto has_pseudo_not_style = style_sheet->HasPseudoNotStyle();
@@ -842,9 +853,9 @@ void CSSPatching::GetCSSStyleForFiber(FiberElement* node,
   }
 }
 
-void CSSPatching::ApplyCascadeStylesForFiber(CSSFragment* style_sheet,
-                                             FiberElement* node,
-                                             const std::string& rule) {
+void StyleResolver::ApplyCascadeStylesForFiber(CSSFragment* style_sheet,
+                                               FiberElement* node,
+                                               const std::string& rule) {
   // for descendant selector, we just find the parent class in current
   // component scope!
   if (style_sheet->HasCascadeStyle()) {
@@ -894,7 +905,7 @@ void CSSPatching::ApplyCascadeStylesForFiber(CSSFragment* style_sheet,
   }
 }
 
-void CSSPatching::MergeHigherCascadeStylesForFiber(
+void StyleResolver::MergeHigherCascadeStylesForFiber(
     const std::string& current_selector, const std::string& parent_selector,
     AttributeHolder* node, CSSFragment* style_sheet) {
   std::string integrated_selector =
@@ -907,7 +918,8 @@ void CSSPatching::MergeHigherCascadeStylesForFiber(
   }
 }
 
-const tasm::CSSParserConfigs& CSSPatching::GetCSSParserConfigs() {
+const tasm::CSSParserConfigs& StyleResolver::GetCSSParserConfigs() {
+  ElementManager* manager_ = manager();
   if (manager_) {
     return manager_->GetCSSParserConfigs();
   }
@@ -915,10 +927,11 @@ const tasm::CSSParserConfigs& CSSPatching::GetCSSParserConfigs() {
   return *kDefaultCSSConfigs;
 }
 
-void CSSPatching::UpdateContentNode(const StyleMap& attrs,
-                                    RadonElement* element) {
+void StyleResolver::UpdateContentNode(const StyleMap& attrs,
+                                      RadonElement* element) {
   if (!element->IsPseudoNode() || !element->content_data()) return;
 
+  ElementManager* manager_ = manager();
   ContentData* data = element->content_data();
   while (data) {
     RadonElement* node = nullptr;
@@ -962,8 +975,8 @@ void CSSPatching::UpdateContentNode(const StyleMap& attrs,
   }
 }
 
-void CSSPatching::ParsePlaceHolderTokens(PseudoPlaceHolderStyles& result,
-                                         const StyleMap& map) {
+void StyleResolver::ParsePlaceHolderTokens(PseudoPlaceHolderStyles& result,
+                                           const StyleMap& map) {
   for (const auto& i : map) {
     auto id = i.first;
     auto& value = i.second;
@@ -983,7 +996,7 @@ void CSSPatching::ParsePlaceHolderTokens(PseudoPlaceHolderStyles& result,
   }
 }
 
-PseudoPlaceHolderStyles CSSPatching::ParsePlaceHolderTokens(
+PseudoPlaceHolderStyles StyleResolver::ParsePlaceHolderTokens(
     const InlineTokenVector& tokens) {
   PseudoPlaceHolderStyles result;
 
@@ -994,7 +1007,7 @@ PseudoPlaceHolderStyles CSSPatching::ParsePlaceHolderTokens(
   return result;
 }
 
-CSSPatching::InlineTokenVector CSSPatching::ParsePseudoCSSTokens(
+StyleResolver::InlineTokenVector StyleResolver::ParsePseudoCSSTokens(
     AttributeHolder* node, const char* selector) {
   InlineTokenVector tokens;
 
@@ -1043,10 +1056,10 @@ CSSPatching::InlineTokenVector CSSPatching::ParsePseudoCSSTokens(
   return tokens;
 }
 
-void CSSPatching::ParsePseudoCSSTokensForFiber(FiberElement* element,
-                                               CSSFragment* fragment,
-                                               const char* selector,
-                                               StyleMap& map) {
+void StyleResolver::ParsePseudoCSSTokensForFiber(FiberElement* element,
+                                                 CSSFragment* fragment,
+                                                 const char* selector,
+                                                 StyleMap& map) {
   if (!fragment) {
     return;
   }
@@ -1090,9 +1103,9 @@ void CSSPatching::ParsePseudoCSSTokensForFiber(FiberElement* element,
   }
 }
 
-void CSSPatching::GenerateContentData(const lepus::Value& value,
-                                      const AttributeHolder* vnode,
-                                      RadonElement* node) {
+void StyleResolver::GenerateContentData(const lepus::Value& value,
+                                        const AttributeHolder* vnode,
+                                        RadonElement* node) {
   struct Content {
     enum ContentType {
       TEXT = 0,

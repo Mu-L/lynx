@@ -25,8 +25,8 @@
 #include "core/renderer/css/css_variable_handler.h"
 #include "core/renderer/css/dynamic_css_styles_manager.h"
 #include "core/renderer/dom/attribute_holder.h"
-#include "core/renderer/dom/css_patching.h"
 #include "core/renderer/dom/element_container.h"
+#include "core/renderer/dom/style_resolver.h"
 #include "core/renderer/events/events.h"
 #include "core/renderer/events/gesture.h"
 #include "core/renderer/ui_wrapper/layout/layout_node.h"
@@ -766,6 +766,13 @@ class Element : public lepus::RefCounted {
   starlight::DirectionType direction_ =
       starlight::DefaultLayoutStyle::SL_DEFAULT_DIRECTION;
 
+  /**
+   StyleResolver has no member variables and its size is 1 byte. Put it here
+   along with booleans to minimize size of Element.
+   */
+  friend class StyleResolver;
+  StyleResolver style_resolver_;
+
   // relevant to layout and frame
   float width_{0};
   float height_{0};
@@ -787,9 +794,6 @@ class Element : public lepus::RefCounted {
   ElementManager* element_manager_{nullptr};
 
   Catalyzer* catalyzer_;
-
-  // TODO(songshourui.null): rename css_patching_ to style_resolver_;
-  CSSPatching css_patching_;
 
   std::shared_ptr<PropBundle> prop_bundle_;
   // just for unit test now.

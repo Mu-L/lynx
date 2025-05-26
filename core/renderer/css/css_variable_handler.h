@@ -17,7 +17,8 @@ namespace tasm {
 
 class CSSVariableHandler {
  public:
-  void SetEnableFiberArch(bool fiberArch) { enable_fiber_arch_ = fiberArch; }
+  explicit CSSVariableHandler(bool enable_fiber_arch = false)
+      : enable_fiber_arch_(enable_fiber_arch) {}
 
   bool HandleCSSVariables(StyleMap& map, AttributeHolder* holder,
                           const CSSParserConfigs& configs);
@@ -35,7 +36,7 @@ class CSSVariableHandler {
       const std::string& format,
       base::MoveOnlyClosure<base::String, const std::string&> rule_matcher);
 
-  bool enable_fiber_arch_{false};
+  bool enable_fiber_arch_;
 };
 }  // namespace tasm
 }  // namespace lynx

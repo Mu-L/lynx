@@ -2,8 +2,8 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef CORE_RENDERER_DOM_CSS_PATCHING_H_
-#define CORE_RENDERER_DOM_CSS_PATCHING_H_
+#ifndef CORE_RENDERER_DOM_STYLE_RESOLVER_H_
+#define CORE_RENDERER_DOM_STYLE_RESOLVER_H_
 
 #include <memory>
 #include <string>
@@ -24,7 +24,7 @@ class FiberElement;
 class RadonElement;
 class ElementManager;
 
-class CSSPatching {
+class StyleResolver {
  public:
   constexpr const static size_t kDefaultMatchedSize = 16;
 
@@ -34,9 +34,6 @@ class CSSPatching {
   BASE_EXPORT_FOR_DEVTOOL static MatchedVector<css::MatchedRule>
   GetCSSMatchedRule(AttributeHolder* node, CSSFragment* style_sheet);
 
-  CSSPatching(Element* element, ElementManager* manager);
-  ~CSSPatching() = default;
-
   void ResolveStyle(StyleMap& result, CSSFragment* fragment,
                     CSSVariableMap* changed_css_vars = nullptr);
   void HandleCSSVariables(StyleMap& styles);
@@ -45,11 +42,11 @@ class CSSPatching {
 
   void ResolvePlaceHolder();
 
-  void SetEnableFiberArch(bool enable);
-  void SetElementManager(ElementManager* manager) { manager_ = manager; }
-
  private:
   enum class PseudoClassType { kFocus, kHover, kActive };
+
+  Element* element() const;
+  ElementManager* manager() const;
 
   void GetCSSStyleNew(AttributeHolder* node, CSSFragment* style_sheet);
 
@@ -128,14 +125,6 @@ class CSSPatching {
                                     CSSFragment* fragment, const char* selector,
                                     StyleMap& map);
 
-  Element* element_;
-
-  // TODO(songshourui.null): Remove `ElementManager` later, ensuring that
-  // `CSSPatching` does not depend on `ElementManager`.
-  ElementManager* manager_;
-
-  CSSVariableHandler css_var_handler_;
-
   static thread_local MatchedVector<const StyleMap*> matched_style_map;
   static thread_local MatchedVector<const CSSVariableMap*> matched_variable_map;
 };
@@ -143,4 +132,4 @@ class CSSPatching {
 }  // namespace tasm
 }  // namespace lynx
 
-#endif  // CORE_RENDERER_DOM_CSS_PATCHING_H_
+#endif  // CORE_RENDERER_DOM_STYLE_RESOLVER_H_

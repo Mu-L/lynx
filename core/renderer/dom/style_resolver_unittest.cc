@@ -4,7 +4,7 @@
 #define private public
 #define protected public
 
-#include "core/renderer/dom/css_patching.h"
+#include "core/renderer/dom/style_resolver.h"
 
 #include "core/base/threading/task_runner_manufactor.h"
 #include "core/renderer/css/css_property.h"
@@ -125,8 +125,8 @@ TEST_F(CSSPatchingTest, GetCSSStyleForFiber) {
   // check the id selector has higher Priority
   StyleMap result;
   CSSVariableMap changed_css_vars;
-  fiber_element->css_patching_.ResolveStyle(result, &indexFragment,
-                                            &changed_css_vars);
+  fiber_element->style_resolver_.ResolveStyle(result, &indexFragment,
+                                              &changed_css_vars);
 
   // check get the correct font-size
   const auto& value = result.at(CSSPropertyID::kPropertyIDFontSize);
@@ -181,8 +181,8 @@ TEST_F(CSSPatchingTest, GetCSSStyleForFiberDescendantSelector) {
 
   StyleMap result;
   CSSVariableMap changed_css_vars;
-  fiber_element->css_patching_.ResolveStyle(result, &indexFragment,
-                                            &changed_css_vars);
+  fiber_element->style_resolver_.ResolveStyle(result, &indexFragment,
+                                              &changed_css_vars);
 
   // check get the correct font-size
   const auto& value = result.at(CSSPropertyID::kPropertyIDFontSize);
@@ -205,8 +205,8 @@ TEST_F(CSSPatchingTest, GetCSSStyleForFiberDescendantSelector) {
     indexFragment.cascade_map_.emplace(key, tokens);
   }
 
-  fiber_element->css_patching_.ResolveStyle(result, &indexFragment,
-                                            &changed_css_vars);
+  fiber_element->style_resolver_.ResolveStyle(result, &indexFragment,
+                                              &changed_css_vars);
 
   // check get the correct font-size
   auto& new_value = result.at(CSSPropertyID::kPropertyIDFontSize);
@@ -277,8 +277,8 @@ TEST_F(CSSPatchingTest, FiberDescendantSelectorScope) {
 
   StyleMap result;
   CSSVariableMap changed_css_vars;
-  fiber_element->css_patching_.ResolveStyle(result, &indexFragment,
-                                            &changed_css_vars);
+  fiber_element->style_resolver_.ResolveStyle(result, &indexFragment,
+                                              &changed_css_vars);
 
   // check get the correct font-size
   const auto& value = result.at(CSSPropertyID::kPropertyIDFontSize);
@@ -301,8 +301,8 @@ TEST_F(CSSPatchingTest, FiberDescendantSelectorScope) {
     indexFragment.cascade_map_.emplace(key, tokens);
   }
 
-  fiber_element->css_patching_.ResolveStyle(result, &indexFragment,
-                                            &changed_css_vars);
+  fiber_element->style_resolver_.ResolveStyle(result, &indexFragment,
+                                              &changed_css_vars);
 
   // check get the correct font-size
   auto new_value = result.at(CSSPropertyID::kPropertyIDFontSize);
@@ -312,8 +312,8 @@ TEST_F(CSSPatchingTest, FiberDescendantSelectorScope) {
 
   config->SetRemoveDescendantSelectorScope(true);
 
-  fiber_element->css_patching_.ResolveStyle(result, &indexFragment,
-                                            &changed_css_vars);
+  fiber_element->style_resolver_.ResolveStyle(result, &indexFragment,
+                                              &changed_css_vars);
 
   // check get the correct font-size
   new_value = result.at(CSSPropertyID::kPropertyIDFontSize);
@@ -378,7 +378,7 @@ TEST_F(CSSPatchingTest, CSSSelectorDescendantSelectorScope) {
   fragment.rule_set()->AddStyleRule(
       std::make_unique<StyleRule>(std::move(selector_array), std::move(token)));
   StyleMap result;
-  fiber_element->css_patching_.ResolveStyle(result, &fragment, nullptr);
+  fiber_element->style_resolver_.ResolveStyle(result, &fragment, nullptr);
 
   auto value = result.at(key);
   // Can not match the selector
@@ -388,7 +388,7 @@ TEST_F(CSSPatchingTest, CSSSelectorDescendantSelectorScope) {
   // the element can match the selector
   config->SetRemoveDescendantSelectorScope(true);
   result.clear();
-  fiber_element->css_patching_.ResolveStyle(result, &fragment, nullptr);
+  fiber_element->style_resolver_.ResolveStyle(result, &fragment, nullptr);
   auto new_value = result.at(key);
   EXPECT_EQ(new_value.GetPattern(), CSSValuePattern::PX);
   EXPECT_EQ(new_value.AsNumber(), 20);

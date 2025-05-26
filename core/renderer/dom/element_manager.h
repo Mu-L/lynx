@@ -28,7 +28,6 @@
 #include "core/public/prop_bundle.h"
 #include "core/renderer/css/computed_css_style.h"
 #include "core/renderer/css/css_variable_handler.h"
-#include "core/renderer/dom/css_patching.h"
 #include "core/renderer/dom/element.h"
 #include "core/renderer/dom/element_container.h"
 #include "core/renderer/dom/element_context_delegate.h"

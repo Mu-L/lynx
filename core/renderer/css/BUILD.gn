@@ -55,7 +55,7 @@ unittest_set("css_test_testset") {
   ]
 
   sources = [
-    "//lynx/core/renderer/dom/css_patching_unittest.cc",
+    "//lynx/core/renderer/dom/style_resolver_unittest.cc",
     "css_color_unittest.cc",
     "css_font_face_token_unittest.cc",
     "css_fragment_unittest.cc",

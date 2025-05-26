@@ -61,7 +61,6 @@ FiberElement::FiberElement(ElementManager *manager, const base::String &tag)
 FiberElement::FiberElement(ElementManager *manager, const base::String &tag,
                            int32_t css_id)
     : Element(tag, manager), dirty_(kDirtyCreated), css_id_(css_id) {
-  css_patching_.SetEnableFiberArch(true);
   InitLayoutBundle();
   SetAttributeHolder(fml::MakeRefCounted<AttributeHolder>(this));
 

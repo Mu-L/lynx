@@ -8,7 +8,6 @@
 #include <tuple>
 
 #include "core/base/utils/any.h"
-#include "core/renderer/dom/css_patching.h"
 #include "core/renderer/dom/element.h"
 #include "devtool/lynx_devtool/agent/inspector_util.h"
 

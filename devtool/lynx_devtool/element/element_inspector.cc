@@ -593,8 +593,8 @@ ElementInspector::GetMatchedStyleSheet(Element* element) {
                                   "inspector_attribute is null", res);
 
   auto* style_root = inspector_attribute->style_root_;
-  auto matched_rules =
-      lynx::tasm::CSSPatching::GetCSSMatchedRule(attribute_holder, style_sheet);
+  auto matched_rules = lynx::tasm::StyleResolver::GetCSSMatchedRule(
+      attribute_holder, style_sheet);
   for (const auto& matched : matched_rules) {
     if (matched.Data()->Rule()->Token() != nullptr) {
       std::string name = matched.Data()->Selector().ToString();

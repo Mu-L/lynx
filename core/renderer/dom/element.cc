@@ -63,8 +63,7 @@ Element::Element(const base::String& tag, ElementManager* manager,
     : tag_(tag),
       id_(manager ? manager->GenerateElementID() : -1),
       node_index_(node_index),
-      element_manager_(manager),
-      css_patching_(this, manager) {
+      element_manager_(manager) {
   if (manager == nullptr) {
     return;
   }
@@ -145,7 +144,6 @@ Element::Element(const Element& element, bool clone_resolved_props)
       paddings_(element.paddings_),
       sticky_positions_(element.sticky_positions_),
       max_height_(element.max_height_),
-      css_patching_(this, nullptr),
       global_bind_target_set_(element.global_bind_target_set_),
       animation_previous_styles_(element.animation_previous_styles_),
       record_parent_font_size_(element.record_parent_font_size_) {
@@ -178,8 +176,6 @@ void Element::AttachToElementManager(
                              ? manager->GetEnableNewAnimatorForFiber()
                              : manager->GetEnableNewAnimatorForRadon();
 
-  css_patching_.SetElementManager(manager);
-  css_patching_.SetEnableFiberArch(is_fiber_element());
   if (IsRadonArch()) {
     enable_extended_layout_only_opt_ =
         manager->GetEnableExtendedLayoutOnlyOpt();
@@ -923,19 +919,19 @@ void Element::PushToBundle(CSSPropertyID id) {
 
 void Element::ResolveStyle(StyleMap& new_styles,
                            CSSVariableMap* changed_css_vars) {
-  css_patching_.ResolveStyle(new_styles, GetRelatedCSSFragment(),
-                             changed_css_vars);
+  style_resolver_.ResolveStyle(new_styles, GetRelatedCSSFragment(),
+                               changed_css_vars);
 }
 
 void Element::HandlePseudoElement() {
-  css_patching_.HandlePseudoElement(GetRelatedCSSFragment());
+  style_resolver_.HandlePseudoElement(GetRelatedCSSFragment());
 }
 
 void Element::HandleCSSVariables(StyleMap& styles) {
-  css_patching_.HandleCSSVariables(styles);
+  style_resolver_.HandleCSSVariables(styles);
 }
 
-void Element::ResolvePlaceHolder() { css_patching_.ResolvePlaceHolder(); }
+void Element::ResolvePlaceHolder() { style_resolver_.ResolvePlaceHolder(); }
 
 bool Element::DisableFlattenWithOpacity() {
   return has_opacity_ && !is_text() && !is_image();
