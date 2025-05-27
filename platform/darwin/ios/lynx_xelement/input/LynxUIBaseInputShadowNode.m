@@ -39,6 +39,7 @@
 
 - (instancetype)initWithSign:(NSInteger)sign tagName:(NSString *)tagName {
   if (self = [super initWithSign:sign tagName:tagName]) {
+    _widthForMeasure = UNDEFINED_FLOAT;
     _fontSize = 14;
     _placeholderFontSize = UNDEFINED_FLOAT;
     _inputAttrs = [NSMutableDictionary dictionary];
@@ -104,6 +105,10 @@
   NSAttributedString * valueMeasureUnit = [[NSAttributedString alloc] initWithString:self.value.length ? self.value : @" " attributes:self.inputAttrs];
   
   NSAttributedString * placeholderMeasureUnit = self.placeholder.length ? [[NSAttributedString alloc] initWithString:self.placeholder attributes:self.placeholderAttrs] : nil;
+  
+  if (self.widthForMeasure != UNDEFINED_FLOAT) {
+    width = self.widthForMeasure;
+  }
   
   CGSize size = [valueMeasureUnit boundingRectWithSize:CGSizeMake(width, height) options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading context:nil].size;
   

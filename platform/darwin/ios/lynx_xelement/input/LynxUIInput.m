@@ -47,6 +47,13 @@
 
 @implementation LynxUIInputShadowNode
 
+- (instancetype)initWithSign:(NSInteger)sign tagName:(NSString *)tagName {
+  if (self = [super initWithSign:sign tagName:tagName]) {
+    self.widthForMeasure = CGFLOAT_MAX;
+  }
+  return self;
+}
+
 @end
 
 @interface LynxUIInput () <UITextFieldDelegate>
@@ -97,7 +104,7 @@ LYNX_PROP_SETTER("show-soft-input-on-focus", setShowSoftInputOnFocus, BOOL) {
 
 LYNX_UI_METHOD(setValue) {
   NSString *value = params[@"value"];
-  NSInteger cursor = [params[@"cursor"] integerValue];
+  NSInteger cursor = [(params[@"cursor"] ? : @(-1)) integerValue];
   
   [self.view setText:value];
   
@@ -144,8 +151,8 @@ LYNX_UI_METHOD(setValue) {
 
 - (void)textFieldDidChangeSelection:(UITextField *)textField {
   [self emitEvent:@"selection" detail:@{
-    @"cursorBegin": @(self.view.selectedTextRange ? [self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.start] : -1),
-    @"cursorEnd": @(self.view.selectedTextRange ? [self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.end] : -1),
+    @"selectionStart": @(self.view.selectedTextRange ? [self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.start] : -1),
+    @"selectionEnd": @(self.view.selectedTextRange ? [self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.end] : -1),
   }];
 }
 

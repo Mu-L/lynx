@@ -67,6 +67,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSValue *)getContentSize;
 
+- (BOOL)inputView:(id<UITextInput>)input checkInputValidity:(NSString *)source;
+
+- (void)sendInputEvent;
+
 @end
 
 NS_ASSUME_NONNULL_END

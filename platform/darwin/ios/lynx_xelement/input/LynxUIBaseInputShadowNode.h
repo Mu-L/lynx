@@ -10,6 +10,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (atomic, assign) CGSize uiSize;
 
+@property (nonatomic, assign) CGFloat widthForMeasure;
+
 @end
 
 NS_ASSUME_NONNULL_END

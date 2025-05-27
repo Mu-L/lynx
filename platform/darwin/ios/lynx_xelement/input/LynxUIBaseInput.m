@@ -33,6 +33,7 @@
 
 - (instancetype)init {
   if (self = [super init]) {
+    _sendComposingInputEvent = YES;
     _maxLength = NSIntegerMax;
     [LynxPropsProcessor updateProp:@(14) withKey:@"font-size" forUI:self];
     [LynxPropsProcessor updateProp:@(14) withKey:@"placeholder-font-size" forUI:self];
@@ -305,9 +306,9 @@ LYNX_PROP_SETTER("placeholder", setPlaceholder, NSString *) {
 LYNX_UI_METHOD(getValue) {
   callback(kUIMethodSuccess, @{
     @"value" : [self getText],
-    @"cursorBegin": @([self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.start]),
-    @"cursorEnd": @([self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.end]),
-    @"composing" : @([self.view markedTextRange] != nil),
+    @"selectionStart": @(self.view.isFirstResponder ? [self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.start] : -1),
+    @"selectionEnd": @(self.view.isFirstResponder ? [self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.end] : -1),
+    @"isComposing" : @([self.view markedTextRange] != nil),
   });
 }
 
@@ -352,7 +353,9 @@ LYNX_UI_METHOD(setSelectionRange) {
   UITextPosition* start = [self.view positionFromPosition:beginning offset:selectionStart];
   UITextPosition* end = [self.view positionFromPosition:beginning offset:selectionEnd];
   self.view.selectedTextRange = [self.view textRangeFromPosition:start toPosition:end];
-  [self.view scrollRangeToVisible:NSMakeRange(selectionStart, 0)];
+  if ([self.view isKindOfClass:UITextView.class]) {
+    [self.view scrollRangeToVisible:NSMakeRange(selectionStart, 0)];
+  }
   callback(kUIMethodSuccess, nil);
 }
 
@@ -399,39 +402,45 @@ LYNX_UI_METHOD(setSelectionRange) {
   if (![self inputView:input checkInputValidity:[self getText]]) {
     return NO;
   }
+  
+  [self sendInputEvent];
+  
+  return YES;
+}
+
+- (void)sendInputEvent {
   if (!self.sendComposingInputEvent) {
     NSString *curValue = [self getText];
     if (![curValue isEqualToString:self.preValue]) {
       [self emitEvent:@"input" detail:@{
         @"value" : curValue,
-        @"cursorBegin": @([self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.start]),
-        @"cursorEnd": @([self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.end]),
+        @"selectionStart": @(self.view.isFirstResponder ? [self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.start] : -1),
+        @"selectionEnd": @(self.view.isFirstResponder ? [self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.end] : -1),
       }];
       self.preValue = curValue;
     }
   } else {
     NSDictionary *curInputData = @{
       @"value" : [self getText],
-      @"cursorBegin": @([self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.start]),
-      @"cursorEnd": @([self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.end]),
-      @"composing" : @([self.view markedTextRange] != nil)
+      @"selectionStart": @(self.view.isFirstResponder ? [self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.start] : -1),
+      @"selectionEnd": @(self.view.isFirstResponder ? [self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.end] : -1),
+      @"isComposing" : @([self.view markedTextRange] != nil)
     };
     if (![curInputData isEqual:self.preInputData]) {
       [self emitEvent:@"input" detail:curInputData];
       self.preInputData = curInputData;
     }
   }
-  return YES;
 }
 
 - (BOOL)inputView:(id<UITextInput>)input shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
   if (!self.readonly) {
-      [self emitEvent:@"beforeInput" detail:@{
+      [self emitEvent:@"beforeinput" detail:@{
         @"value" : [self getText],
         @"cursor": @(range.location),
         @"length": @(range.length),
         @"replace" : string ? : @"",
-        @"composing" : @([self isComposing])
+        @"isComposing" : @([self isComposing])
       }];
     NSString *currentText = self.getText;
     NSUInteger newLength = [currentText length] + [string length] - range.length;

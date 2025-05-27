@@ -131,6 +131,7 @@ open class LynxUIBaseInput(context: LynxContext) : LynxUI<LynxEditTextView>(cont
                     }
 
                     lynxContext.touchEventDispatcher?.setFocusedUI(this@LynxUIBaseInput)
+
                 }
             }
 
@@ -165,9 +166,17 @@ open class LynxUIBaseInput(context: LynxContext) : LynxUI<LynxEditTextView>(cont
                             "input"
                         ).apply {
                             addDetail("value", it.toString())
-                            addDetail("cursorBegin", selectionStart)
-                            addDetail("cursorEnd", selectionEnd)
-                            addDetail("composing", mView?.inputConnection()?.hasComposingText(it))
+                          var selectionStart = -1
+                          if (mView.isFocused) {
+                            selectionStart = mView.selectionStart
+                          }
+                          var selectionEnd = -1
+                          if (mView.isFocused) {
+                            selectionEnd = mView.selectionEnd
+                          }
+                            addDetail("selectionStart", selectionStart)
+                            addDetail("selectionEnd", selectionEnd)
+                            addDetail("isComposing", mView?.inputConnection()?.hasComposingText(it))
                         })
                     }
                 }
@@ -178,18 +187,19 @@ open class LynxUIBaseInput(context: LynxContext) : LynxUI<LynxEditTextView>(cont
 
             onSelectionChangeListener = object : LynxEditTextView.OnSelectionChangeListener {
                 override fun onSelectionChange(selStart: Int, selEnd: Int) {
-                    lynxContext.eventEmitter.sendCustomEvent(
+                      lynxContext.eventEmitter.sendCustomEvent(
                         LynxDetailEvent(
-                            sign,
-                            "selection"
+                          sign,
+                          "selection"
                         ).apply {
-                            addDetail("cursorBegin", selStart)
-                            addDetail("cursorEnd", selEnd)
+                          addDetail("selectionStart", selStart)
+                          addDetail("selectionEnd", selEnd)
                         })
                 }
             }
 
         }
+        editText.hint = ""
         return  editText
     }
 
@@ -361,6 +371,13 @@ open class LynxUIBaseInput(context: LynxContext) : LynxUI<LynxEditTextView>(cont
 
     @LynxProp(name = "confirm-type")
     fun setConfirmType(value: String?) {
+      if (isTextArea()) {
+        // can not apply both confirm-type and type on textarea
+        mView.isSingleLine = false
+        mView.inputType = InputType.TYPE_CLASS_TEXT
+        mView.setHorizontallyScrolling(false)
+        mView.maxLines = mView.maxLines
+      }
         when(value ?: "done") {
             "next" -> mView.imeOptions = EditorInfo.IME_ACTION_NEXT
             "search"-> mView.imeOptions = EditorInfo.IME_ACTION_SEARCH
@@ -372,6 +389,7 @@ open class LynxUIBaseInput(context: LynxContext) : LynxUI<LynxEditTextView>(cont
 
     @LynxProp(name = "type")
     fun setInputType(value: String?) {
+            val imeOptions = mView.imeOptions;
             when (value ?: "text") {
                 LynxUIBaseInput.TYPE_NUMBER ->  mView.inputType = InputType.TYPE_CLASS_NUMBER
                 LynxUIBaseInput.TYPE_TEXT -> mView.inputType = InputType.TYPE_CLASS_TEXT
@@ -387,7 +405,11 @@ open class LynxUIBaseInput(context: LynxContext) : LynxUI<LynxEditTextView>(cont
                 mView.transformationMethod = PasswordTransformationMethod.getInstance()
             }
             mView.setSelection(selectionStart)
-        mView.inputType = mView.inputType or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            mView.inputType = mView.inputType or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            if (isTextArea()) {
+                mView.isSingleLine = false
+                mView.imeOptions = imeOptions
+            }
     }
 
     @LynxProp(name = "maxlength")
@@ -657,11 +679,23 @@ open class LynxUIBaseInput(context: LynxContext) : LynxUI<LynxEditTextView>(cont
             composing = mView.inputConnection()?.hasComposingText(it) == true
         }
         val result = JavaOnlyMap()
-        result["value"] = mView.text?:""
-        result["cursorBegin"] = mView.selectionStart
-        result["cursorEnd"] = mView.selectionStart
-        result["composing"] = composing
-        callback?.invoke(LynxUIMethodConstants.SUCCESS)
+        var text = ""
+        mView.text ?. let { 
+          text = mView.text.toString();
+        }
+        var selectionStart = -1
+        if (mView.isFocused) {
+          selectionStart = mView.selectionStart
+        }
+        var selectionEnd = -1
+        if (mView.isFocused) {
+          selectionEnd = mView.selectionEnd
+        }
+        result["value"] = text;
+        result["selectionStart"] = selectionStart
+        result["selectionEnd"] = selectionEnd
+        result["isComposing"] = composing
+        callback?.invoke(LynxUIMethodConstants.SUCCESS, result)
     }
 
     @LynxUIMethod
@@ -739,5 +773,9 @@ open class LynxUIBaseInput(context: LynxContext) : LynxUI<LynxEditTextView>(cont
             ).apply {
                 addDetail("value", mView.text?.toString())
             })
+    }
+  
+    open fun isTextArea(): Boolean {
+      return false;
     }
 }

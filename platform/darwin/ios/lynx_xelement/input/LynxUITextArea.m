@@ -117,7 +117,7 @@ LYNX_PROP_SETTER("show-soft-input-on-focus", setShowSoftInputOnFocus, BOOL) {
 
 LYNX_UI_METHOD(setValue) {
   NSString *value = params[@"value"];
-  NSInteger cursor = [params[@"cursor"] integerValue];
+  NSInteger cursor = [(params[@"cursor"] ? : @(-1)) integerValue];
   
   [self.view setText:value];
   
@@ -197,6 +197,7 @@ LYNX_UI_METHOD(setValue) {
 
 - (void)textViewDidChange:(UITextView*)textView {
   if (![self inputViewDidChange:textView]) {
+    self.lastValue = [self getText];
     return;
   }
   self.placeholderView.hidden = textView.text.length != 0;
@@ -214,13 +215,10 @@ LYNX_UI_METHOD(setValue) {
     
     NSInteger line = [self calcLines:textView firstRect:firstRect lastRect:lastRect];
     
-    if (line != kLynxTextAreaOutOfMaxlines) {
-      [self emitEvent:@"line" detail:@{
-        @"line" : @(line)
-      }];
-    } else {
-      // MAX
-    }
+    
+    [self emitEvent:@"line" detail:@{
+      @"line" : @(line) // include kLynxTextAreaOutOfMaxlines
+    }];
         
     if (line == kLynxTextAreaOutOfMaxlines) {
       // Try to trim to maxlines
@@ -242,7 +240,11 @@ LYNX_UI_METHOD(setValue) {
     [self triggerLayoutIfNeeded];
     _preHeight = lastRect.origin.y;
   }
-  
+  if (![[self getText] isEqualToString:(self.lastValue ? : @"")]) {
+    [self sendInputEvent];
+  }
+  self.lastValue = [self getText];
+
 }
 
 - (void)textViewDidBeginEditing:(UITextView *)textView {
@@ -259,9 +261,17 @@ LYNX_UI_METHOD(setValue) {
 
 - (void)textViewDidChangeSelection:(UITextView *)textView {
   [self emitEvent:@"selection" detail:@{
-    @"cursorBegin": @(self.view.selectedTextRange ? [self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.start] : -1),
-    @"cursorEnd": @(self.view.selectedTextRange  ? [self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.end] : -1),
+    @"selectionStart": @(self.view.selectedTextRange ? [self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.start] : -1),
+    @"selectionEnd": @(self.view.selectedTextRange  ? [self.view offsetFromPosition:self.view.beginningOfDocument toPosition:self.view.selectedTextRange.end] : -1),
   }];
+}
+
+- (BOOL)inputViewDidChange:(id<UITextInput>)input {
+  if (![self inputView:input checkInputValidity:[self getText]]) {
+    return NO;
+  }
+    
+  return YES;
 }
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
@@ -278,7 +288,6 @@ LYNX_UI_METHOD(setValue) {
     return NO;
   }
   
-  self.lastValue = textView.text;
   return [self inputView:textView shouldChangeCharactersInRange:range replacementString:text];
 }
 

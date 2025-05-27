@@ -102,6 +102,15 @@ open class LynxUITextArea(context: LynxContext) : LynxUIBaseInput(context) {
             }
 
             mMaxLinesReached = r < end
+            if (mMaxLinesReached) {
+              lynxContext.eventEmitter.sendCustomEvent(
+                LynxDetailEvent(
+                  sign,
+                  "line"
+                ).apply {
+                  addDetail("line", -1)
+                })
+            }
             return source.subSequence(0, r)
         }
         return source
@@ -125,5 +134,9 @@ open class LynxUITextArea(context: LynxContext) : LynxUIBaseInput(context) {
                     addDetail("line", textLayout.lineCount)
                 })
         }
+    }
+  
+    override fun isTextArea(): Boolean {
+      return true;
     }
 }
