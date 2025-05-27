@@ -84,7 +84,7 @@ const commandBufferCreator = function(appendTarget, idGen) {
   const active = cb.active;
 
   // Flush at 4 * 40 = 160KB, which is 80% of total buffer size.
-  const flushThres = 40 * 1024;
+  const flushThresh = 40 * 1024;
   // Current cutoff for long commands is 32KB, which is well below the 40KB free space.
   const cmdLengthCutoff = 8192;
   const isLittleEndian = new Uint16Array(new Uint8Array([1, 0]).buffer)[0] === 1;
@@ -92,68 +92,68 @@ const commandBufferCreator = function(appendTarget, idGen) {
   let TestAsyncObject = appendTarget.TestAsyncObject
 
   function voidFromVoid() {
-    let end = uint32View[0];
-    uint32View[end] = 1;
-    uint32View[end + 1] = this.__id;
+    let $end = uint32View[0];
+    uint32View[$end] = 1;
+    uint32View[$end + 1] = this.__id;
 
-    end += 2;
+    $end += 2;
 
 
-    uint32View[0] = end;
+    uint32View[0] = $end;
 
-    if (end > flushThres) {
+    if ($end > flushThresh) {
       cb.flush();
     }
   }
 
   function voidFromString(s) {
-    let end = uint32View[0];
-    uint32View[end] = 2;
-    uint32View[end + 1] = this.__id;
+    let $end = uint32View[0];
+    uint32View[$end] = 2;
+    uint32View[$end + 1] = this.__id;
 
     let sLen = s.length; // throws when null
     if (sLen / 2 > cmdLengthCutoff) {
       this.voidFromString_(...arguments);
       return;
     }
-    uint32View[end + 2] = sLen;
-    end += 3;
+    uint32View[$end + 2] = sLen;
+    $end += 3;
 
-    str2view(s, dataView, end);
-    end += Math.ceil(sLen / 2);
+    str2view(s, dataView, $end);
+    $end += Math.ceil(sLen / 2);
 
-    uint32View[0] = end;
+    uint32View[0] = $end;
 
-    if (end > flushThres) {
+    if ($end > flushThresh) {
       cb.flush();
     }
   }
 
   function voidFromStringArray(sa) {
-    let end = uint32View[0];
-    uint32View[end] = 3;
-    uint32View[end + 1] = this.__id;
+    let $end = uint32View[0];
+    uint32View[$end] = 3;
+    uint32View[$end + 1] = this.__id;
 
-    uint32View[end + 2] = sa.length;
-    end += 3;
+    uint32View[$end + 2] = sa.length;
+    $end += 3;
 
     for (let s of sa) {
-      uint32View[end] = s.length;
-      str2view(s, dataView, end + 1);
-      end += Math.ceil(s.length / 2) + 1;
+      uint32View[$end] = s.length;
+      str2view(s, dataView, $end + 1);
+      $end += Math.ceil(s.length / 2) + 1;
     }
 
-    uint32View[0] = end;
+    uint32View[0] = $end;
 
-    if (end > flushThres) {
+    if ($end > flushThresh) {
       cb.flush();
     }
   }
 
   function voidFromTypedArray(fa) {
-    let end = uint32View[0];
-    uint32View[end] = 4;
-    uint32View[end + 1] = this.__id;
+    let $end = uint32View[0];
+    uint32View[$end] = 4;
+    uint32View[$end + 1] = this.__id;
 
     let faLen = fa.byteLength / 4; // throws when null
     if (!faLen) {
@@ -166,23 +166,23 @@ const commandBufferCreator = function(appendTarget, idGen) {
       this.voidFromTypedArray_(...arguments);
       return;
     }
-    uint32View[end + 2] = faLen;
-    end += 3;
+    uint32View[$end + 2] = faLen;
+    $end += 3;
 
-    float32View.set(fa, end);
-    end += fa.length;
+    float32View.set(fa, $end);
+    $end += fa.length;
 
-    uint32View[0] = end;
+    uint32View[0] = $end;
 
-    if (end > flushThres) {
+    if ($end > flushThresh) {
       cb.flush();
     }
   }
 
   function voidFromArrayBuffer(ab) {
-    let end = uint32View[0];
-    uint32View[end] = 5;
-    uint32View[end + 1] = this.__id;
+    let $end = uint32View[0];
+    uint32View[$end] = 5;
+    uint32View[$end + 1] = this.__id;
 
     let abLen = ab.byteLength / 4; // throws when null
     if (abLen > cmdLengthCutoff) {
@@ -191,23 +191,23 @@ const commandBufferCreator = function(appendTarget, idGen) {
       return;
     }
     const abBufferView = new Uint8Array(ab);
-    uint32View[end + 2] = abBufferView.byteLength;
-    end += 3;
+    uint32View[$end + 2] = abBufferView.byteLength;
+    $end += 3;
 
-    uint8View.set(abBufferView, end * 4);
-    end += Math.ceil(abBufferView.byteLength / 4);
+    uint8View.set(abBufferView, $end * 4);
+    $end += Math.ceil(abBufferView.byteLength / 4);
 
-    uint32View[0] = end;
+    uint32View[0] = $end;
 
-    if (end > flushThres) {
+    if ($end > flushThresh) {
       cb.flush();
     }
   }
 
   function voidFromArrayBufferView(abv) {
-    let end = uint32View[0];
-    uint32View[end] = 6;
-    uint32View[end + 1] = this.__id;
+    let $end = uint32View[0];
+    uint32View[$end] = 6;
+    uint32View[$end + 1] = this.__id;
 
     let abvLen = abv.byteLength / 4; // throws when null
     if (abvLen > cmdLengthCutoff) {
@@ -218,28 +218,28 @@ const commandBufferCreator = function(appendTarget, idGen) {
     let abvBufferView;
     if (ArrayBuffer.isView(abv)) {
       abvBufferView = new Uint8Array(abv.buffer, abv.byteOffset, abv.byteLength);
-      uint32View[end + 2] = getViewType(abv);
+      uint32View[$end + 2] = getViewType(abv);
     } else {
       abvBufferView = new Uint8Array(abv);
-      uint32View[end + 2] = 0;
+      uint32View[$end + 2] = 0;
     }
-    uint32View[end + 3] = abvBufferView.byteLength;
-    end += 4;
+    uint32View[$end + 3] = abvBufferView.byteLength;
+    $end += 4;
 
-    uint8View.set(abvBufferView, end * 4);
-    end += Math.ceil(abvBufferView.byteLength / 4);
+    uint8View.set(abvBufferView, $end * 4);
+    $end += Math.ceil(abvBufferView.byteLength / 4);
 
-    uint32View[0] = end;
+    uint32View[0] = $end;
 
-    if (end > flushThres) {
+    if ($end > flushThresh) {
       cb.flush();
     }
   }
 
   function voidFromNullableArrayBufferView(abv) {
-    let end = uint32View[0];
-    uint32View[end] = 7;
-    uint32View[end + 1] = this.__id;
+    let $end = uint32View[0];
+    uint32View[$end] = 7;
+    uint32View[$end + 1] = this.__id;
 
     let abvLen = abv?.byteLength / 4;
     if (abvLen > cmdLengthCutoff) {
@@ -250,20 +250,20 @@ const commandBufferCreator = function(appendTarget, idGen) {
     let abvBufferView;
     if (ArrayBuffer.isView(abv)) {
       abvBufferView = new Uint8Array(abv.buffer, abv.byteOffset, abv.byteLength);
-      uint32View[end + 2] = getViewType(abv);
+      uint32View[$end + 2] = getViewType(abv);
     } else {
       abvBufferView = new Uint8Array(abv);
-      uint32View[end + 2] = 0;
+      uint32View[$end + 2] = 0;
     }
-    uint32View[end + 3] = abvBufferView.byteLength;
-    end += 4;
+    uint32View[$end + 3] = abvBufferView.byteLength;
+    $end += 4;
 
-    uint8View.set(abvBufferView, end * 4);
-    end += Math.ceil(abvBufferView.byteLength / 4);
+    uint8View.set(abvBufferView, $end * 4);
+    $end += Math.ceil(abvBufferView.byteLength / 4);
 
-    uint32View[0] = end;
+    uint32View[0] = $end;
 
-    if (end > flushThres) {
+    if ($end > flushThresh) {
       cb.flush();
     }
   }
@@ -273,17 +273,17 @@ const commandBufferCreator = function(appendTarget, idGen) {
     let puppet = new TestAsyncObject(id);
     puppet.__id = id;
     objects.push(puppet);
-    let end = uint32View[0];
-    uint32View[end] = 8;
-    uint32View[end + 1] = this.__id;
+    let $end = uint32View[0];
+    uint32View[$end] = 8;
+    uint32View[$end + 1] = this.__id;
 
-    uint32View[end + 2] = id;
-    end += 3;
+    uint32View[$end + 2] = id;
+    $end += 3;
 
 
-    uint32View[0] = end;
+    uint32View[0] = $end;
 
-    if (end > flushThres) {
+    if ($end > flushThresh) {
       cb.flush();
     }
     return puppet;
@@ -293,18 +293,18 @@ const commandBufferCreator = function(appendTarget, idGen) {
     if (tao && !(tao instanceof TestAsyncObject)) {
       throw new TypeError('Invalid type for arg 0, TestAsyncObject expected');
     }
-    let end = uint32View[0];
-    uint32View[end] = 9;
-    uint32View[end + 1] = this.__id;
+    let $end = uint32View[0];
+    uint32View[$end] = 9;
+    uint32View[$end + 1] = this.__id;
 
-    uint32View[end + 2] = tao.__id;
+    uint32View[$end + 2] = tao.__id;
     objects.push(tao);
-    end += 3;
+    $end += 3;
 
 
-    uint32View[0] = end;
+    uint32View[0] = $end;
 
-    if (end > flushThres) {
+    if ($end > flushThresh) {
       cb.flush();
     }
   }
@@ -313,18 +313,18 @@ const commandBufferCreator = function(appendTarget, idGen) {
     if (tao && !(tao instanceof TestAsyncObject)) {
       throw new TypeError('Invalid type for arg 0, TestAsyncObject expected');
     }
-    let end = uint32View[0];
-    uint32View[end] = 10;
-    uint32View[end + 1] = this.__id;
+    let $end = uint32View[0];
+    uint32View[$end] = 10;
+    uint32View[$end + 1] = this.__id;
 
-    uint32View[end + 2] = tao?.__id;
+    uint32View[$end + 2] = tao?.__id;
     objects.push(tao);
-    end += 3;
+    $end += 3;
 
 
-    uint32View[0] = end;
+    uint32View[0] = $end;
 
-    if (end > flushThres) {
+    if ($end > flushThresh) {
       cb.flush();
     }
   }
@@ -333,15 +333,15 @@ const commandBufferCreator = function(appendTarget, idGen) {
     if (tao && !(tao instanceof TestAsyncObject)) {
       throw new TypeError('Invalid type for arg 0, TestAsyncObject expected');
     }
-    let end = uint32View[0];
-    uint32View[end] = 11;
-    uint32View[end + 1] = this.__id;
+    let $end = uint32View[0];
+    uint32View[$end] = 11;
+    uint32View[$end + 1] = this.__id;
 
-    uint32View[end + 2] = tao.__id;
-    end += 3;
+    uint32View[$end + 2] = tao.__id;
+    $end += 3;
 
 
-    uint32View[0] = end;
+    uint32View[0] = $end;
 
     const result = cb.call();
     objects.length = 0;

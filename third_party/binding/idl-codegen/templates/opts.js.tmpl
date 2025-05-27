@@ -78,7 +78,7 @@ const commandBufferCreator = function(appendTarget, idGen) {
   const active = cb.active;
 
   // Flush at 4 * 40 = 160KB, which is 80% of total buffer size.
-  const flushThres = 40 * 1024;
+  const flushThresh = 40 * 1024;
   // Current cutoff for long commands is 32KB, which is well below the 40KB free space.
   const cmdLengthCutoff = 8192;
   const isLittleEndian = new Uint16Array(new Uint8Array([1, 0]).buffer)[0] === 1;
@@ -109,29 +109,29 @@ const commandBufferCreator = function(appendTarget, idGen) {
     objects.push(puppet);
     {% endif %}
 {#                                                                            #}
-    let end = uint32View[0];
-    uint32View[end] = {{method.buffered_method_id}};
+    let $end = uint32View[0];
+    uint32View[$end] = {{method.buffered_method_id}};
     {% if method.flushed_within_frame %}
     const contextId = this.__id;
-    uint32View[end + 1] = contextId;
+    uint32View[$end + 1] = contextId;
     {% else %}
-    uint32View[end + 1] = this.__id;
+    uint32View[$end + 1] = this.__id;
     {% endif %}
 
     {% for argument in method.arguments %}
     {% if argument.is_boolean_type %}
-    uint32View[end + {{ns.count}}] = {{argument.name}};
+    uint32View[$end + {{ns.count}}] = {{argument.name}};
     {% set ns.count = ns.count + 1 %}
     {% elif argument.is_numeric_type %}
     {% if argument.idl_type == 'unrestricted float' or argument.idl_type == 'float' %}
-    float32View[end + {{ns.count}}] = {{argument.name}};
+    float32View[$end + {{ns.count}}] = {{argument.name}};
     {% elif argument.idl_type == 'long' or argument.idl_type == 'short' or argument.idl_type == 'byte' %}
-    int32View[end + {{ns.count}}] = {{argument.name}};
+    int32View[$end + {{ns.count}}] = {{argument.name}};
     {% elif argument.idl_type == 'long long' or argument.idl_type == 'unsigned long long' or argument.idl_type == 'unrestricted double' or argument.idl_type == 'double' %}
-    dataView.setFloat64((end + {{ns.count}}) * 4, {{argument.name}}, isLittleEndian);
+    dataView.setFloat64(($end + {{ns.count}}) * 4, {{argument.name}}, isLittleEndian);
     {% set ns.count = ns.count + 1 %}
     {% else %}
-    uint32View[end + {{ns.count}}] = {{argument.name}};
+    uint32View[$end + {{ns.count}}] = {{argument.name}};
     {% endif %}
     {% set ns.count = ns.count + 1 %}
     {% elif argument.is_string_type %}
@@ -140,11 +140,11 @@ const commandBufferCreator = function(appendTarget, idGen) {
       this.{{method.name}}_(...arguments);
       return;
     }
-    uint32View[end + {{ns.count}}] = {{argument.name}}Len;
+    uint32View[$end + {{ns.count}}] = {{argument.name}}Len;
     {% set ns.count = ns.count + 1 %}
 {#                                                                            #}
     {% elif argument.is_wrapper_type %}
-    uint32View[end + {{ns.count}}] = {{argument.name}}{{'?' if argument.is_nullable}}.__id;
+    uint32View[$end + {{ns.count}}] = {{argument.name}}{{'?' if argument.is_nullable}}.__id;
     {% set ns.count = ns.count + 1 %}
     {% if not method.is_sync %}
     objects.push({{argument.name}});
@@ -152,7 +152,7 @@ const commandBufferCreator = function(appendTarget, idGen) {
 {#                                                                            #}
     {% elif argument.is_sequence_type %}
     {# TODO(yuyifei): Currently assumes sequence<string> or sequence<uint32> #}
-    uint32View[end + {{ns.count}}] = {{argument.name}}.length;
+    uint32View[$end + {{ns.count}}] = {{argument.name}}.length;
     {% set ns.count = ns.count + 1 %}
 {#                                                                            #}
     {% elif argument.is_typed_array %}{# This needs to handle arrays as well #}
@@ -171,7 +171,7 @@ const commandBufferCreator = function(appendTarget, idGen) {
       this.{{method.name}}_(...arguments);
       return;
     }
-    uint32View[end + {{ns.count}}] = {{argument.name}}Len;
+    uint32View[$end + {{ns.count}}] = {{argument.name}}Len;
     {% set ns.count = ns.count + 1 %}
 {#                                                                            #}
     {% elif argument.idl_type == 'ArrayBuffer' or argument.idl_type == 'ArrayBufferView' %}
@@ -188,76 +188,76 @@ const commandBufferCreator = function(appendTarget, idGen) {
     {% if argument.idl_type == 'ArrayBuffer' %}
     const {{argument.name}}BufferView = new Uint8Array({{argument.name}});
     {% if argument.is_nullable %}
-    uint32View[end + {{ns.count}}] = ({{argument.name}} == null);
+    uint32View[$end + {{ns.count}}] = ({{argument.name}} == null);
     {% set ns.count = ns.count + 1 %}
     {% endif %}
-    uint32View[end + {{ns.count}}] = {{argument.name}}BufferView.byteLength;
+    uint32View[$end + {{ns.count}}] = {{argument.name}}BufferView.byteLength;
     {% set ns.count = ns.count + 1 %}
     {% else %}{# ArrayBufferView #}
     let {{argument.name}}BufferView;
     if (ArrayBuffer.isView({{argument.name}})) {
       {{argument.name}}BufferView = new Uint8Array({{argument.name}}.buffer, {{argument.name}}.byteOffset, {{argument.name}}.byteLength);
-      uint32View[end + {{ns.count}}] = getViewType({{argument.name}});
+      uint32View[$end + {{ns.count}}] = getViewType({{argument.name}});
     } else {
       {{argument.name}}BufferView = new Uint8Array({{argument.name}});
-      uint32View[end + {{ns.count}}] = 0;
+      uint32View[$end + {{ns.count}}] = 0;
     }
     {% set ns.count = ns.count + 1 %}
-    uint32View[end + {{ns.count}}] = {{argument.name}}BufferView.byteLength;
+    uint32View[$end + {{ns.count}}] = {{argument.name}}BufferView.byteLength;
     {% set ns.count = ns.count + 1 %}
     {% endif %}
     {% endif %}
 {#                                                                            #}
     {% endfor %}
     {% if method.return_async %}
-    uint32View[end + {{ns.count}}] = id;
+    uint32View[$end + {{ns.count}}] = id;
     {% set ns.count = ns.count + 1 %}
     {% endif %}
-    end += {{ns.count}};
+    $end += {{ns.count}};
 
     {% for argument in method.arguments if argument.is_typed_array or argument.is_sequence_type %}
     {% if argument.idl_type == 'Float32Array' %}
-    float32View.set({{argument.name}}, end);
-    end += {{argument.name}}.length;
+    float32View.set({{argument.name}}, $end);
+    $end += {{argument.name}}.length;
     {% elif argument.idl_type == 'Int32Array' %}
-    int32View.set({{argument.name}}, end);
-    end += {{argument.name}}.length;
+    int32View.set({{argument.name}}, $end);
+    $end += {{argument.name}}.length;
     {% elif argument.idl_type == 'Uint32Array' %}
-    uint32View.set({{argument.name}}, end);
-    end += {{argument.name}}.length;
+    uint32View.set({{argument.name}}, $end);
+    $end += {{argument.name}}.length;
     {% elif argument.is_sequence_type %}
     {# TODO(yuyifei): Currently assumes sequence<string> or sequence<uint32> #}
     {% if argument.sequence_element_type == 'String' %}
     for (let s of {{argument.name}}) {
-      uint32View[end] = s.length;
-      str2view(s, dataView, end + 1);
-      end += Math.ceil(s.length / 2) + 1;
+      uint32View[$end] = s.length;
+      str2view(s, dataView, $end + 1);
+      $end += Math.ceil(s.length / 2) + 1;
     }
     {% else %}
-    uint32View.set({{argument.name}}, end);
-    end += {{argument.name}}.length;
+    uint32View.set({{argument.name}}, $end);
+    $end += {{argument.name}}.length;
     {% endif %}{# sequence_element_type #}
     {% endif %}
     {% endfor %}
 {#                                                                            #}
     {% for argument in method.arguments if argument.is_string_type %}
-    str2view({{argument.name}}, dataView, end);
-    end += Math.ceil({{argument.name}}Len / 2);
+    str2view({{argument.name}}, dataView, $end);
+    $end += Math.ceil({{argument.name}}Len / 2);
     {% endfor %}
 {#                                                                            #}
     {% for argument in method.arguments if argument.idl_type == 'ArrayBuffer' or argument.idl_type == 'ArrayBufferView' %}
-    uint8View.set({{argument.name}}BufferView, end * 4);
-    end += Math.ceil({{argument.name}}BufferView.byteLength / 4);
+    uint8View.set({{argument.name}}BufferView, $end * 4);
+    $end += Math.ceil({{argument.name}}BufferView.byteLength / 4);
     {% endfor %}
 
-    uint32View[0] = end;
+    uint32View[0] = $end;
 
     {% if method.is_sync %}
     const result = cb.call();
     objects.length = 0;
     return result;
     {% else %}
-    if (end > flushThres{{ ' || !active[contextId]' if method.flushed_within_frame }}) {
+    if ($end > flushThresh{{ ' || !active[contextId]' if method.flushed_within_frame }}) {
       {% if method.flushed_within_frame %}
       active[contextId] = true;
       {% endif %}
