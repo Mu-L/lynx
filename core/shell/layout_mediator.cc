@@ -126,8 +126,10 @@ void LayoutMediator::OnLayoutAfter(
     }
 
     engine_actor_->Act([queue = operation_queue_.get(), catalyzer = catalyzer_,
-                        options = options, h = std::move(holder), has_layout,
-                        is_first_layout, facade_actor = facade_actor_,
+                        options =
+                            std::make_shared<tasm::PipelineOptions>(*options),
+                        h = std::move(holder), has_layout, is_first_layout,
+                        facade_actor = facade_actor_,
                         node_manager = node_manager_,
                         page_options = page_options_](auto &engine) mutable {
       options->has_layout = has_layout;
@@ -149,8 +151,9 @@ void LayoutMediator::OnLayoutAfter(
         [layout_result_manager = layout_result_manager_.get(),
          catalyzer = catalyzer_, facade_actor = facade_actor_,
          node_manager = node_manager_, operations = std::move(operations),
-         holder = std::move(holder), options = options, is_first_layout,
-         has_layout, page_options = page_options_]() mutable {
+         holder = std::move(holder),
+         options = std::make_shared<tasm::PipelineOptions>(*options),
+         is_first_layout, has_layout, page_options = page_options_]() mutable {
           options->has_layout = has_layout;
           HandlePendingLayoutTask(nullptr, catalyzer, options, page_options,
                                   &operations);
