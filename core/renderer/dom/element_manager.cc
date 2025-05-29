@@ -176,6 +176,10 @@ ElementManager::ElementManager(
       [this]() { return GetParallelWithSyncLayout(); });
   enable_batch_layout_task_with_sync_layout_ =
       LynxEnv::GetInstance().EnableBatchLayoutTaskWithSyncLayout();
+  // TODO(songshourui.null): A temporary config is being introduced with the
+  // bugfix to avoid breaks. This config will be removed after verifying the
+  // bugfix online.
+  fix_parallel_z_index_crash_ = LynxEnv::GetInstance().FixParallelZIndexCrash();
 }
 
 static bool EnableLayoutOnlyStatistic() {
