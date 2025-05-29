@@ -8,6 +8,7 @@ import("../../core/renderer/build.gni")
 import("../../core/renderer/css/build.gni")
 import("../../core/renderer/data/build.gni")
 import("../../core/renderer/dom/build.gni")
+import("../../core/renderer/simple_styling/simple_styling.gni")
 import("../../core/renderer/utils/build.gni")
 import("../../core/runtime/bindings/lepus/build.gni")
 import("../../core/runtime/jscache/quickjs/quickjs_cache.gni")
@@ -138,6 +139,9 @@ if (build_lynx_lepus_node) {
     sources = lynx_css_core_sources_path
     sources += lynx_css_parser_sources_path
     sources -= lynx_css_extra_sources_path
+
+    # simple styling
+    sources += lynx_simple_styling_sources_path
 
     # lepus
     sources += lynx_lepus_common_sources_path
