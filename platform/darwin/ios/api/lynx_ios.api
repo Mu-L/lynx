@@ -1322,7 +1322,7 @@ public class LynxEventHandler : NSObject {
   public BOOL LynxEventHandler::enableSimultaneousTap enableSimultaneousTap;
   public instancetype LynxEventHandler::initWithRootView:(UIView *rootView);
   public instancetype LynxEventHandler::initWithRootView:withRootUI:(UIView *rootView,[withRootUI] nullable LynxUI *rootUI);
-  public void LynxEventHandler::attachLynxView:(UIView *rootView);
+  public void LynxEventHandler::attachContainerView:(UIView *rootView);
   public void LynxEventHandler::updateUiOwner:eventEmitter:(nullable LynxUIOwner *owner,[eventEmitter] LynxEventEmitter *eventEmitter);
   public id< LynxEventTarget > LynxEventHandler::hitTest:withEvent:(CGPoint point,[withEvent] nullable UIEvent *event);
   public void LynxEventHandler::onGestureRecognized();
@@ -4201,11 +4201,11 @@ public interface LynxUIOwner(Private) {
 
 public protocol LynxUIRendererProtocol-p : <NSObject> {
   public BOOL LynxUIRendererProtocol-p::useInvokeUIMethodFunction useInvokeUIMethodFunction;
-  public void LynxUIRendererProtocol-p::attachLynxView:(LynxView *lynxView);
+  public void LynxUIRendererProtocol-p::attachContainerView:(UIView< LUIBodyView > *containerView);
   public void LynxUIRendererProtocol-p::onSetupUIDelegate:(lynx::tasm::UIDelegate *uiDelegate);
   public void LynxUIRendererProtocol-p::onSetupUIDelegate:withModuleManager:withJSProxy:(lynx::shell::LynxShell *shell,[withModuleManager] lynx::piper::LynxModuleManager *moduleManager,[withJSProxy] std::shared_ptr< lynx::shell::LynxRuntimeProxy > jsProxy);
   public lynx::tasm::UIDelegate * LynxUIRendererProtocol-p::uiDelegate();
-  public void LynxUIRendererProtocol-p::setupEventHandler:engineProxy:lynxView:context:shellPtr:(LynxTemplateRender *templateRenderer,[engineProxy] LynxEngineProxy *engineProxy,[lynxView] LynxView *lynxView,[context] LynxContext *context,[shellPtr] int64_t shellPtr);
+  public void LynxUIRendererProtocol-p::setupEventHandler:engineProxy:containerView:context:shellPtr:(id< TemplateRenderCallbackProtocol > templateRenderer,[engineProxy] LynxEngineProxy *engineProxy,[containerView] UIView< LUIBodyView > *containerView,[context] LynxContext *context,[shellPtr] int64_t shellPtr);
   public void LynxUIRendererProtocol-p::setPageConfig:context:(const std::shared_ptr< lynx::tasm::PageConfig > &pageConfig,[context] LynxContext *context);
   public void LynxUIRendererProtocol-p::setFluencyTracerEnabled:(LynxBooleanOption enabled);
   public BOOL LynxUIRendererProtocol-p::needPaintingContextProxy();
@@ -4218,7 +4218,7 @@ public protocol LynxUIRendererProtocol-p : <NSObject> {
   public UIView * LynxUIRendererProtocol-p::eventHandlerRootView();
   public LynxUIOwner * LynxUIRendererProtocol-p::uiOwner();
   public LynxRootUI * LynxUIRendererProtocol-p::rootUI();
-  public void LynxUIRendererProtocol-p::setupWithContainerView:templateRenderer:builder:screenSize:(LynxView *containerView,[templateRenderer] LynxTemplateRender *templateRenderer,[builder] LynxViewBuilder *builder,[screenSize] CGSize screenSize);
+  public void LynxUIRendererProtocol-p::setupWithContainerView:builder:screenSize:(UIView< LUIBodyView > *containerView,[builder] LynxViewBuilder *builder,[screenSize] CGSize screenSize);
   public void LynxUIRendererProtocol-p::setLynxContext:(LynxContext *context);
   public void LynxUIRendererProtocol-p::setEnableGenericResourceFetcher:(BOOL enable);
   public id< LynxTemplateResourceFetcher > LynxUIRendererProtocol-p::templateResourceFetcher();
@@ -4711,6 +4711,8 @@ public protocol TemplateRenderCallbackProtocol-p : <LynxErrorReceiverProtocol> {
   public void TemplateRenderCallbackProtocol-p::onEventCapture:withEventCatch:andEventID:(NSInteger targetID,[withEventCatch] BOOL isCatch,[andEventID] int64_t eventID);
   public void TemplateRenderCallbackProtocol-p::onEventBubble:withEventCatch:andEventID:(NSInteger targetID,[withEventCatch] BOOL isCatch,[andEventID] int64_t eventID);
   public void TemplateRenderCallbackProtocol-p::onEventFire:withEventStop:andEventID:(NSInteger targetID,[withEventStop] BOOL isStop,[andEventID] int64_t eventID);
+  public void TemplateRenderCallbackProtocol-p::notifyIntersectionObservers();
+  public BOOL TemplateRenderCallbackProtocol-p::onLynxEvent:(LynxEvent *event);
 }
 
 public struct TransOffset {

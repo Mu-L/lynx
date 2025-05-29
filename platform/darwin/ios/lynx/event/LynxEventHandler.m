@@ -288,7 +288,7 @@
   return self;
 }
 
-- (void)attachLynxView:(LynxView*)rootView {
+- (void)attachContainerView:(UIView*)rootView {
   _rootView = rootView;
   [_rootView addGestureRecognizer:_tapRecognizer];
   [_rootView addGestureRecognizer:_longPressRecognizer];

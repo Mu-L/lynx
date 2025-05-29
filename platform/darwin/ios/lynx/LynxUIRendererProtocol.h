@@ -25,9 +25,7 @@ class LynxModuleManager;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class LynxView;
 @class LynxUIOwner;
-@class LynxTemplateRender;
 @class LynxTemplateResourceFetcher;
 @class LynxViewBuilder;
 
@@ -37,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, readonly) BOOL useInvokeUIMethodFunction;
 
-- (void)attachLynxView:(LynxView *)lynxView;
+- (void)attachContainerView:(UIView<LUIBodyView> *)containerView;
 
 - (void)onSetupUIDelegate:(lynx::tasm::UIDelegate *)uiDelegate;
 
@@ -47,9 +45,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (lynx::tasm::UIDelegate *)uiDelegate;
 
-- (void)setupEventHandler:(LynxTemplateRender *)templateRenderer
+- (void)setupEventHandler:(id<TemplateRenderCallbackProtocol>)templateRenderer
               engineProxy:(LynxEngineProxy *)engineProxy
-                 lynxView:(LynxView *)lynxView
+            containerView:(UIView<LUIBodyView> *)containerView
                   context:(LynxContext *)context
                  shellPtr:(int64_t)shellPtr;
 
@@ -82,8 +80,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (LynxRootUI *)rootUI;
 
-- (void)setupWithContainerView:(LynxView *)containerView
-              templateRenderer:(LynxTemplateRender *)templateRenderer
+- (void)setupWithContainerView:(UIView<LUIBodyView> *)containerView
+
                        builder:(LynxViewBuilder *)builder
                     screenSize:(CGSize)screenSize;
 

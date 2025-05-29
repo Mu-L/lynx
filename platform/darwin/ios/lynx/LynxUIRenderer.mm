@@ -44,13 +44,13 @@
   return NO;
 }
 
-- (void)attachLynxView:(nonnull LynxView *)lynxView {
+- (void)attachContainerView:(nonnull UIView<LUIBodyView> *)containerView {
   if (_uiOwner != nil) {
-    [_uiOwner attachContainerView:(LynxView *)lynxView];
+    [_uiOwner attachContainerView:containerView];
   }
 
   if (_eventHandler) {
-    [_eventHandler attachLynxView:lynxView];
+    [_eventHandler attachContainerView:containerView];
   }
 }
 
@@ -67,9 +67,9 @@
   return ui_delegate_.get();
 }
 
-- (void)setupEventHandler:(LynxTemplateRender *)templateRenderer
+- (void)setupEventHandler:(id<TemplateRenderCallbackProtocol>)templateRenderer
               engineProxy:(LynxEngineProxy *)engineProxy
-                 lynxView:(LynxView *)lynxView
+            containerView:(UIView<LUIBodyView> *)containerView
                   context:(LynxContext *)context
                  shellPtr:(int64_t)shellPtr {
   _uiOwner.uiContext.shellPtr = shellPtr;
@@ -87,7 +87,7 @@
   [_eventEmitter setIntersectionObserverBlock:intersectionObserver];
   _uiOwner.uiContext.eventEmitter = _eventEmitter;
   if (_eventHandler == nil) {
-    _eventHandler = [[LynxEventHandler alloc] initWithRootView:lynxView];
+    _eventHandler = [[LynxEventHandler alloc] initWithRootView:containerView];
   }
   _uiOwner.uiContext.eventHandler = _eventHandler;
 
@@ -182,8 +182,7 @@
   return nil;
 }
 
-- (void)setupWithContainerView:(LynxView *)containerView
-              templateRenderer:(LynxTemplateRender *)templateRenderer
+- (void)setupWithContainerView:(UIView<LUIBodyView> *)containerView
                        builder:(LynxViewBuilder *)builder
                     screenSize:(CGSize)screenSize {
   LynxScreenMetrics *screenMetrics =

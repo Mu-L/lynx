@@ -135,4 +135,11 @@
 - (void)onEventFire:(NSInteger)targetID withEventStop:(BOOL)isStop andEventID:(int64_t)eventID {
 }
 
+- (void)notifyIntersectionObservers {
+}
+
+- (BOOL)onLynxEvent:(LynxEvent *)event {
+  return NO;
+}
+
 @end

@@ -27,7 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithRootView:(UIView *)rootView;
 - (instancetype)initWithRootView:(UIView *)rootView withRootUI:(nullable LynxUI *)rootUI;
 
-- (void)attachLynxView:(UIView *)rootView;
+- (void)attachContainerView:(UIView *)rootView;
 
 - (void)updateUiOwner:(nullable LynxUIOwner *)owner eventEmitter:(LynxEventEmitter *)eventEmitter;
 

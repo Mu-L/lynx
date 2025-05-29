@@ -123,7 +123,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
       [_runtimeOptions merge:_runtime.options];
     }
 
-    [builder.lynxUIRenderer attachLynxView:lynxView];
+    [builder.lynxUIRenderer attachContainerView:lynxView];
 
     /// Member Variable
     CGSize screenSize;
@@ -254,10 +254,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
 }
 
 - (void)setUpUIRendererWithBuilder:(LynxViewBuilder*)builder screenSize:(CGSize)screenSize {
-  [builder.lynxUIRenderer setupWithContainerView:_lynxView
-                                templateRenderer:self
-                                         builder:builder
-                                      screenSize:screenSize];
+  [builder.lynxUIRenderer setupWithContainerView:_lynxView builder:builder screenSize:screenSize];
   [_devTool attachLynxUIOwner:[builder.lynxUIRenderer uiOwner]];
 
   [self setUpResourceProviderWithBuilder:builder];
@@ -302,7 +299,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
   TRACE_EVENT(LYNX_TRACE_CATEGORY, TEMPLATE_RENDER_SETUP_EVENT_HANDLER);
   [_lynxUIRenderer setupEventHandler:self
                          engineProxy:_lynxEngineProxy
-                            lynxView:_lynxView
+                       containerView:_lynxView
                              context:_context
                             shellPtr:reinterpret_cast<int64_t>(shell_.get())];
 }
@@ -2220,7 +2217,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
   }
 
   if (_lynxUIRenderer != nil) {
-    [_lynxUIRenderer attachLynxView:lynxView];
+    [_lynxUIRenderer attachContainerView:lynxView];
   }
 
   if (_devTool) {

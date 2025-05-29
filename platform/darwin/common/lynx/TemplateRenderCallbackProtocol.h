@@ -7,6 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import <Lynx/LynxErrorReceiverProtocol.h>
+#import <Lynx/LynxEvent.h>
 #import <Lynx/LynxTemplateBundle.h>
 #include "core/template_bundle/template_codec/binary_decoder/page_config.h"
 
@@ -150,6 +151,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)onEventBubble:(NSInteger)targetID withEventCatch:(BOOL)isCatch andEventID:(int64_t)eventID;
 
 - (void)onEventFire:(NSInteger)targetID withEventStop:(BOOL)isStop andEventID:(int64_t)eventID;
+
+- (void)notifyIntersectionObservers;
+
+- (BOOL)onLynxEvent:(LynxEvent *)event;
 
 @end
 
