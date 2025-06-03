@@ -97,9 +97,31 @@
 }
 
 - (void)postJsCacheGenerationTask:(NSString*)bytecodeSourceUrl {
+  [self postJsCacheGenerationTask:bytecodeSourceUrl callback:nil];
+}
+
+- (void)postJsCacheGenerationTask:(nonnull NSString*)bytecodeSourceUrl
+                         callback:(nullable LynxBytecodeResponseBlock)callback {
   if (template_bundle_ && bytecodeSourceUrl && bytecodeSourceUrl.length > 0) {
+    std::unique_ptr<lynx::piper::cache::BytecodeGenerateCallback> bytecode_callback = nullptr;
+    if (callback) {
+      bytecode_callback = std::make_unique<lynx::piper::cache::BytecodeGenerateCallback>(
+          [callback](std::string error_msg, lynx::piper::Buffer* buffer) {
+            NSString* error_info =
+                error_msg.empty() ? nil : [NSString stringWithUTF8String:error_msg.c_str()];
+            NSData* byte_buffer = nil;
+            if (buffer) {
+              byte_buffer = [NSData
+                  dataWithBytesNoCopy:const_cast<void*>(static_cast<const void*>(buffer->data()))
+                               length:buffer->size()
+                         freeWhenDone:NO];
+            }
+            callback(error_info, byte_buffer);
+          });
+    }
     lynx::piper::cache::JsCacheManagerFacade::PostCacheGenerationTask(
-        *template_bundle_, [bytecodeSourceUrl UTF8String], lynx::piper::JSRuntimeType::quickjs);
+        *template_bundle_, [bytecodeSourceUrl UTF8String], lynx::piper::JSRuntimeType::quickjs,
+        std::move(bytecode_callback));
   }
 }
 

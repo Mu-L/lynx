@@ -7,6 +7,15 @@
 
 #import <Lynx/LynxTemplateBundleOption.h>
 
+/**
+ * block that represents a bytecode generate result callback.
+ * @param errorMsg when success, errorMsg will be null, otherwise is error.
+ * @param buffer when success, this will be bytecode result. Note: Please note that the current
+ * NSData is constructed using dataWithBytesNoCopy. If you need to use it, please make a copy
+ * yourself and do not store this object directly.
+ */
+typedef void (^LynxBytecodeResponseBlock)(NSString* _Nullable errorMsg, NSData* _Nullable buffer);
+
 @interface LynxTemplateBundle : NSObject
 
 @property(nonatomic, readonly, nullable) NSString* url;
@@ -34,6 +43,15 @@
  * @param bytecodeSourceUrl The source url of the template.
  */
 - (void)postJsCacheGenerationTask:(nonnull NSString*)bytecodeSourceUrl;
+
+/**
+ * Post a task to generate bytecode for a given template bundle.
+ * The task will be executed in a background thread.
+ * @param bytecodeSourceUrl The source url of the template.
+ * @param callback When generate finished, this will response the result.
+ */
+- (void)postJsCacheGenerationTask:(nonnull NSString*)bytecodeSourceUrl
+                         callback:(nullable LynxBytecodeResponseBlock)callback;
 
 @end
 
