@@ -379,9 +379,9 @@ void FiberElement::ProcessFullRawInlineStyle() {
   // If self has raw inline styles, parse to current_raw_inline_styles_ but do
   // not process to final style map. Inline styles will be merged finally by
   // MergeInlineStyles.
-  if (!full_raw_inline_style_.IsEmpty()) {
-    ParseRawInlineStyles(full_raw_inline_style_, nullptr);
-    full_raw_inline_style_.SetNil();
+  if (!full_raw_inline_style_.empty()) {
+    ParseRawInlineStyles(nullptr);
+    full_raw_inline_style_ = base::String();
   }
 }
 
@@ -686,7 +686,7 @@ const AttrMap &FiberElement::GetAttributesForWorklet() {
   return data_model()->attributes();
 }
 
-const lepus::Value &FiberElement::GetRawInlineStyles() {
+const base::String &FiberElement::GetRawInlineStyles() {
   return full_raw_inline_style_;
 }
 
@@ -694,8 +694,8 @@ const RawLepusStyleMap &FiberElement::GetCurrentRawInlineStyles() const {
   return current_raw_inline_styles_;
 }
 
-void FiberElement::SetRawInlineStyles(const lepus::Value &value) {
-  full_raw_inline_style_ = value;
+void FiberElement::SetRawInlineStyles(base::String value) {
+  full_raw_inline_style_ = std::move(value);
   MarkDirty(kDirtyStyle);
 }
 
@@ -712,7 +712,7 @@ void FiberElement::RemoveAllInlineStyles() {
     }
   });
 
-  full_raw_inline_style_.SetNil();
+  full_raw_inline_style_ = base::String();
   current_raw_inline_styles_.clear();
   MarkDirty(kDirtyStyle);
 }
@@ -2833,43 +2833,40 @@ void FiberElement::RestoreLayoutNode(FiberElement *node) {
   node->next_render_sibling_ = nullptr;
 }
 
-void FiberElement::ParseRawInlineStyles(const lepus::Value &input,
-                                        StyleMap *parsed_styles) {
+void FiberElement::ParseRawInlineStyles(StyleMap *parsed_styles) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, FIBER_ELEMENT_PARSE_RAW_INLINE_STYLES);
   auto &configs = element_manager_->GetCSSParserConfigs();
-  if (input.IsString()) {
-    const auto &str = input.StdString();
-    ParseStyleDeclarationList(
-        str.c_str(), static_cast<uint32_t>(str.size()),
-        [this, parsed_styles, &configs](
-            const char *key_start, uint32_t key_length, const char *value_start,
-            uint32_t value_length) {
-          auto id = CSSProperty::GetPropertyID(
-              base::static_string::GenericCacheKey(key_start, key_length));
-          if (CSSProperty::IsPropertyValid(id)) {
-            auto value = lepus::Value(base::String(value_start, value_length));
-            if (parsed_styles != nullptr) {
-              UnitHandler::Process(id, value, *parsed_styles, configs);
-            }
-            current_raw_inline_styles_.insert_or_assign(id, std::move(value));
+  const auto &str = full_raw_inline_style_.str();
+  ParseStyleDeclarationList(
+      str.c_str(), static_cast<uint32_t>(str.size()),
+      [this, parsed_styles, &configs](
+          const char *key_start, uint32_t key_length, const char *value_start,
+          uint32_t value_length) {
+        auto id = CSSProperty::GetPropertyID(
+            base::static_string::GenericCacheKey(key_start, key_length));
+        if (CSSProperty::IsPropertyValid(id)) {
+          auto value = lepus::Value(base::String(value_start, value_length));
+          if (parsed_styles != nullptr) {
+            UnitHandler::Process(id, value, *parsed_styles, configs);
           }
+          current_raw_inline_styles_.insert_or_assign(id, std::move(value));
+        }
 
-          // DevTool needs to get InlineStyle information from DataModel's
-          // InlineStyle, so when DevTool is enabled, it needs to set the
-          // corresponding InlineStyle for DataModel.
-          EXEC_EXPR_FOR_INSPECTOR(if (element_manager()->IsDomTreeEnabled()) {
-            if (data_model() == nullptr) {
-              return;
-            }
-            data_model()->SetInlineStyle(
-                id, base::String(value_start, value_length), configs);
-          });
+        // DevTool needs to get InlineStyle information from DataModel's
+        // InlineStyle, so when DevTool is enabled, it needs to set the
+        // corresponding InlineStyle for DataModel.
+        EXEC_EXPR_FOR_INSPECTOR(if (element_manager()->IsDomTreeEnabled()) {
+          if (data_model() == nullptr) {
+            return;
+          }
+          data_model()->SetInlineStyle(
+              id, base::String(value_start, value_length), configs);
         });
+      });
 
-    EXEC_EXPR_FOR_INSPECTOR(if (element_manager()->IsDomTreeEnabled()) {
-      element_manager()->OnElementNodeSetForInspector(this);
-    });
-  }
+  EXEC_EXPR_FOR_INSPECTOR(if (element_manager()->IsDomTreeEnabled()) {
+    element_manager()->OnElementNodeSetForInspector(this);
+  });
 }
 
 void FiberElement::DoFullCSSResolving() {

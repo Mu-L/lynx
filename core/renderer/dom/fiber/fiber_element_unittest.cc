@@ -12607,7 +12607,7 @@ TEST_P(FiberElementTest, TestSetRawInlineStyles0) {
   auto view = manager->CreateFiberPage("0", 0);
 
   view->SetRawInlineStyles(
-      lepus::Value("background-color:red;border-width:1px;"));
+      base::String("background-color:red;border-width:1px;"));
 
   CSSPropertyID id = CSSPropertyID::kPropertyIDBackgroundColor;
   auto value = lepus::Value("black");
@@ -13012,13 +13012,13 @@ TEST_P(FiberElementTest, FontSizeResetTest) {
   auto page = manager->CreateFiberPage("page", 11);
 
   auto text = manager->CreateFiberText("text");
-  text->SetRawInlineStyles(lepus::Value("font-size:20px"));
+  text->SetRawInlineStyles(base::String("font-size:20px"));
   page->InsertNode(text);
   page->FlushActionsAsRoot();
   EXPECT_TRUE(text->GetFontSize() == 20);
 
   text->RemoveAllInlineStyles();
-  text->SetRawInlineStyles(lepus::Value(""));
+  text->SetRawInlineStyles(base::String());
   page->FlushActionsAsRoot();
   EXPECT_TRUE(text->GetFontSize() ==
               manager->GetLynxEnvConfig().PageDefaultFontSize());

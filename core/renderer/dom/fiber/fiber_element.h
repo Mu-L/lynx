@@ -508,9 +508,9 @@ class FiberElement : public Element, public SelectorItem {
 
   virtual const AttrMap& GetAttributesForWorklet() override;
 
-  const lepus::Value& GetRawInlineStyles();
+  const base::String& GetRawInlineStyles();
   const RawLepusStyleMap& GetCurrentRawInlineStyles() const;
-  void SetRawInlineStyles(const lepus::Value& value);
+  void SetRawInlineStyles(base::String value);
 
   void MarkDirty(const uint32_t flag) {
     dirty_ |= flag;
@@ -953,7 +953,7 @@ class FiberElement : public Element, public SelectorItem {
 
   void PrepareComponentExternalStyles(AttributeHolder* holder);
   void PrepareRootCSSVariables(AttributeHolder* holder);
-  void ParseRawInlineStyles(const lepus::Value& input, StyleMap* parsed_styles);
+  void ParseRawInlineStyles(StyleMap* parsed_styles);
   void DoFullCSSResolving();
   const tasm::CSSValue& ResolveCurrentStyleValue(
       const CSSPropertyID& key, const tasm::CSSValue& default_value);
@@ -1036,7 +1036,7 @@ class FiberElement : public Element, public SelectorItem {
   bool is_first_created_{true};
 
   // indicate the value of SetRawInlineStyles, we need to split it
-  lepus::Value full_raw_inline_style_;
+  base::String full_raw_inline_style_;
 
   StyleMap parsed_styles_map_;
 
