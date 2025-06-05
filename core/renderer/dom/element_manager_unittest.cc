@@ -2,6 +2,9 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
+#define private public
+#define protected public
+
 #include "core/renderer/dom/element_manager.h"
 
 #include "core/base/threading/task_runner_manufactor.h"
@@ -64,6 +67,26 @@ TEST_F(ElementManagerTest, CreateFiberNode) {
 
   EXPECT_EQ(node->GetTag(), tag.str());
   EXPECT_TRUE(node->is_fiber_element());
+}
+
+TEST_F(ElementManagerTest, TestCalcTotalMemoryDiff) {
+  manager->config_->SetEnableFiberArch(true);
+  int32_t expected_total_memory = 0;
+  int32_t average_element_memory_size = 0;
+
+  int32_t expect_counter = 10;
+  std::vector<fml::RefPtr<FiberElement>> fiber_elements;
+  EXPECT_EQ(manager->total_memory_, 0);
+  for (int i = 0; i < expect_counter; i++) {
+    auto fiber_element = manager->CreateFiberNode("view");
+    average_element_memory_size = fiber_element->GetMemoryUsage();
+    fiber_elements.push_back(fiber_element);
+  }
+
+  expected_total_memory = average_element_memory_size * expect_counter;
+  auto total_memory_diff = manager->CalcTotalMemoryUsageDiff();
+  EXPECT_EQ(manager->total_memory_, expected_total_memory);
+  EXPECT_EQ(total_memory_diff, expected_total_memory);
 }
 
 TEST_F(ElementManagerTest, CreateFiberComponent) {

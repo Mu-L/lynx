@@ -99,6 +99,7 @@ class BASE_EXPORT_FOR_DEVTOOL LynxEnv {
     FIX_PARALLEL_Z_INDEX_CRASH,
     FIX_INSERT_BEFORE_FIXED_BUG,
     OPT_AVOID_DESTROY_RUNTIME_WAIT,
+    ENABLE_FIBER_ELEMENT_MEMORY_REPORT,
     // Please add new enum values above
     END_MARK,  // Keep this as the last enum value, and do not use
   };
@@ -208,6 +209,8 @@ class BASE_EXPORT_FOR_DEVTOOL LynxEnv {
              "opt_avoid_destroy_runtime_wait"},
             {Key::FIX_PARALLEL_Z_INDEX_CRASH, "fix_parallel_z_index_crash"},
             {Key::FIX_INSERT_BEFORE_FIXED_BUG, "fix_insert_before_fixed_bug"},
+            {Key::ENABLE_FIBER_ELEMENT_MEMORY_REPORT,
+             "enable_fiber_element_memory_report"},
         });
     auto it = (*env_key_to_string_map).find(key);
     DCHECK(it != (*env_key_to_string_map).end());
@@ -323,6 +326,7 @@ class BASE_EXPORT_FOR_DEVTOOL LynxEnv {
   bool EnableUnifiedPixelPipeline();
   bool FixParallelZIndexCrash();
   bool FixInsertBeforeFixedBug();
+  bool EnableFiberElementMemoryReport();
 
   LynxEnv(const LynxEnv&) = delete;
   LynxEnv& operator=(const LynxEnv&) = delete;

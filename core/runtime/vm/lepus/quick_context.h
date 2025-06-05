@@ -176,6 +176,10 @@ class QuickContext : private LEPUSRuntimeData, public Context {
 
   virtual void EnableRuntimeLeakCheck(bool enable) override;
 
+  virtual void UpdateVMOuterObjSize(int size) override;
+
+  virtual bool IsTracingGCEnabled() override;
+
  private:
   virtual Value CallArgs(const base::String& name, const Value* args[],
                          size_t args_count,

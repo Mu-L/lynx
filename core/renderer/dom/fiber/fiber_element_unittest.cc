@@ -8083,6 +8083,11 @@ TEST_P(FiberElementTest, InlineElementTest0) {
 }
 
 TEST_P(FiberElementTest, InlineElementTest0_0) {
+  int32_t captured_element_memory_size = 0;
+  manager->vm_update_outer_obj_size_callback_ =
+      [&captured_element_memory_size](int32_t size) {
+        captured_element_memory_size = size;
+      };
   auto page = manager->CreateFiberPage("page", 11);
 
   // create text and insert it to page
@@ -8103,6 +8108,9 @@ TEST_P(FiberElementTest, InlineElementTest0_0) {
 
   auto options = std::make_shared<PipelineOptions>();
   manager->OnPatchFinish(options, page.get());
+
+  EXPECT_TRUE(manager->total_memory_ > 0);
+  EXPECT_EQ(captured_element_memory_size, manager->total_memory_);
 
   EXPECT_FALSE(text->is_inline_element());
   EXPECT_TRUE(text->TendToFlatten());

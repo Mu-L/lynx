@@ -182,6 +182,8 @@ ElementManager::ElementManager(
   fix_parallel_z_index_crash_ = LynxEnv::GetInstance().FixParallelZIndexCrash();
   fix_insert_before_fixed_bug_ =
       LynxEnv::GetInstance().FixInsertBeforeFixedBug();
+  enable_fiber_element_memory_reporter_ =
+      LynxEnv::GetInstance().EnableFiberElementMemoryReport();
 }
 
 static bool EnableLayoutOnlyStatistic() {
@@ -442,7 +444,11 @@ ElementManager::GetSubTreeLayoutInfo(int32_t root_id, Viewport viewport) {
   return delegate_->GetSubTreeLayoutInfo(root_id, viewport);
 }
 
-void ElementManager::DidPatchFinishForFiber() {}
+void ElementManager::DidPatchFinishForFiber() {
+  if (EnableFiberElementMemoryReport()) {
+    UpdateElementMemoryUsage(CalcTotalMemoryUsageDiff());
+  }
+}
 
 void ElementManager::PrepareComponentNodeForInspector(Element *component) {
   EXEC_EXPR_FOR_INSPECTOR({
@@ -1403,6 +1409,24 @@ void ElementManager::LegacyHandleLayoutTask(
 
 bool ElementManager::CSSFragmentParsingOnTASMWorkerMTSRender() {
   return css_fragment_parsing_tasm_worker_thread_;
+}
+
+void ElementManager::RegisterVMUpdateOuterObjSizeCallback(
+    base::MoveOnlyClosure<void, int> closure) {
+  vm_update_outer_obj_size_callback_ = std::move(closure);
+}
+
+void ElementManager::UpdateElementMemoryUsage(int size) {
+  if (enable_fiber_element_memory_reporter_ &&
+      vm_update_outer_obj_size_callback_ != nullptr) {
+    vm_update_outer_obj_size_callback_(size);
+  }
+}
+
+int32_t ElementManager::CalcTotalMemoryUsageDiff() {
+  int32_t prev_total_memory = total_memory_;
+  total_memory_ = node_manager()->GetTotalMemoryUsage();
+  return total_memory_ - prev_total_memory;
 }
 
 namespace {

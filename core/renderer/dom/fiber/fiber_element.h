@@ -839,6 +839,8 @@ class FiberElement : public Element, public SelectorItem {
     parallel_reduce_tasks_.emplace_back(std::move(operation));
   }
 
+  virtual int32_t GetMemoryUsage() const override { return sizeof(*this); }
+
  protected:
   FiberElement(const FiberElement& element, bool clone_resolved_props);
 

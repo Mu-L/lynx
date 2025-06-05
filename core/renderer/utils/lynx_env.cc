@@ -426,5 +426,8 @@ bool LynxEnv::EnableUnifiedPixelPipeline() {
   return GetBoolEnv(Key::ENABLE_UNIFIED_PIXEL_PIPELINE, false);
 }
 
+bool LynxEnv::EnableFiberElementMemoryReport() {
+  return GetBoolEnv(Key::ENABLE_FIBER_ELEMENT_MEMORY_REPORT, true);
+}
 }  // namespace tasm
 }  // namespace lynx

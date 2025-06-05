@@ -6,6 +6,7 @@
 #define CORE_RENDERER_DOM_ELEMENT_MANAGER_H_
 
 #include <functional>
+#include <limits>
 #include <list>
 #include <map>
 #include <memory>
@@ -108,6 +109,25 @@ class NodeManager {
       }
     }
     node_map_.clear();
+  }
+
+  int32_t GetTotalMemoryUsage() const {
+    if (node_map_.empty()) {
+      return 0;
+    }
+
+    int32_t remaining_element_count = static_cast<int32_t>(node_map_.size());
+    int32_t element_memory_size = node_map_.begin()->second->GetMemoryUsage();
+    uint32_t max_allowed =
+        static_cast<uint32_t>(std::numeric_limits<int32_t>::max()) + 1;
+
+    // Check overflow
+    if (static_cast<uint32_t>(element_memory_size) >
+        max_allowed / remaining_element_count) {
+      return std::numeric_limits<int32_t>::max();
+    }
+
+    return remaining_element_count * element_memory_size;
   }
 
  private:
@@ -1099,6 +1119,17 @@ class ElementManager : public ElementContextDelegate {
     css_fragment_parsing_tasm_worker_thread_ = enable;
   }
 
+  void RegisterVMUpdateOuterObjSizeCallback(
+      base::MoveOnlyClosure<void, int> closure);
+
+  void UpdateElementMemoryUsage(int size);
+
+  inline bool EnableFiberElementMemoryReport() {
+    return enable_fiber_element_memory_reporter_;
+  }
+
+  int32_t CalcTotalMemoryUsageDiff();
+
  protected:
   /**
    * call this function after exec OnPatchFinishForFiber
@@ -1148,6 +1179,8 @@ class ElementManager : public ElementContextDelegate {
   // Internal timeout in threaded element flush mode to enable force running on
   // thread-pool in unittests
   int32_t task_wait_timeout_{0};
+
+  int32_t total_memory_{0};
 
   std::atomic_int element_count_{0};
   std::atomic_int layout_only_element_count_{0};
@@ -1199,6 +1232,8 @@ class ElementManager : public ElementContextDelegate {
   bool fix_insert_before_fixed_bug_{true};
   bool css_fragment_parsing_tasm_worker_thread_{false};
 
+  bool enable_fiber_element_memory_reporter_{false};
+
   LynxEnvConfig lynx_env_config_;
   std::shared_ptr<PageConfig> config_;
   PageOptions page_options_;
@@ -1245,6 +1280,8 @@ class ElementManager : public ElementContextDelegate {
   base::ConcurrentQueue<std::string> attribute_timing_flag_list_;
 
   std::shared_ptr<tasm::TasmWorkerTaskRunner> task_runner_;
+
+  base::MoveOnlyClosure<void, int> vm_update_outer_obj_size_callback_{};
 
   ALLOW_UNUSED_TYPE int64_t record_id_{0};
   ALLOW_UNUSED_TYPE std::map<lynx::devtool::DevToolFunction,

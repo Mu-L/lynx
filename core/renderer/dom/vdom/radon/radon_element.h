@@ -186,6 +186,8 @@ class RadonElement : public Element {
 
   void PreparePropsBundleForDynamicCSS();
 
+  virtual int32_t GetMemoryUsage() const override { return sizeof(*this); }
+
  private:
   void RemoveNode(RadonElement* child, int32_t index, bool destroy);
 

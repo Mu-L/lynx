@@ -242,6 +242,10 @@ class Context {
 
   virtual void EnableRuntimeLeakCheck(bool enable){};
 
+  virtual void UpdateVMOuterObjSize(int size){};
+
+  virtual bool IsTracingGCEnabled() { return false; }
+
  protected:
   virtual Value CallArgs(const base::String& name, const Value* args[],
                          size_t args_count, bool pause_suppression_mode) = 0;

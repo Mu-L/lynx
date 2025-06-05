@@ -1019,6 +1019,24 @@ void QuickContext::EnableRuntimeLeakCheck(bool enable) {
   SetObjectCtxCheckStatus(context(), enable);
 }
 
+void QuickContext::UpdateVMOuterObjSize(int size) {
+  auto lepus_context = context();
+  if (lepus_context != nullptr) {
+    auto lepus_runtime = LEPUS_GetRuntime(lepus_context);
+    if (lepus_runtime != nullptr) {
+      UpdateOuterObjSize(lepus_runtime, size);
+    }
+  }
+}
+
+bool QuickContext::IsTracingGCEnabled() {
+  auto lepus_context = context();
+  if (lepus_context != nullptr) {
+    return LEPUS_IsGCMode(lepus_context);
+  }
+  return false;
+}
+
 #if ENABLE_TRACE_PERFETTO
 void QuickContext::SetRuntimeProfiler(
     std::shared_ptr<profile::RuntimeProfiler> runtime_profile) {

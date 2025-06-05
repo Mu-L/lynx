@@ -380,7 +380,15 @@ void TemplateAssembler::DidDecodeTemplate(
   }
   auto card = FindEntry(tasm::DEFAULT_ENTRY_NAME);
   if (card && card->GetVm()) {
-    card->GetVm()->UpdateGCTiming(true);
+    auto vm_context_ptr = card->GetVm();
+    vm_context_ptr->UpdateGCTiming(true);
+    if (page_config_->GetEnableLepusNG() &&
+        vm_context_ptr->IsTracingGCEnabled()) {
+      page_proxy()->element_manager()->RegisterVMUpdateOuterObjSizeCallback(
+          [vm_context_ptr_ = vm_context_ptr](int size) {
+            vm_context_ptr_->UpdateVMOuterObjSize(size);
+          });
+    }
   }
 
   // timing actions
@@ -3234,6 +3242,12 @@ void TemplateAssembler::RunPixelPipeline() {
     TRACE_EVENT(LYNX_TRACE_CATEGORY, LYNX_PIPELINE_FLUSH_UI_OPERATION);
     page_proxy()->element_manager()->painting_context()->Flush();
     current_pipeline_context->ResetFlushUIOperationRequested();
+  }
+
+  // TODO(@zhouzhitao): Move this to Pipeline Lifecycle Observer if provided;
+  if (page_proxy()->element_manager()->EnableFiberElementMemoryReport()) {
+    page_proxy()->element_manager()->UpdateElementMemoryUsage(
+        page_proxy()->element_manager()->CalcTotalMemoryUsageDiff());
   }
 
   // TODO(@yangguangzhao.solace): Advance Pipeline Lifecycle State;

@@ -665,6 +665,8 @@ class Element : public lepus::RefCounted {
   virtual size_t CountInlineStyles() = 0;
   virtual void MergeInlineStyles(StyleMap& merged_styles) = 0;
 
+  virtual int32_t GetMemoryUsage() const { return sizeof(*this); }
+
  protected:
   Element(const Element&, bool clone_resolved_props);
 
