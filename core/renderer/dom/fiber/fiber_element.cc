@@ -132,8 +132,8 @@ FiberElement::FiberElement(const FiberElement &element,
     }
   }
 
-  if (element.config().IsObject() && element.config().GetLength() > 0) {
-    config_ = lepus::Value::ShallowCopy(element.config());
+  if (element.config().IsTable() && element.config().GetLength() > 0) {
+    config_ = lepus::Value::ShallowCopy(element.config()).Table();
   }
 
   element_context_delegate_ = element.element_context_delegate_;
@@ -731,7 +731,13 @@ void FiberElement::SetBuiltinAttribute(ElementBuiltInAttributeEnum key,
       MarkPartElement(value.String());
       break;
     case ElementBuiltInAttributeEnum::CONFIG:
-      config_ = value;
+      if (value.IsTable()) {
+        config_ = value.Table();
+      } else if (value.IsJSTable()) {
+        config_ = value.ToLepusValue().Table();
+      } else {
+        DCHECK(false);
+      }
       break;
     default:
       key_is_legal = false;
@@ -2410,10 +2416,12 @@ void FiberElement::SetParsedStyles(StyleMap &&parsed_styles,
 void FiberElement::AddConfig(const base::String &key,
                              const lepus::Value &value) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, FIBER_ELEMENT_ADD_CONFIG);
-  if (config_.IsTable() && config_.Table()->IsConst()) {
-    config_ = lepus::Value::ShallowCopy(config_);
+  if (config_ == nullptr) {
+    config_ = lepus::Dictionary::Create();
+  } else if (config_->IsConst()) {
+    config_ = lepus::Value::ShallowCopy(lepus::Value(config_)).Table();
   }
-  config_.SetProperty(key, value);
+  config_->SetValue(key, value);
 }
 
 void FiberElement::SetConfig(const lepus::Value &config) {
@@ -2422,7 +2430,13 @@ void FiberElement::SetConfig(const lepus::Value &config) {
   // To improve performance, ensure that the isObject check is performed before
   // calling SetConfig, and the check and LOGW in SetConfig are no longer
   // performed.
-  config_ = config;
+  if (config.IsTable()) {
+    config_ = config.Table();
+  } else if (config.IsJSTable()) {
+    config_ = config.ToLepusValue().Table();
+  } else {
+    DCHECK(false);
+  }
 }
 
 void FiberElement::MarkStyleDirty(bool recursive) {

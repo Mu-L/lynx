@@ -499,10 +499,15 @@ class FiberElement : public Element, public SelectorItem {
   void SetConfig(const lepus::Value& config);
 
   /**
-   * A key function to get element's config
+   * A key function to get element's config.
+   * The returned value is constant. You should not get Table() from
+   * the value and change configs. Use AddConfig() instead which will
+   * guarantee this element creates a writable config table.
    */
-  const lepus::Value& config() { return config_; }
-  const lepus::Value& config() const { return config_; }
+  const lepus::Value config() const {
+    return lepus::Value(
+        config_ ?: fml::RefPtr<lepus::Dictionary>(lepus::Value::DummyTable()));
+  }
 
   virtual StyleMap GetStylesForWorklet() override;
 
@@ -1065,7 +1070,7 @@ class FiberElement : public Element, public SelectorItem {
 
   // Configuration set for elements through the LepusRuntime will be stored in
   // the config variable
-  lepus::Value config_{lepus::Dictionary::Create()};
+  fml::RefPtr<lepus::Dictionary> config_;
 
   std::list<base::closure> parallel_reduce_tasks_;
 
