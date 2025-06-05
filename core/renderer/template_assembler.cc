@@ -1541,6 +1541,8 @@ void TemplateAssembler::UpdateComponentData(
               });
 
   Scope scope(this);
+  pipeline_context_manager_->CreateAndUpdateCurrentPipelineContext(
+      pipeline_options);
   LOGI("TemplateAssembler::UpdateComponentData. this:"
        << this << " url:" << url_
        << " update_data_type:" << static_cast<uint32_t>(task.type_));
@@ -3216,16 +3218,18 @@ bool TemplateAssembler::LoadTemplateForSSRRuntime(std::vector<uint8_t> source) {
 // pixel pipeline once, controlled by its lifecycle state.
 void TemplateAssembler::RunPixelPipeline() {
   auto* current_pipeline_context = GetCurrentPipelineContext();
+  if (!current_pipeline_context ||
+      !current_pipeline_context->GetOptions()->enable_unified_pixel_pipeline) {
+    // quick rejection for pixel pipeline;
+    return;
+  }
+
   auto pipeline_option = current_pipeline_context->GetOptions();
   TRACE_EVENT(LYNX_TRACE_CATEGORY, LYNX_PIPELINE_RUN_PIXEL,
               [&pipeline_option](lynx::perfetto::EventContext ctx) {
                 ctx.event()->add_debug_annotations(
                     "pipeline_id", pipeline_option->pipeline_id);
               });
-  if (!current_pipeline_context->GetOptions()->enable_unified_pixel_pipeline) {
-    // quick rejection for pixel pipeline;
-    return;
-  }
   if (current_pipeline_context->IsResolveRequested()) {
     TRACE_EVENT(LYNX_TRACE_CATEGORY, LYNX_PIPELINE_TRIGGER_LAYOUT);
     // trigger resolve;
