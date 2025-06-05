@@ -4,12 +4,15 @@
 
 #ifndef CORE_RUNTIME_VM_LEPUS_REGEXP_H_
 #define CORE_RUNTIME_VM_LEPUS_REGEXP_H_
-#include "base/include/fml/memory/ref_counted.h"
+
 #include "base/include/value/base_string.h"
+#include "core/runtime/vm/lepus/ref_counted_class.h"
+#include "core/runtime/vm/lepus/ref_type.h"
+
 namespace lynx {
 namespace lepus {
 class Value;
-class RegExp : public fml::RefCountedThreadSafeStorage {
+class RegExp : public lepus::RefCounted {
  public:
   static fml::RefPtr<RegExp> Create() {
     return fml::AdoptRef<RegExp>(new RegExp());
@@ -35,6 +38,20 @@ class RegExp : public fml::RefCountedThreadSafeStorage {
   void ReleaseSelf() const override { delete this; }
 
   ~RegExp() override = default;
+
+  RefType GetRefType() const override { return RefType::kRegExp; }
+
+  void Print(std::ostream& output) override {
+    output << "regexp" << std::endl;
+    output << "pattern: " << get_pattern().str() << std::endl;
+    output << "flags: " << get_flags().str() << std::endl;
+  }
+
+  bool Equals(const fml::RefPtr<RefCounted>& other) override {
+    auto reg_exp = fml::static_ref_ptr_cast<RegExp>(other);
+    return get_pattern() == reg_exp->get_pattern() &&
+           get_flags() == reg_exp->get_flags();
+  }
 
   friend bool operator==(const RegExp& left, const RegExp& right) {
     return left.pattern_ == right.pattern_ && left.flags_ == right.flags_;

@@ -35,6 +35,16 @@ class RefCountedBase : public fml::RefCountedThreadSafeStorage {
 
 class RefCounted : public RefCountedBase {
  public:
+  virtual fml::RefPtr<RefCounted> Clone() {
+    return fml::RefPtr<RefCounted>(nullptr);
+  }
+
+  virtual void Print(std::ostream& output) {}
+
+  virtual bool Equals(const fml::RefPtr<RefCounted>& other) {
+    return this == other.get();
+  }
+
   std::unique_ptr<Value> js_object_cache;
 };
 

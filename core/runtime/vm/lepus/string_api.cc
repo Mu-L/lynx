@@ -362,7 +362,8 @@ static Value Search(VMContext* context) {
   if (params_count != 1) {
     DCHECK(params_count == 2);
     if (context->GetParam(0)->IsRegExp()) {
-      reg_exp = context->GetParam(0)->RegExp();
+      reg_exp =
+          fml::static_ref_ptr_cast<RegExp>(context->GetParam(0)->RefCounted());
     } else {
       DCHECK(context->GetParam(0)->IsString());
       reg_exp = RegExp::Create(context->GetParam(0)->String());
@@ -477,7 +478,8 @@ static Value Match(VMContext* context) {
   // handle param:
   param = context->GetParam(0);
   if (param->IsRegExp()) {
-    auto reg_exp = context->GetParam(0)->RegExp();
+    auto reg_exp =
+        fml::static_ref_ptr_cast<RegExp>(context->GetParam(0)->RefCounted());
     pattern = reg_exp->get_pattern().str();
     flags = reg_exp->get_flags().str();
     re_flags = GetRegExpFlags(flags);
@@ -685,7 +687,7 @@ static Value Replace(VMContext* context) {
   } else if (param1->IsRegExp()) {
     // if the pattern is a reg exp, use lre_compile and lre_exe function to
     // get the result
-    auto param1_regex = param1->RegExp();
+    auto param1_regex = fml::static_ref_ptr_cast<RegExp>(param1->RefCounted());
     const auto& pattern = param1_regex->get_pattern();
     const auto& flags = param1_regex->get_flags().str();
     auto re_flags = GetRegExpFlags(flags);

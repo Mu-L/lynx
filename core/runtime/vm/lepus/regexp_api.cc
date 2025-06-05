@@ -23,7 +23,8 @@ namespace lepus {
 static Value Test(VMContext* context) {
   long params_count = context->GetParamsSize();
   DCHECK(context->GetParam(params_count - 1)->IsRegExp());
-  auto reg_exp = context->GetParam(params_count - 1)->RegExp();
+  auto reg_exp = fml::static_ref_ptr_cast<RegExp>(
+      context->GetParam(params_count - 1)->RefCounted());
 
   const std::string& pattern = reg_exp->get_pattern().str();
   const std::string& flags = reg_exp->get_flags().str();

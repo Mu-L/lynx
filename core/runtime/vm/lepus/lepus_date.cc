@@ -197,8 +197,9 @@ void CDate::ParserFormatString(std::string date, const std::string& format,
 }
 
 std::string CDate::FormatToString(Value* date, const std::string& format) {
-  const tm_extend& time = date->Date()->get_date_();
-  int ms = date->Date()->get_ms_();
+  const tm_extend& time =
+      fml::static_ref_ptr_cast<CDate>(date->RefCounted())->get_date_();
+  int ms = fml::static_ref_ptr_cast<CDate>(date->RefCounted())->get_ms_();
   std::string destination;
   size_t i = 0, length = format.length();
   constexpr size_t kBufferSize = 32;

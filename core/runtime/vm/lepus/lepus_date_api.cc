@@ -80,7 +80,8 @@ static Value LepusLocal(VMContext* context) {
 static Value Locale(VMContext* context) {
   auto params_count = context->GetParamsSize();
   DCHECK(params_count == 1 || params_count == 2);
-  auto date = context->GetParam(params_count - 1)->Date();
+  auto date = fml::static_ref_ptr_cast<CDate>(
+      context->GetParam(params_count - 1)->RefCounted());
   if (params_count == 1) {
     return Value(DateContent()[date->get_language()]);
   }
@@ -96,7 +97,8 @@ static Value Locale(VMContext* context) {
 static Value Unix(VMContext* context) {
   auto params_count_ = context->GetParamsSize();
   DCHECK(params_count_ == 1);
-  auto date = context->GetParam(0)->Date();
+  auto date =
+      fml::static_ref_ptr_cast<CDate>(context->GetParam(0)->RefCounted());
   time_t time1 = date->get_time_t_();
   int64_t time1_v = static_cast<int64_t>(time1);
   int64_t ret = static_cast<int64_t>(time1_v * 1000 + date->get_ms_());
@@ -108,7 +110,9 @@ static Value Format(VMContext* context) {
   auto params_count = context->GetParamsSize();
   if (params_count == 1) {
     char buf[64];
-    const tm_extend t = context->GetParam(0)->Date()->get_date_();
+    const tm_extend t =
+        fml::static_ref_ptr_cast<CDate>(context->GetParam(0)->RefCounted())
+            ->get_date_();
     strftime(buf, 64, "%Y-%m-%dT%H:%M:%S", &t);
     return Value(buf);
   }
@@ -132,7 +136,8 @@ static Value Format(VMContext* context) {
 static Value Year(VMContext* context) {
   auto params_count_ = context->GetParamsSize();
   DCHECK(params_count_ == 1 || params_count_ == 2);
-  auto date = context->GetParam(params_count_ - 1)->Date();
+  auto date = fml::static_ref_ptr_cast<CDate>(
+      context->GetParam(params_count_ - 1)->RefCounted());
   int year = date->get_date_().tm_year + 1900;
   return Value(static_cast<uint32_t>(year));
 }
@@ -140,7 +145,8 @@ static Value Year(VMContext* context) {
 static Value Month(VMContext* context) {
   auto params_count_ = context->GetParamsSize();
   DCHECK(params_count_ == 1 || params_count_ == 2);
-  auto date = context->GetParam(params_count_ - 1)->Date();
+  auto date = fml::static_ref_ptr_cast<CDate>(
+      context->GetParam(params_count_ - 1)->RefCounted());
   int month = date->get_date_().tm_mon;
   return Value(static_cast<uint32_t>(month));
 }
@@ -148,7 +154,8 @@ static Value Month(VMContext* context) {
 static Value Date(VMContext* context) {
   auto params_count_ = context->GetParamsSize();
   DCHECK(params_count_ == 1 || params_count_ == 2);
-  auto date = context->GetParam(params_count_ - 1)->Date();
+  auto date = fml::static_ref_ptr_cast<CDate>(
+      context->GetParam(params_count_ - 1)->RefCounted());
   int dat = date->get_date_().tm_mday;
   return Value(static_cast<uint32_t>(dat));
 }
@@ -156,7 +163,8 @@ static Value Date(VMContext* context) {
 static Value Day(VMContext* context) {
   auto params_count_ = context->GetParamsSize();
   DCHECK(params_count_ == 1 || params_count_ == 2);
-  auto date = context->GetParam(params_count_ - 1)->Date();
+  auto date = fml::static_ref_ptr_cast<CDate>(
+      context->GetParam(params_count_ - 1)->RefCounted());
   int day = date->get_date_().tm_wday;
   return Value(static_cast<uint32_t>(day));
 }
@@ -164,7 +172,8 @@ static Value Day(VMContext* context) {
 static Value Hour(VMContext* context) {
   auto params_count_ = context->GetParamsSize();
   DCHECK(params_count_ == 1 || params_count_ == 2);
-  auto date = context->GetParam(params_count_ - 1)->Date();
+  auto date = fml::static_ref_ptr_cast<CDate>(
+      context->GetParam(params_count_ - 1)->RefCounted());
   int Hour = date->get_date_().tm_hour;
   return Value(static_cast<uint32_t>(Hour));
 }
@@ -172,7 +181,8 @@ static Value Hour(VMContext* context) {
 static Value Minute(VMContext* context) {
   auto params_count_ = context->GetParamsSize();
   DCHECK(params_count_ == 1 || params_count_ == 2);
-  auto date = context->GetParam(params_count_ - 1)->Date();
+  auto date = fml::static_ref_ptr_cast<CDate>(
+      context->GetParam(params_count_ - 1)->RefCounted());
   int Min = date->get_date_().tm_min;
   return Value(static_cast<uint32_t>(Min));
 }
@@ -180,7 +190,8 @@ static Value Minute(VMContext* context) {
 static Value Sec(VMContext* context) {
   auto params_count_ = context->GetParamsSize();
   DCHECK(params_count_ == 1 || params_count_ == 2);
-  auto date = context->GetParam(params_count_ - 1)->Date();
+  auto date = fml::static_ref_ptr_cast<CDate>(
+      context->GetParam(params_count_ - 1)->RefCounted());
   int second = date->get_date_().tm_sec;
   return Value(static_cast<uint32_t>(second));
 }

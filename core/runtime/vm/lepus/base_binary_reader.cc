@@ -256,7 +256,7 @@ bool BaseBinaryReader::DecodeValue(Value* result, bool is_header) {
 #if !ENABLE_JUST_LEPUSNG
     case ValueType::Value_Closure: {
       DECODE_CLOSURE(closure);
-      result->SetClosure(std::move(closure));
+      result->SetRefCounted(std::move(closure));
     } break;
     case ValueType::Value_CFunction:
     case ValueType::Value_CPointer:
@@ -269,12 +269,12 @@ bool BaseBinaryReader::DecodeValue(Value* result, bool is_header) {
       break;
     case ValueType::Value_CDate: {
       DECODE_DATE(date);
-      result->SetDate(std::move(date));
+      result->SetRefCounted(std::move(date));
       break;
     }
     case ValueType::Value_RegExp: {
       DECODE_REGEXP(reg);
-      result->SetRegExp(std::move(reg));
+      result->SetRefCounted(std::move(reg));
       break;
     }
     case ValueType::Value_NaN: {

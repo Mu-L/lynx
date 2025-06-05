@@ -11,11 +11,12 @@
 #include <utility>
 #include <vector>
 
-#include "base/include/fml/memory/ref_counted.h"
 #include "base/include/vector.h"
 #include "core/runtime/vm/lepus/array.h"
 #include "core/runtime/vm/lepus/lepus_value.h"
 #include "core/runtime/vm/lepus/op_code.h"
+#include "core/runtime/vm/lepus/ref_counted_class.h"
+#include "core/runtime/vm/lepus/ref_type.h"
 #include "core/runtime/vm/lepus/regexp.h"
 #include "core/runtime/vm/lepus/switch.h"
 #include "core/runtime/vm/lepus/upvalue.h"
@@ -271,7 +272,7 @@ class Function : public fml::RefCountedThreadSafeStorage {
   base::Stack<uint64_t> loop_block_stack_;
 };
 
-class Closure : public fml::RefCountedThreadSafeStorage {
+class Closure : public lepus::RefCounted {
  public:
   static fml::RefPtr<Closure> Create(fml::RefPtr<Function> function) {
     return fml::AdoptRef<Closure>(new Closure(std::move(function)));
@@ -293,6 +294,8 @@ class Closure : public fml::RefCountedThreadSafeStorage {
 
   void SetContext(Value v) { context_ = std::move(v); }
   Value GetContext() { return context_; }
+
+  RefType GetRefType() const override { return RefType::kClosure; }
 
  protected:
   Closure() = default;

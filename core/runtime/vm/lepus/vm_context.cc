@@ -88,7 +88,8 @@ bool VMContext::Execute(Value* ret_val) {
   EnsureLynx();
 
   Value* top = heap().top_++;
-  top->SetClosure(Closure::Create(fml::RefPtr<Function>(root_function_.get())));
+  top->SetRefCounted(
+      Closure::Create(fml::RefPtr<Function>(root_function_.get())));
 
   Value ret;
   if (current_frame_) {
@@ -353,7 +354,8 @@ bool VMContext::GetTopLevelVariableByName(const base::String& name,
 int32_t VMContext::CallFunction(Value* function, size_t argc, Value* ret) {
   if (unlikely(function->IsClosure())) {
     heap_.top_ = function + 1;
-    auto lepus_function = function->GetClosure()->function();
+    auto lepus_function =
+        fml::static_ref_ptr_cast<Closure>(function->RefCounted())->function();
     const Instruction* ins = lepus_function->GetOpCodes();
     Frame frame(heap_.top_, function, ret, ins,
                 ins + lepus_function->OpCodeSize(), current_frame_, 0);
@@ -452,7 +454,8 @@ void VMContext::ReportException(const std::string& exception_info, int& pc,
         instruction_length = static_cast<int>(current_frame_->end_ -
                                               current_frame_->instruction_);
         if (current_frame_->function_) {
-          current_frame_closure = current_frame_->function_->GetClosure();
+          current_frame_closure = fml::static_ref_ptr_cast<Closure>(
+              current_frame_->function_->RefCounted());
           current_frame_function = current_frame_closure->function().get();
         }
         current_frame_base = current_frame_->instruction_;
@@ -476,7 +479,8 @@ void VMContext::ReportException(const std::string& exception_info, int& pc,
     current_frame_base = current_frame_->instruction_;
     current_frame_regs = current_frame_->register_;
     if (current_frame_->function_) {
-      current_frame_closure = current_frame_->function_->GetClosure();
+      current_frame_closure = fml::static_ref_ptr_cast<Closure>(
+          current_frame_->function_->RefCounted());
       current_frame_function = current_frame_closure->function().get();
     }
     exception_info_.erase(exception_info_.find_last_not_of('\n') + 1,
@@ -502,8 +506,8 @@ std::string VMContext::BuildBackTrace(const base::Vector<int>& pc,
   size_t index = 0;
   while (current_frame) {
     int current_pc = index >= pc.size() ? -1 : pc[index++];
-    fml::RefPtr<Closure> current_closure =
-        current_frame->function_->GetClosure();
+    fml::RefPtr<Closure> current_closure = fml::static_ref_ptr_cast<Closure>(
+        current_frame->function_->RefCounted());
     fml::RefPtr<Function> current_function = current_closure->function();
     if (!current_function.get()) break;
 
@@ -718,7 +722,8 @@ LEPUS_NOT_INLINE void VMContext::RunFrame_Op_CreateBlockContext(
 
   *a = Value(CArray::Create());
   a->Array()->resize(array_size);
-  auto current_closure = current_frame_->function_->GetClosure();
+  auto current_closure = fml::static_ref_ptr_cast<Closure>(
+      current_frame_->function_->RefCounted());
   Value pre_context = current_closure->GetContext();
 
   a->SetProperty(0, pre_context);
@@ -750,7 +755,8 @@ LEPUS_NOT_INLINE void VMContext::RunFrame_Label_LeaveBlock() {
 void VMContext::RunFrame() {
   if (current_frame_ == nullptr) return;
   // function is retained by closure, so we only retain the closure by RefPtr.
-  fml::RefPtr<Closure> closure = current_frame_->function_->GetClosure();
+  fml::RefPtr<Closure> closure = fml::static_ref_ptr_cast<Closure>(
+      current_frame_->function_->RefCounted());
   Function* function = closure->function().get();
   Value* a = nullptr;
   Value* b = nullptr;
@@ -879,7 +885,8 @@ void VMContext::RunFrame() {
         c = GET_REGISTER_C(i);
         current_frame_->current_pc_ = pc;
         if (likely(a->IsClosure())) {
-          auto lepus_function = a->GetClosure()->function();
+          auto lepus_function =
+              fml::static_ref_ptr_cast<Closure>(a->RefCounted())->function();
           int32_t params_size = lepus_function->GetParamsSize();
           if (params_size > static_cast<int32_t>(argc)) {
             ReportLogBox("Do not support default function params on function " +
@@ -1191,7 +1198,8 @@ void VMContext::RunFrame() {
         auto arr = CArray::Create();
         arr->resize(array_size);
         Frame* frame = current_frame_;
-        auto current_closure = frame->function_->GetClosure();
+        auto current_closure =
+            fml::static_ref_ptr_cast<Closure>(frame->function_->RefCounted());
         arr->set(0, current_closure->GetContext());
         *a = Value(std::move(arr));
         closure_context_ = *a;
@@ -1389,7 +1397,8 @@ void VMContext::RunFrame() {
 
 void VMContext::GenerateClosure(Value* value, long index) {
   Frame* frame = current_frame_;
-  auto current_closure = frame->function_->GetClosure();
+  auto current_closure =
+      fml::static_ref_ptr_cast<Closure>(frame->function_->RefCounted());
   auto function = current_closure->function()->GetChildFunction(index);
   auto closure = Closure::Create(function);
 
@@ -1405,7 +1414,7 @@ void VMContext::GenerateClosure(Value* value, long index) {
     }
   }
   closure->SetContext(closure_context_);
-  value->SetClosure(closure);
+  value->SetRefCounted(closure);
 
   if (!closure_context_.IsNil()) {
     closures_.AddClosure(closure, executed_);

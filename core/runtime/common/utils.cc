@@ -120,7 +120,9 @@ std::optional<Value> valueFromLepus(
       if (jsi_object_wrapper_manager) {
         piper::Value func =
             jsi_object_wrapper_manager->GetJSIObjectByIDOnJSThread(
-                runtime, data.LEPUSObject()->JSIObjectID());
+                runtime,
+                fml::static_ref_ptr_cast<lepus::LEPUSObject>(data.RefCounted())
+                    ->JSIObjectID());
         return func;
       }
 

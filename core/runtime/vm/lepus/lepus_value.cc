@@ -15,13 +15,9 @@
 #include "core/runtime/trace/runtime_trace_event_def.h"
 #include "core/runtime/vm/lepus/array.h"
 #include "core/runtime/vm/lepus/byte_array.h"
-#include "core/runtime/vm/lepus/function.h"
-#include "core/runtime/vm/lepus/js_object.h"
-#include "core/runtime/vm/lepus/lepus_date.h"
 #include "core/runtime/vm/lepus/lynx_value_extended.h"
 #include "core/runtime/vm/lepus/path_parser.h"
 #include "core/runtime/vm/lepus/ref_counted_class.h"
-#include "core/runtime/vm/lepus/regexp.h"
 #include "core/runtime/vm/lepus/table.h"
 
 namespace lynx {
@@ -75,18 +71,6 @@ Value::Value(base::String&& data) {
   base::String::Unsafe::SetStringToEmpty(data);
 }
 
-Value::Value(const fml::RefPtr<lepus::LEPUSObject>& data)
-    : value_({.val_ptr = reinterpret_cast<lynx_value_ptr>(data.get()),
-              .type = lynx_value_object,
-              .tag = static_cast<int32_t>(CustomRefCountedType::kJSObject)}) {
-  data.get()->AddRef();
-}
-
-Value::Value(fml::RefPtr<lepus::LEPUSObject>&& data)
-    : value_({.val_ptr = reinterpret_cast<lynx_value_ptr>(data.AbandonRef()),
-              .type = lynx_value_object,
-              .tag = static_cast<int32_t>(CustomRefCountedType::kJSObject)}) {}
-
 Value::Value(const fml::RefPtr<lepus::ByteArray>& data)
     : value_({.val_ptr = reinterpret_cast<lynx_value_ptr>(data.get()),
               .type = lynx_value_arraybuffer}) {
@@ -97,17 +81,17 @@ Value::Value(fml::RefPtr<lepus::ByteArray>&& data)
     : value_({.val_ptr = reinterpret_cast<lynx_value_ptr>(data.AbandonRef()),
               .type = lynx_value_arraybuffer}) {}
 
-Value::Value(const fml::RefPtr<lepus::RefCounted>& data)
-    : value_({.val_ptr = reinterpret_cast<lynx_value_ptr>(data.get()),
-              .type = lynx_value_object,
-              .tag = static_cast<int32_t>(CustomRefCountedType::kRefCounted)}) {
+Value::Value(const fml::RefPtr<lepus::RefCounted>& data) {
+  value_.val_ptr = reinterpret_cast<lynx_value_ptr>(data.get());
+  value_.type = lynx_value_object;
+  value_.tag = static_cast<int32_t>(data->GetRefType());
   data.get()->AddRef();
 }
 
-Value::Value(fml::RefPtr<lepus::RefCounted>&& data)
-    : value_({.val_ptr = reinterpret_cast<lynx_value_ptr>(data.AbandonRef()),
-              .type = lynx_value_object,
-              .tag = static_cast<int32_t>(CustomRefCountedType::kRefCounted)}) {
+Value::Value(fml::RefPtr<lepus::RefCounted>&& data) {
+  value_.tag = static_cast<int32_t>(data->GetRefType());
+  value_.val_ptr = reinterpret_cast<lynx_value_ptr>(data.AbandonRef());
+  value_.type = lynx_value_object;
 }
 
 Value::Value(bool val) : value_({.val_bool = val, .type = lynx_value_bool}) {}
@@ -276,138 +260,6 @@ double Value::Number() const {
   return 0;
 }
 
-#if !ENABLE_JUST_LEPUSNG
-Value::Value(const fml::RefPtr<lepus::Closure>& data)
-    : value_({.val_ptr = reinterpret_cast<lynx_value_ptr>(data.get()),
-              .type = lynx_value_object,
-              .tag = static_cast<int32_t>(CustomRefCountedType::kClosure)}) {
-  data.get()->AddRef();
-}
-
-Value::Value(fml::RefPtr<Closure>&& data)
-    : value_({.val_ptr = reinterpret_cast<lynx_value_ptr>(data.AbandonRef()),
-              .type = lynx_value_object,
-              .tag = static_cast<int32_t>(CustomRefCountedType::kClosure)}) {}
-
-Value::Value(const fml::RefPtr<lepus::CDate>& data)
-    : value_({.val_ptr = reinterpret_cast<lynx_value_ptr>(data.get()),
-              .type = lynx_value_object,
-              .tag = static_cast<int32_t>(CustomRefCountedType::kCDate)}) {
-  data.get()->AddRef();
-}
-
-Value::Value(fml::RefPtr<CDate>&& data)
-    : value_({.val_ptr = reinterpret_cast<lynx_value_ptr>(data.AbandonRef()),
-              .type = lynx_value_object,
-              .tag = static_cast<int32_t>(CustomRefCountedType::kCDate)}) {}
-
-Value::Value(const fml::RefPtr<lepus::RegExp>& data)
-    : value_({.val_ptr = reinterpret_cast<lynx_value_ptr>(data.get()),
-              .type = lynx_value_object,
-              .tag = static_cast<int32_t>(CustomRefCountedType::kRegExp)}) {
-  data.get()->AddRef();
-}
-
-Value::Value(fml::RefPtr<lepus::RegExp>&& data)
-    : value_({.val_ptr = reinterpret_cast<lynx_value_ptr>(data.AbandonRef()),
-              .type = lynx_value_object,
-              .tag = static_cast<int32_t>(CustomRefCountedType::kRegExp)}) {}
-
-fml::WeakRefPtr<lepus::RegExp> Value::RegExp() const& {
-  return fml::WeakRefPtr<lepus::RegExp>(
-      value_.val_ptr != nullptr && value_.type == lynx_value_object &&
-              value_.tag == static_cast<int32_t>(CustomRefCountedType::kRegExp)
-          ? reinterpret_cast<lepus::RegExp*>(value_.val_ptr)
-          : DummyRegExp());
-}
-
-fml::RefPtr<lepus::RegExp> Value::RegExp() && {
-  if (value_.val_ptr != nullptr && value_.type == lynx_value_object &&
-      value_.tag == static_cast<int32_t>(CustomRefCountedType::kRegExp)) {
-    return fml::RefPtr<lepus::RegExp>(
-        reinterpret_cast<lepus::RegExp*>(value_.val_ptr));
-  }
-  return lepus::RegExp::Create();
-}
-
-fml::WeakRefPtr<Closure> Value::GetClosure() const& {
-  return fml::WeakRefPtr<Closure>(
-      value_.val_ptr != nullptr && value_.type == lynx_value_object &&
-              value_.tag == static_cast<int32_t>(CustomRefCountedType::kClosure)
-          ? reinterpret_cast<Closure*>(value_.val_ptr)
-          : DummyClosure());
-}
-
-fml::RefPtr<Closure> Value::GetClosure() && {
-  if (value_.val_ptr != nullptr && value_.type == lynx_value_object &&
-      value_.tag == static_cast<int32_t>(CustomRefCountedType::kClosure)) {
-    return fml::RefPtr<Closure>(reinterpret_cast<Closure*>(value_.val_ptr));
-  }
-  return Closure::Create(nullptr);
-}
-
-fml::WeakRefPtr<CDate> Value::Date() const& {
-  return fml::WeakRefPtr<CDate>(
-      value_.val_ptr != nullptr && value_.type == lynx_value_object &&
-              value_.tag == static_cast<int32_t>(CustomRefCountedType::kCDate)
-          ? reinterpret_cast<CDate*>(value_.val_ptr)
-          : DummyDate());
-}
-
-fml::RefPtr<CDate> Value::Date() && {
-  if (value_.val_ptr != nullptr && value_.type == lynx_value_object &&
-      value_.tag == static_cast<int32_t>(CustomRefCountedType::kCDate)) {
-    return fml::RefPtr<CDate>(reinterpret_cast<CDate*>(value_.val_ptr));
-  }
-  return CDate::Create();
-}
-
-void Value::SetClosure(const fml::RefPtr<lepus::Closure>& closure) {
-  FreeValue();
-  value_.val_ptr = reinterpret_cast<lynx_value_ptr>(closure.get());
-  value_.type = lynx_value_object;
-  value_.tag = static_cast<int32_t>(CustomRefCountedType::kClosure);
-  closure->AddRef();
-}
-
-void Value::SetClosure(fml::RefPtr<lepus::Closure>&& closure) {
-  FreeValue();
-  value_.val_ptr = reinterpret_cast<lynx_value_ptr>(closure.AbandonRef());
-  value_.type = lynx_value_object;
-  value_.tag = static_cast<int32_t>(CustomRefCountedType::kClosure);
-}
-
-void Value::SetDate(const fml::RefPtr<lepus::CDate>& date) {
-  FreeValue();
-  value_.val_ptr = reinterpret_cast<lynx_value_ptr>(date.get());
-  value_.type = lynx_value_object;
-  value_.tag = static_cast<int32_t>(CustomRefCountedType::kCDate);
-  date->AddRef();
-}
-
-void Value::SetDate(fml::RefPtr<lepus::CDate>&& date) {
-  FreeValue();
-  value_.val_ptr = reinterpret_cast<lynx_value_ptr>(date.AbandonRef());
-  value_.type = lynx_value_object;
-  value_.tag = static_cast<int32_t>(CustomRefCountedType::kCDate);
-}
-
-void Value::SetRegExp(const fml::RefPtr<lepus::RegExp>& regexp) {
-  FreeValue();
-  value_.val_ptr = reinterpret_cast<lynx_value_ptr>(regexp.get());
-  value_.type = lynx_value_object;
-  value_.tag = static_cast<int32_t>(CustomRefCountedType::kRegExp);
-  regexp->AddRef();
-}
-
-void Value::SetRegExp(fml::RefPtr<lepus::RegExp>&& regexp) {
-  FreeValue();
-  value_.val_ptr = reinterpret_cast<lynx_value_ptr>(regexp.AbandonRef());
-  value_.type = lynx_value_object;
-  value_.tag = static_cast<int32_t>(CustomRefCountedType::kRegExp);
-}
-#endif  // !ENABLE_JUST_LEPUSNG
-
 const std::string& Value::StdString() const {
   if (value_.type == lynx_value_string) {
     return reinterpret_cast<base::RefCountedStringImpl*>(value_.val_ptr)->str();
@@ -477,23 +329,6 @@ base::String Value::String() && {
   return base::String();
 }
 
-fml::WeakRefPtr<lepus::LEPUSObject> Value::LEPUSObject() const& {
-  return fml::WeakRefPtr<lepus::LEPUSObject>(
-      value_.val_ptr != nullptr && value_.type == lynx_value_object &&
-              value_.tag == static_cast<int>(CustomRefCountedType::kJSObject)
-          ? reinterpret_cast<lepus::LEPUSObject*>(value_.val_ptr)
-          : DummyLEPUSObject());
-}
-
-fml::RefPtr<lepus::LEPUSObject> Value::LEPUSObject() && {
-  if (value_.val_ptr != nullptr && value_.type == lynx_value_object &&
-      value_.tag == static_cast<int>(CustomRefCountedType::kJSObject)) {
-    return fml::RefPtr<lepus::LEPUSObject>(
-        reinterpret_cast<lepus::LEPUSObject*>(value_.val_ptr));
-  }
-  return lepus::LEPUSObject::Create();
-}
-
 fml::WeakRefPtr<lepus::ByteArray> Value::ByteArray() const& {
   return fml::WeakRefPtr<lepus::ByteArray>(
       value_.val_ptr != nullptr && value_.type == lynx_value_arraybuffer
@@ -540,15 +375,13 @@ fml::RefPtr<CArray> Value::Array() && {
 
 fml::WeakRefPtr<lepus::RefCounted> Value::RefCounted() const& {
   return fml::WeakRefPtr<lepus::RefCounted>(
-      value_.type == lynx_value_object &&
-              value_.tag == static_cast<int>(CustomRefCountedType::kRefCounted)
+      value_.type == lynx_value_object
           ? reinterpret_cast<lepus::RefCounted*>(value_.val_ptr)
           : nullptr);
 }
 
 fml::RefPtr<lepus::RefCounted> Value::RefCounted() && {
-  if (value_.type == lynx_value_object &&
-      value_.tag == static_cast<int>(CustomRefCountedType::kRefCounted)) {
+  if (value_.type == lynx_value_object) {
     return fml::RefPtr<lepus::RefCounted>(
         reinterpret_cast<lepus::RefCounted*>(value_.val_ptr));
   }
@@ -648,21 +481,6 @@ void Value::SetArray(fml::RefPtr<lepus::CArray>&& ary) {
   value_.type = lynx_value_array;
 }
 
-void Value::SetJSObject(const fml::RefPtr<lepus::LEPUSObject>& lepus_obj) {
-  FreeValue();
-  value_.val_ptr = reinterpret_cast<lynx_value_ptr>(lepus_obj.get());
-  value_.type = lynx_value_object;
-  value_.tag = static_cast<int32_t>(CustomRefCountedType::kJSObject);
-  lepus_obj->AddRef();
-}
-
-void Value::SetJSObject(fml::RefPtr<lepus::LEPUSObject>&& lepus_obj) {
-  FreeValue();
-  value_.val_ptr = reinterpret_cast<lynx_value_ptr>(lepus_obj.AbandonRef());
-  value_.type = lynx_value_object;
-  value_.tag = static_cast<int32_t>(CustomRefCountedType::kJSObject);
-}
-
 void Value::SetByteArray(const fml::RefPtr<lepus::ByteArray>& src) {
   FreeValue();
   value_.val_ptr = reinterpret_cast<lynx_value_ptr>(src.get());
@@ -680,15 +498,15 @@ void Value::SetRefCounted(const fml::RefPtr<lepus::RefCounted>& src) {
   FreeValue();
   value_.val_ptr = reinterpret_cast<lynx_value_ptr>(src.get());
   value_.type = lynx_value_object;
-  value_.tag = static_cast<int32_t>(CustomRefCountedType::kRefCounted);
+  value_.tag = static_cast<int32_t>(src->GetRefType());
   src->AddRef();
 }
 
 void Value::SetRefCounted(fml::RefPtr<lepus::RefCounted>&& src) {
   FreeValue();
+  value_.tag = static_cast<int32_t>(src->GetRefType());
   value_.val_ptr = reinterpret_cast<lynx_value_ptr>(src.AbandonRef());
   value_.type = lynx_value_object;
-  value_.tag = static_cast<int32_t>(CustomRefCountedType::kRefCounted);
 }
 
 int Value::GetLength() const {
@@ -846,8 +664,10 @@ void Value::MergeValue(lepus::Value& target, const lepus::Value& update) {
     return;
   }
   // check target's first level variable.
-  // 1. if update key is not path, simply add new k-v pair for the first level
-  // 2. if update key is value path, clone the first level k-v pair and update
+  // 1. if update key is not path, simply add new k-v pair for the first
+  // level
+  // 2. if update key is value path, clone the first level k-v pair and
+  // update
   //     the exact value.
   auto update_table =
       update.IsTable()
@@ -1000,17 +820,13 @@ Value Value::CloneRecursively(const Value& src, bool clone_as_jsvalue) {
       return Value(std::move(ary));
     }
     case lynx_value_object: {
-      CustomRefCountedType ref_type =
-          static_cast<CustomRefCountedType>(src.value_.tag);
+      RefType ref_type = static_cast<RefType>(src.value_.tag);
       switch (ref_type) {
-        case CustomRefCountedType::kJSObject:
-          return Value(
-              LEPUSObject::Create(src.LEPUSObject()->jsi_object_proxy()));
+        case RefType::kJSIObject:
+          return Value(src.RefCounted()->Clone());
 #if !ENABLE_JUST_LEPUSNG
-        case CustomRefCountedType::kCDate: {
-          auto date =
-              CDate::Create(src.Date()->get_date_(), src.Date()->get_ms_(),
-                            src.Date()->get_language());
+        case RefType::kCDate: {
+          auto date = src.RefCounted()->Clone();
           return Value(std::move(date));
         }
 #endif
@@ -1121,27 +937,11 @@ bool operator==(const Value& left, const Value& right) {
       // TODO(frendy): add impl
       break;
     case lynx_value_object: {
-      CustomRefCountedType ref_type =
-          static_cast<CustomRefCountedType>(left.value_.tag);
-      switch (ref_type) {
-        case CustomRefCountedType::kRefCounted:
-          return left.RefCounted() == right.RefCounted();
-        case CustomRefCountedType::kJSObject:
-          return *(left.LEPUSObject().get()) == *(right.LEPUSObject().get());
-#if !ENABLE_JUST_LEPUSNG
-        case CustomRefCountedType::kClosure:
-          return left.GetClosure() == right.GetClosure();
-        case CustomRefCountedType::kCDate:
-          return *(left.Date().get()) == *(right.Date().get());
-        case CustomRefCountedType::kRegExp:
-          return left.RegExp()->get_pattern() ==
-                     right.RegExp()->get_pattern() &&
-                 left.RegExp()->get_flags() == right.RegExp()->get_flags();
-#endif
-        default:
-          break;
+      if (!left.RefCounted() && !right.RefCounted()) {
+        return true;
       }
-    } break;
+      return left.RefCounted() && left.RefCounted()->Equals(right.RefCounted());
+    }
     case lynx_value_int32:
     case lynx_value_int64:
     case lynx_value_uint32:
@@ -1242,40 +1042,42 @@ void Value::PrintValue(std::ostream& output, bool ignore_other,
       }
       break;
     case lynx_value_object: {
-      CustomRefCountedType ref_type =
-          static_cast<CustomRefCountedType>(value_.tag);
+      RefType ref_type = static_cast<RefType>(value_.tag);
       switch (ref_type) {
-        case CustomRefCountedType::kRefCounted:
-        case CustomRefCountedType::kClosure:
+        case RefType::kJSIObject:
+          if (ignore_other) {
+            output << "";
+          } else {
+            RefCounted()->Print(output);
+          }
+          break;
+#if !ENABLE_JUST_LEPUSNG
+        case RefType::kClosure:
           if (ignore_other) {
             output << "";
           } else {
             output << "closure/cfunction/cpointer/refcounted" << std::endl;
           }
           break;
-        case CustomRefCountedType::kJSObject:
+        case RefType::kCDate:
           if (ignore_other) {
             output << "";
           } else {
-            output << "LEPUSObject id=" << LEPUSObject()->JSIObjectID();
+            RefCounted()->Print(output);
           }
           break;
-#if !ENABLE_JUST_LEPUSNG
-        case CustomRefCountedType::kCDate:
-          if (ignore_other) {
-            output << "";
-          } else {
-            Date()->print(output);
-          }
-          break;
-        case CustomRefCountedType::kRegExp: {
-          output << "regexp" << std::endl;
-          output << "pattern: " << RegExp()->get_pattern().str() << std::endl;
-          output << "flags: " << RegExp()->get_flags().str() << std::endl;
+        case RefType::kRegExp: {
+          RefCounted()->Print(output);
         } break;
 #endif
 
         default:
+          // RefCounted
+          if (ignore_other) {
+            output << "";
+          } else {
+            output << "closure/cfunction/cpointer/refcounted" << std::endl;
+          }
           break;
       }
     } break;
@@ -1314,9 +1116,8 @@ bool Value::MarkConst() const {
       // markConst.
       return true;
     case lynx_value_object: {
-      CustomRefCountedType ref_type =
-          static_cast<CustomRefCountedType>(value_.tag);
-      if (ref_type == CustomRefCountedType::kRefCounted) {
+      RefType ref_type = static_cast<RefType>(value_.tag);
+      if (ref_type < RefType::kJSIObject) {
         reinterpret_cast<lepus::RefCounted*>(value_.val_ptr)
             ->js_object_cache.reset();
       }
@@ -1570,19 +1371,18 @@ ValueType Value::LegacyTypeFromLynxValue(const lynx_value& value) {
     case lynx_value_function_table:
       return Value_FunctionTable;
     case lynx_value_object: {
-      CustomRefCountedType type = static_cast<CustomRefCountedType>(value.tag);
+      RefType type = static_cast<RefType>(value.tag);
       switch (type) {
-        case CustomRefCountedType::kRefCounted:
-          return Value_RefCounted;
-        case CustomRefCountedType::kJSObject:
+        case RefType::kJSIObject:
           return Value_JSObject;
-        case CustomRefCountedType::kClosure:
+        case RefType::kClosure:
           return Value_Closure;
-        case CustomRefCountedType::kCDate:
+        case RefType::kCDate:
           return Value_CDate;
-        case CustomRefCountedType::kRegExp:
+        case RefType::kRegExp:
           return Value_RegExp;
         default:
+          return Value_RefCounted;
           break;
       }
     } break;
@@ -1788,32 +1588,6 @@ CArray* Value::DummyArray() {
 
 Dictionary* Value::DummyTable() {
   static thread_local Dictionary dummy;
-  dummy.Reset();
-  return &dummy;
-}
-
-#if !ENABLE_JUST_LEPUSNG
-RegExp* Value::DummyRegExp() {
-  static thread_local lepus::RegExp dummy;
-  dummy.Reset();
-  return &dummy;
-}
-
-CDate* Value::DummyDate() {
-  static thread_local CDate dummy;
-  dummy.Reset();
-  return &dummy;
-}
-
-Closure* Value::DummyClosure() {
-  static thread_local Closure dummy(nullptr);
-  dummy.Reset();
-  return &dummy;
-}
-#endif
-
-LEPUSObject* Value::DummyLEPUSObject() {
-  static thread_local lepus::LEPUSObject dummy(nullptr);
   dummy.Reset();
   return &dummy;
 }

@@ -313,7 +313,7 @@ void ContextBinaryWriter::EncodeValue(const Value* value, bool is_header) {
       EncodeArray(value->Array());
       break;
     case ValueType::Value_Closure:
-      EncodeClosure(value->GetClosure());
+      EncodeClosure(fml::static_ref_ptr_cast<Closure>(value->RefCounted()));
       break;
     case ValueType::Value_CPointer:
     case ValueType::Value_RefCounted:
@@ -330,12 +330,18 @@ void ContextBinaryWriter::EncodeValue(const Value* value, bool is_header) {
     case ValueType::Value_Undefined:
       break;
     case ValueType::Value_CDate:
-      EncodeDate(value->Date());
+      EncodeDate(fml::static_ref_ptr_cast<CDate>(value->RefCounted()));
       break;
     case ValueType::Value_RegExp: {
-      Value pattern = lepus::Value(value->RegExp()->get_pattern().str());
+      Value pattern =
+          lepus::Value(fml::static_ref_ptr_cast<RegExp>(value->RefCounted())
+                           ->get_pattern()
+                           .str());
       EncodeValue(&pattern);
-      Value flag = lepus::Value(value->RegExp()->get_flags().str());
+      Value flag =
+          lepus::Value(fml::static_ref_ptr_cast<RegExp>(value->RefCounted())
+                           ->get_flags()
+                           .str());
       EncodeValue(&flag);
       break;
     }

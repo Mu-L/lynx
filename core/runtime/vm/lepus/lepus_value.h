@@ -85,13 +85,9 @@ enum ValueType {
 
 class Context;
 class CArray;
-class CDate;
 class Dictionary;
-class Closure;
-class RegExp;
 class ByteArray;
 class RefCounted;
-class LEPUSObject;
 class BuiltinFunctionTable;
 
 typedef Value (*CFunction)(Context*);
@@ -123,18 +119,10 @@ class BASE_EXPORT_FOR_DEVTOOL Value {
   explicit Value(const fml::RefPtr<CArray>& data);
   explicit Value(fml::RefPtr<CArray>&& data);
   explicit Value(const fml::WeakRefPtr<CArray>& data);
-  explicit Value(const fml::RefPtr<lepus::LEPUSObject>& data);
-  explicit Value(fml::RefPtr<lepus::LEPUSObject>&& data);
   explicit Value(const fml::RefPtr<lepus::ByteArray>& data);
   explicit Value(fml::RefPtr<lepus::ByteArray>&& data);
   explicit Value(const fml::RefPtr<lepus::RefCounted>& data);
   explicit Value(fml::RefPtr<lepus::RefCounted>&& data);
-  explicit Value(const fml::RefPtr<Closure>& data);
-  explicit Value(fml::RefPtr<Closure>&& data);
-  explicit Value(const fml::RefPtr<CDate>& data);
-  explicit Value(fml::RefPtr<CDate>&& data);
-  explicit Value(const fml::RefPtr<RegExp>& data);
-  explicit Value(fml::RefPtr<RegExp>&& data);
 
   explicit Value(bool val);
   explicit Value(void* data);
@@ -148,26 +136,19 @@ class BASE_EXPORT_FOR_DEVTOOL Value {
 
   inline bool IsCDate() const {
     return value_.type == lynx_value_object &&
-           value_.tag == static_cast<int32_t>(CustomRefCountedType::kCDate);
+           value_.tag == static_cast<int32_t>(RefType::kCDate);
   }
   inline bool IsRegExp() const {
     return value_.type == lynx_value_object &&
-           value_.tag == static_cast<int32_t>(CustomRefCountedType::kRegExp);
+           value_.tag == static_cast<int32_t>(RefType::kRegExp);
   }
-
-  void SetClosure(const fml::RefPtr<lepus::Closure>&);
-  void SetClosure(fml::RefPtr<lepus::Closure>&&);
-  void SetRegExp(const fml::RefPtr<lepus::RegExp>&);
-  void SetRegExp(fml::RefPtr<lepus::RegExp>&&);
-  void SetDate(const fml::RefPtr<lepus::CDate>&);
-  void SetDate(fml::RefPtr<lepus::CDate>&&);
 
   inline void DupValue() const;
   void FreeValue();
 
   inline bool IsClosure() const {
     return value_.type == lynx_value_object &&
-           value_.tag == static_cast<int32_t>(CustomRefCountedType::kClosure);
+           value_.tag == static_cast<int32_t>(RefType::kClosure);
   }
   inline bool IsCallable() const { return IsClosure() || IsJSFunction(); }
 
@@ -258,8 +239,7 @@ class BASE_EXPORT_FOR_DEVTOOL Value {
 
   inline bool IsRefCounted() const {
     return value_.type == lynx_value_object &&
-           value_.tag ==
-               static_cast<int32_t>(CustomRefCountedType::kRefCounted);
+           value_.tag < static_cast<int32_t>(RefType::kJSIObject);
   }
 
   inline bool IsInt32() const { return value_.type == lynx_value_int32; }
@@ -277,7 +257,7 @@ class BASE_EXPORT_FOR_DEVTOOL Value {
   }
   inline bool IsJSObject() const {
     return value_.type == lynx_value_object &&
-           value_.tag == static_cast<int32_t>(CustomRefCountedType::kJSObject);
+           value_.tag == static_cast<int32_t>(RefType::kJSIObject);
   }
   inline bool IsByteArray() const {
     return value_.type == lynx_value_arraybuffer;
@@ -370,21 +350,13 @@ class BASE_EXPORT_FOR_DEVTOOL Value {
   /// optimal but acceptable for safety reason.
   base::String String() &&;
 
-  fml::WeakRefPtr<Closure> GetClosure() const&;
-  fml::WeakRefPtr<CDate> Date() const&;
-  fml::WeakRefPtr<lepus::RegExp> RegExp() const&;
   fml::WeakRefPtr<Dictionary> Table() const&;
   fml::WeakRefPtr<CArray> Array() const&;
-  fml::WeakRefPtr<lepus::LEPUSObject> LEPUSObject() const&;
   fml::WeakRefPtr<lepus::ByteArray> ByteArray() const&;
   fml::WeakRefPtr<lepus::RefCounted> RefCounted() const&;
 
-  fml::RefPtr<Closure> GetClosure() &&;
-  fml::RefPtr<CDate> Date() &&;
-  fml::RefPtr<lepus::RegExp> RegExp() &&;
   fml::RefPtr<Dictionary> Table() &&;
   fml::RefPtr<CArray> Array() &&;
-  fml::RefPtr<lepus::LEPUSObject> LEPUSObject() &&;
   fml::RefPtr<lepus::ByteArray> ByteArray() &&;
   fml::RefPtr<lepus::RefCounted> RefCounted() &&;
 
@@ -402,8 +374,6 @@ class BASE_EXPORT_FOR_DEVTOOL Value {
   void SetArray(const fml::RefPtr<lepus::CArray>&);
   void SetArray(fml::RefPtr<lepus::CArray>&&);
 
-  void SetJSObject(const fml::RefPtr<lepus::LEPUSObject>&);
-  void SetJSObject(fml::RefPtr<lepus::LEPUSObject>&&);
   void SetByteArray(const fml::RefPtr<lepus::ByteArray>&);
   void SetByteArray(fml::RefPtr<lepus::ByteArray>&&);
 
@@ -682,10 +652,6 @@ class BASE_EXPORT_FOR_DEVTOOL Value {
                                                const lynx_value& dst);
   static CArray* DummyArray();
   static Dictionary* DummyTable();
-  static class RegExp* DummyRegExp();
-  static CDate* DummyDate();
-  static Closure* DummyClosure();
-  static class LEPUSObject* DummyLEPUSObject();
   static class ByteArray* DummyByteArray();
 
   static void ForEachLepusValue(const Value& value, LepusValueIterator func);

@@ -22,7 +22,6 @@ enum class RefType : int32_t {
   kLepusTable,
   kLepusArray,
   kByteArray,
-  kJSIObject,
   kElement,
   kSignal,
   kComputation,
@@ -30,13 +29,7 @@ enum class RefType : int32_t {
   kScope,
   kOtherType,
   kStyleObject,
-};
-
-enum class CustomRefCountedType : uint32_t {
-  kNone,
-  kRefCounted,  // TODO(frendy): Remove this type after lepus value is
-                // decoupled.
-  kJSObject,
+  kJSIObject,
   kClosure,
   kCDate,
   kRegExp,

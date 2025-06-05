@@ -173,7 +173,7 @@ static std::string CastToString(const Value& v) {
       }
     } break;
     case lepus::ValueType::Value_RegExp: {
-      auto v_reg = v.RegExp();
+      auto v_reg = fml::static_ref_ptr_cast<RegExp>(v.RefCounted());
       result += "/";
       result += v_reg->get_pattern().str();
       result += "/";
@@ -181,7 +181,7 @@ static std::string CastToString(const Value& v) {
     } break;
     case lepus::ValueType::Value_CDate: {
       std::stringstream ss;
-      v.Date()->print(ss);
+      fml::static_ref_ptr_cast<CDate>(v.RefCounted())->print(ss);
       result = ss.str();
       result.pop_back();
       break;

@@ -290,7 +290,7 @@ void lepusValueToJSONString(std::stringstream& ss, const lepus_value& value,
     } break;
 #if !ENABLE_JUST_LEPUSNG
     case lepus::ValueType::Value_CDate: {
-      value.Date()->print(ss);
+      fml::static_ref_ptr_cast<CDate>(value.RefCounted())->print(ss);
     } break;
 #endif
     case lepus::ValueType::Value_NaN: {

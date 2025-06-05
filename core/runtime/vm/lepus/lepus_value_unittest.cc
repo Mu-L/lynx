@@ -507,12 +507,12 @@ TEST_F(LepusValueTest, LepusValueRefCounted) {
 
     auto obj3 = lepus::LEPUSObject::Create();
     lepus::Value v3;
-    v3.SetJSObject(obj3);
+    v3.SetRefCounted(obj3);
     ASSERT_TRUE(v3.IsJSObject());
     lepus::Value v4;
-    v4.SetJSObject(std::move(obj3));
+    v4.SetRefCounted(std::move(obj3));
     ASSERT_TRUE(v4.IsJSObject());
-    ASSERT_TRUE(v4.LEPUSObject());
+    ASSERT_TRUE(v4.RefCounted());
     ASSERT_TRUE(v4.Type() == Value_JSObject);
   }
   {
@@ -537,13 +537,13 @@ TEST_F(LepusValueTest, LepusValueRefCounted) {
     ASSERT_TRUE(v3.IsClosure());
     auto s2 = lepus::Closure::Create(lepus::Function::Create());
     lepus::Value v4;
-    v4.SetClosure(s2);
+    v4.SetRefCounted(s2);
     ASSERT_TRUE(v4.IsClosure());
     lepus::Value v5;
-    v5.SetClosure(lepus::Closure::Create(lepus::Function::Create()));
+    v5.SetRefCounted(lepus::Closure::Create(lepus::Function::Create()));
     ASSERT_TRUE(v5.IsClosure());
     ASSERT_TRUE(v5.Type() == Value_Closure);
-    auto r1 = v5.GetClosure();
+    auto r1 = v5.RefCounted();
     ASSERT_TRUE(r1);
   }
   {
@@ -556,13 +556,13 @@ TEST_F(LepusValueTest, LepusValueRefCounted) {
     ASSERT_TRUE(v3.IsCDate());
     auto s2 = lepus::CDate::Create();
     lepus::Value v4;
-    v4.SetDate(s2);
+    v4.SetRefCounted(s2);
     ASSERT_TRUE(v4.IsCDate());
     lepus::Value v5;
-    v5.SetDate(lepus::CDate::Create());
+    v5.SetRefCounted(lepus::CDate::Create());
     ASSERT_TRUE(v5.IsCDate());
     ASSERT_TRUE(v5.Type() == Value_CDate);
-    auto r1 = v5.Date();
+    auto r1 = v5.RefCounted();
     ASSERT_TRUE(r1);
   }
   {
@@ -575,13 +575,13 @@ TEST_F(LepusValueTest, LepusValueRefCounted) {
     ASSERT_TRUE(v3.IsRegExp());
     auto s2 = lepus::RegExp::Create();
     lepus::Value v4;
-    v4.SetRegExp(s2);
+    v4.SetRefCounted(s2);
     ASSERT_TRUE(v4.IsRegExp());
     lepus::Value v5;
-    v5.SetRegExp(lepus::RegExp::Create());
+    v5.SetRefCounted(lepus::RegExp::Create());
     ASSERT_TRUE(v5.IsRegExp());
     ASSERT_TRUE(v5.Type() == Value_RegExp);
-    auto r1 = v5.RegExp();
+    auto r1 = v5.RefCounted();
     ASSERT_TRUE(r1);
   }
 }

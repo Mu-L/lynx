@@ -14,7 +14,8 @@
 #include <vector>
 
 #include "base/include/base_export.h"
-#include "base/include/fml/memory/ref_counted.h"
+#include "core/runtime/vm/lepus/ref_counted_class.h"
+#include "core/runtime/vm/lepus/ref_type.h"
 
 namespace lynx {
 namespace lepus {
@@ -26,7 +27,7 @@ struct tm_extend : public tm {
 #endif
 };
 
-class CDate : public fml::RefCountedThreadSafeStorage {
+class CDate : public lepus::RefCounted {
  public:
   static Value GetTimeZoneOffset();
   static fml::RefPtr<CDate> Create() {
@@ -68,6 +69,18 @@ class CDate : public fml::RefCountedThreadSafeStorage {
   void ReleaseSelf() const override { delete this; }
 
   ~CDate() override = default;
+
+  RefType GetRefType() const override { return RefType::kCDate; }
+
+  fml::RefPtr<RefCounted> Clone() override {
+    return Create(get_date_(), get_ms_(), get_language());
+  }
+
+  void Print(std::ostream& output) override { print(output); }
+
+  bool Equals(const fml::RefPtr<RefCounted>& other) override {
+    return *this == *(fml::static_ref_ptr_cast<CDate>(other).get());
+  }
 
   friend bool operator==(const CDate& left, const CDate& right);
   BASE_EXPORT_FOR_DEVTOOL void print(std::stringstream& ss);

@@ -129,7 +129,8 @@ static void Print_Value(lepus::Value* val, std::ostream& output) {
       output << "]";
       break;
     case lepus::ValueType::Value_CDate:
-      val->Date()->print(output);
+      lynx::fml::static_ref_ptr_cast<lepus::CDate>(val->RefCounted())
+          ->print(output);
       break;
     case lepus::ValueType::Value_Closure:
     case lepus::ValueType::Value_CFunction:
@@ -139,14 +140,25 @@ static void Print_Value(lepus::Value* val, std::ostream& output) {
       break;
     case lepus::ValueType::Value_RegExp:
       output << "regexp" << std::endl;
-      output << "pattern: " << val->RegExp()->get_pattern().str() << std::endl;
-      output << "flags: " << val->RegExp()->get_flags().str() << std::endl;
+      output << "pattern: "
+             << lynx::fml::static_ref_ptr_cast<lepus::RegExp>(val->RefCounted())
+                    ->get_pattern()
+                    .str()
+             << std::endl;
+      output << "flags: "
+             << lynx::fml::static_ref_ptr_cast<lepus::RegExp>(val->RefCounted())
+                    ->get_flags()
+                    .str()
+             << std::endl;
       break;
     case lepus::ValueType::Value_NaN:
       output << "NaN";
       break;
     case lepus::ValueType::Value_JSObject:
-      output << "LEPUSObject id=" << val->LEPUSObject()->JSIObjectID();
+      output << "LEPUSObject id="
+             << lynx::fml::static_ref_ptr_cast<lepus::LEPUSObject>(
+                    val->RefCounted())
+                    ->JSIObjectID();
       break;
   }
 }

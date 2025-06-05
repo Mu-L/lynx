@@ -33,6 +33,18 @@ class LEPUSObject : public lepus::RefCounted {
     return fml::AdoptRef<LEPUSObject>(new LEPUSObject(std::move(proxy)));
   }
 
+  fml::RefPtr<RefCounted> Clone() override {
+    return Create(jsi_object_proxy());
+  }
+
+  void Print(std::ostream& output) override {
+    output << "LEPUSObject id=" << JSIObjectID();
+  }
+
+  bool Equals(const fml::RefPtr<RefCounted>& other) override {
+    return *this == *(fml::static_ref_ptr_cast<LEPUSObject>(other).get());
+  }
+
   RefType GetRefType() const override { return RefType::kJSIObject; };
 
   std::shared_ptr<LEPUSObject::JSIObjectProxy> jsi_object_proxy();

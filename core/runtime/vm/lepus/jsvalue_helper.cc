@@ -98,15 +98,14 @@ LEPUSValue LEPUSValueHelper::ToJsValue(LEPUSContext* ctx, const lynx_value& val,
                             reinterpret_cast<lepus::RefCounted*>(val.val_ptr),
                             lepus::Value::LegacyTypeFromLynxValue(val));
     case lynx_value_object: {
-      CustomRefCountedType ref_type =
-          static_cast<CustomRefCountedType>(val.tag);
+      RefType ref_type = static_cast<RefType>(val.tag);
       switch (ref_type) {
-        case CustomRefCountedType::kRefCounted:
+        case RefType::kLepusTable... RefType::kStyleObject:
           if (deep_convert) {
             return RefCountedToJSValue(
                 ctx, *reinterpret_cast<lepus::RefCounted*>(val.val_ptr));
           }
-        case CustomRefCountedType::kJSObject:
+        case RefType::kJSIObject:
           return CreateLepusRef(
               ctx, reinterpret_cast<lepus::RefCounted*>(val.val_ptr),
               lepus::Value::LegacyTypeFromLynxValue(val));
@@ -424,14 +423,15 @@ lynx_value LEPUSValueHelper::ConstructLepusRefToLynxValue(
   ValueType old_type = static_cast<ValueType>(LEPUS_GetLepusRefTag(val));
   lynx_value_type type = lepus::Value::ToLynxValueType(old_type);
   int32_t tag = 0;
+  auto* ptr = LEPUS_GetLepusRefPoint(val);
   if (type == lynx_value_object) {
     if (old_type == Value_RefCounted) {
-      tag = static_cast<int32_t>(CustomRefCountedType::kRefCounted);
+      tag = static_cast<int32_t>(
+          reinterpret_cast<RefCounted*>(ptr)->GetRefType());
     } else if (old_type == Value_JSObject) {
-      tag = static_cast<int32_t>(CustomRefCountedType::kJSObject);
+      tag = static_cast<int32_t>(RefType::kJSIObject);
     }
   }
-  auto* ptr = LEPUS_GetLepusRefPoint(val);
   reinterpret_cast<fml::RefCountedThreadSafeStorage*>(ptr)->AddRef();
   LEPUSLepusRef* ref =
       reinterpret_cast<LEPUSLepusRef*>(LEPUS_VALUE_GET_PTR(val));
