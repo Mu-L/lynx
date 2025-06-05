@@ -480,7 +480,11 @@ public class TextShadowNode extends BaseTextShadowNode implements CustomMeasureF
     LynxTextBackgroundSpan[] backgroundSpans = truncatedSpannableString.getSpans(
         truncationStartIndex, truncatedSpannableString.length(), LynxTextBackgroundSpan.class);
     for (int i = 0; i < backgroundSpans.length; i++) {
-      backgroundSpans[i].updateBackgroundStartEndIndex(truncationStartIndex);
+      int spanStartIndex = truncatedSpannableString.getSpanStart(backgroundSpans[i]);
+      // Update span start index only when span start index is greater than truncation start index.
+      if (spanStartIndex >= truncationStartIndex) {
+        backgroundSpans[i].updateBackgroundStartEndIndex(truncationStartIndex);
+      }
     }
 
     backgroundSpans =
