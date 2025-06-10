@@ -130,7 +130,11 @@ template <>
 struct TraceFormatTraits<const char*> {
   inline static void WriteIntoTrace(lynx::perfetto::LynxDebugAnnotation* debug,
                                     const char* value) {
-    debug->set_string_value(value, strlen(value));
+    if (value == nullptr) {
+      debug->set_string_value("nullptr");
+    } else {
+      debug->set_string_value(value, strlen(value));
+    }
   }
 };
 
