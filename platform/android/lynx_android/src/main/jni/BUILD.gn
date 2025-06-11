@@ -88,6 +88,8 @@ lynx_core_source_set("build") {
     "gen/NativeFacade_register_jni.h",
     "gen/PaintingContext_jni.h",
     "gen/PaintingContext_register_jni.h",
+    "gen/PerformanceController_jni.h",
+    "gen/PerformanceController_register_jni.h",
     "gen/PiperData_jni.h",
     "gen/PiperData_register_jni.h",
     "gen/PlatformCallBack_jni.h",
