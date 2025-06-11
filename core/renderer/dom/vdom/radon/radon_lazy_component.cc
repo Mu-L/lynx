@@ -255,20 +255,20 @@ const std::string& RadonLazyComponent::GetEntryName() const {
   return entry_name_;
 }
 
-lepus::Value& RadonLazyComponent::GetComponentInfoMap(
+lepus::Value RadonLazyComponent::GetComponentInfoMap(
     const std::string& entry_name) {
   if (IsEmpty()) {
     // lazy-bundle is loaded failed.
-    return component_info_map_;
+    return lepus::Value(component_info_map_);
   }
   return RadonComponent::GetComponentInfoMap(entry_name);
 }
 
-lepus::Value& RadonLazyComponent::GetComponentPathMap(
+lepus::Value RadonLazyComponent::GetComponentPathMap(
     const std::string& entry_name) {
   if (IsEmpty()) {
     // lazy-bundle is loaded failed.
-    return component_path_map_;
+    return lepus::Value(component_path_map_);
   }
   return RadonComponent::GetComponentPathMap(entry_name);
 }

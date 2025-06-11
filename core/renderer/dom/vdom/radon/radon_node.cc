@@ -339,13 +339,14 @@ void RadonNode::DispatchSelf(const DispatchOption& option) {
     InsertElementIntoParent(ParentElement());
     option.has_patched_ = true;
   }
-  if (class_transmit_option_ && !class_transmit_option_->IsEmpty()) {
+  if (class_transmit_option_.has_value() &&
+      !class_transmit_option_->IsEmpty()) {
     const auto& removed = class_transmit_option_->removed_classes();
     option.class_transmit_.RemoveClass(removed.begin(), removed.end());
     for (const auto& iter : class_transmit_option_->added_classes()) {
       option.class_transmit_.AddClass(iter);
     }
-    class_transmit_option_ = nullptr;
+    class_transmit_option_.reset();
   }
 }
 
@@ -822,9 +823,6 @@ bool RadonNode::ShouldFlushStyle(RadonNode* old_radon_node,
   }
   // TODO: check external class.
   if (need_transmit_class_dirty_) {
-    if (class_transmit_option_ == nullptr) {
-      class_transmit_option_ = std::make_unique<ClassTransmitOption>();
-    }
     for (const auto& clazz : classes()) {
       class_transmit_option_->AddClass(clazz);
     }
@@ -841,7 +839,8 @@ bool RadonNode::ShouldFlushStyle(RadonNode* old_radon_node,
     style_updated |= OptimizedShouldFlushStyle(old_radon_node, option);
   }
 
-  if (class_transmit_option_ && !class_transmit_option_->IsEmpty()) {
+  if (class_transmit_option_.has_value() &&
+      !class_transmit_option_->IsEmpty()) {
     for (const auto& iter : class_transmit_option_->added_classes()) {
       option.class_transmit_.AddClass(iter);
     }

@@ -211,9 +211,13 @@ class TemplateEntry : public VmContextHolder, public CSSStyleSheetDelegate {
   // Execute Binary Function
   bool Execute();
 
-  lepus::Value& component_info_map() { return component_info_map_; }
+  lepus::Value component_info_map() {
+    return lepus::Value(component_info_map_);
+  }
 
-  lepus::Value& component_path_map() { return component_path_map_; }
+  lepus::Value component_path_map() {
+    return lepus::Value(component_path_map_);
+  }
 
   bool IsCard() const { return is_card_; }
 
@@ -298,8 +302,10 @@ class TemplateEntry : public VmContextHolder, public CSSStyleSheetDelegate {
 #endif
 
   // global maps usually used to create component or lazy bundle
-  lepus::Value component_info_map_ = lepus::Value(lepus::Dictionary::Create());
-  lepus::Value component_path_map_ = lepus::Value(lepus::Dictionary::Create());
+  fml::RefPtr<lepus::Dictionary> component_info_map_{
+      lepus::Dictionary::Create()};
+  fml::RefPtr<lepus::Dictionary> component_path_map_{
+      lepus::Dictionary::Create()};
 
   // result of entry's lepus.js.
   // now is only used for lazy bundle.

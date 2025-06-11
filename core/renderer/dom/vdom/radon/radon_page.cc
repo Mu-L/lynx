@@ -743,7 +743,7 @@ void RadonPage::SetCSSVariables(
     std::shared_ptr<PipelineOptions> &pipeline_options) {
   LOGI("start SetProperty from js id: " << component_id);
   if (component_id == PAGE_ID) {
-    set_variable_ops_.emplace_back(SetCSSVariableOp(id_selector, properties));
+    set_variable_ops_->emplace_back(SetCSSVariableOp(id_selector, properties));
     DispatchOption dispatch_option(proxy_);
     dispatch_option.css_variable_changed_ = true;
     Refresh(dispatch_option, pipeline_options);

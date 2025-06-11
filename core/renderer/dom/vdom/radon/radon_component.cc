@@ -34,9 +34,9 @@ RadonComponent::RadonComponent(
     const base::String& tag_name)
     : RadonNode(page_proxy, tag_name, node_index),
       tid_(tid),
+      dsl_(tasm::PackageInstanceDSL::TT),
       mould_(mould),
       context_(context),
-      dsl_(tasm::PackageInstanceDSL::TT),
       intrinsic_style_sheet_(style_sheet),
       style_sheet_manager_(std::move(style_sheet_manager)) {
   if (mould_) {
@@ -55,9 +55,9 @@ RadonComponent::RadonComponent(
 RadonComponent::RadonComponent(const RadonComponent& node, PtrLookupMap& map)
     : RadonNode(node, map),
       tid_(node.tid_),
+      dsl_(node.dsl_),
       mould_(node.mould_),
       context_(node.context_),
-      dsl_(node.dsl_),
       intrinsic_style_sheet_(node.intrinsic_style_sheet_),
       style_sheet_manager_(node.style_sheet_manager_) {
   if (mould_) {
@@ -72,11 +72,11 @@ RadonComponent::RadonComponent(const RadonComponent& node, PtrLookupMap& map)
   SetComponent(this);
   dsl_ = node.dsl_;
   if (!page_proxy_->GetEnableGlobalComponentMap()) {
-    for (const auto& iter : *node.component_info_map_.Table()) {
-      component_info_map_.Table()->SetValue(iter.first, iter.second);
+    for (const auto& iter : *node.component_info_map_) {
+      component_info_map_->SetValue(iter.first, iter.second);
     }
-    for (const auto& iter : *node.component_path_map_.Table()) {
-      component_path_map_.Table()->SetValue(iter.first, iter.second);
+    for (const auto& iter : *node.component_path_map_) {
+      component_path_map_->SetValue(iter.first, iter.second);
     }
   }
   get_derived_state_from_props_function_ =
@@ -347,21 +347,22 @@ lepus_value RadonComponent::PreprocessData() {
 lepus_value RadonComponent::PreprocessErrorData() {
   if (dsl_ == PackageInstanceDSL::REACT &&
       get_derived_state_from_error_function_.IsCallable() && context_) {
-    lepus_value data = context_->CallClosure(
-        get_derived_state_from_error_function_, render_error_);
+    lepus_value data =
+        context_->CallClosure(get_derived_state_from_error_function_,
+                              render_error_ ? *render_error_ : lepus::Value());
     return data;
   }
   return lepus::Value();
 }
 
-bool RadonComponent::PreRender(const RenderType& render_type) {
+bool RadonComponent::PreRender(RenderType render_type) {
   if (dsl_ == PackageInstanceDSL::REACT) {
     return PreRenderReact(render_type);
   }
   return PreRenderTT(render_type);
 }
 
-bool RadonComponent::PreRenderReact(const RenderType& render_type) {
+bool RadonComponent::PreRenderReact(RenderType render_type) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, RADON_PRERENDER_REACT);
   switch (render_type) {
     case RenderType::UpdateFromJSBySelf:
@@ -490,7 +491,7 @@ void RadonComponent::ResetDataVersions() {
                                     << ", path: " << path().str());
 }
 
-bool RadonComponent::PreRenderTT(const RenderType& render_type) {
+bool RadonComponent::PreRenderTT(RenderType render_type) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, RADON_PRERENDER_TT);
   if (render_type == RenderType::UpdateFromJSBySelf) {
     // update from js, no need to call `getDerivedStateFromProps`
@@ -513,9 +514,10 @@ bool RadonComponent::PreRenderTT(const RenderType& render_type) {
 bool RadonComponent::ShouldComponentUpdate() {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, RADON_SHOULD_COMPONET_UPDATE);
   if (should_component_update_function_.IsCallable() && context_) {
-    lepus::Value result =
-        context_->CallClosure(should_component_update_function_, properties_,
-                              data_, pre_properties_, pre_data_);
+    lepus::Value result = context_->CallClosure(
+        should_component_update_function_, properties_, data_,
+        pre_properties_ ? *pre_properties_ : lepus::Value(),
+        pre_data_ ? *pre_data_ : lepus::Value());
     if (result.IsBool()) {
       return result.Bool();
     }
@@ -843,7 +845,7 @@ void RadonComponent::UpdateRadonComponent(
 void RadonComponent::SetCSSVariables(
     const std::string& id_selector, const lepus::Value& properties,
     std::shared_ptr<PipelineOptions>& pipeline_options) {
-  set_variable_ops_.emplace_back(SetCSSVariableOp(id_selector, properties));
+  set_variable_ops_->emplace_back(SetCSSVariableOp(id_selector, properties));
   DispatchOption dispatch_option(page_proxy_);
   dispatch_option.css_variable_changed_ = true;
   Refresh(dispatch_option, pipeline_options);
@@ -905,11 +907,11 @@ void RadonComponent::PreHandlerCSSVariable() {
               [this](lynx::perfetto::EventContext ctx) {
                 UpdateTraceDebugInfo(ctx.event());
               });
-  if (set_variable_ops_.empty()) {
+  if (!set_variable_ops_.has_value()) {
     return;
   }
 
-  for (auto& temp : set_variable_ops_) {
+  for (auto& temp : *set_variable_ops_) {
     NodeSelectOptions options(NodeSelectOptions::IdentifierType::CSS_SELECTOR,
                               temp.GetIdSelector());
     options.only_current_component = false;
@@ -1164,22 +1166,22 @@ RadonComponent* RadonComponent::GetParentComponent() {
   return nullptr;
 }
 
-lepus::Value& RadonComponent::GetComponentInfoMap(
+lepus::Value RadonComponent::GetComponentInfoMap(
     const std::string& entry_name) {
   if (page_proxy_->GetEnableGlobalComponentMap()) {
     return page_proxy_->GetGlobalComponentInfoMap(
         entry_name.empty() ? GetEntryName() : entry_name);
   }
-  return component_info_map_;
+  return lepus::Value(component_info_map_);
 }
 
-lepus::Value& RadonComponent::GetComponentPathMap(
+lepus::Value RadonComponent::GetComponentPathMap(
     const std::string& entry_name) {
   if (page_proxy_->GetEnableGlobalComponentMap()) {
     return page_proxy_->GetGlobalComponentPathMap(
         entry_name.empty() ? GetEntryName() : entry_name);
   }
-  return component_path_map_;
+  return lepus::Value(component_path_map_);
 }
 
 // Search for list in the ancestor chain and cache the result ever after.
@@ -1252,14 +1254,14 @@ void RadonComponent::OnComponentUpdate(const DispatchOption& option) {
 void RadonComponent::OnReactComponentDidUpdate(const DispatchOption& option) {
   if (IsReact() && !option.ignore_component_lifecycle_) {
     page_proxy_->OnReactComponentDidUpdate(this);
-    if (!CheckReactShouldAbortRenderError(data_) && render_error_.IsObject() &&
-        !render_error_.IsNil()) {
+    if (!CheckReactShouldAbortRenderError(data_) && render_error_ &&
+        render_error_->IsObject() && !render_error_->IsNil()) {
       auto catch_error = lepus::Dictionary::Create();
       BASE_STATIC_STRING_DECL(kMessage, "message");
       BASE_STATIC_STRING_DECL(kStack, "stack");
       BASE_STATIC_STRING_DECL(kName, "name");
-      catch_error->SetValue(kMessage, render_error_.GetProperty(kMessage));
-      catch_error->SetValue(kStack, render_error_.GetProperty(kStack));
+      catch_error->SetValue(kMessage, render_error_->GetProperty(kMessage));
+      catch_error->SetValue(kStack, render_error_->GetProperty(kStack));
       catch_error->SetValue(kName, BASE_STATIC_STRING(LEPUS_RENDER_ERROR));
       DispatchOption dispatch_option(page_proxy_);
       auto pipeline_options = std::make_shared<PipelineOptions>();

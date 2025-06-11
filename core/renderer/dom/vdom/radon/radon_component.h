@@ -10,6 +10,8 @@
 #include <utility>
 #include <vector>
 
+#include "base/include/auto_create_optional.h"
+#include "base/include/vector.h"
 #include "core/renderer/css/css_fragment.h"
 #include "core/renderer/css/css_fragment_decorator.h"
 #include "core/renderer/dom/vdom/radon/base_component.h"
@@ -29,11 +31,11 @@ struct RenderOption {
   bool recursively = false;
 };
 
-using SetCSSVariableOpVector = std::vector<SetCSSVariableOp>;
+using SetCSSVariableOpVector = base::Vector<SetCSSVariableOp>;
 
 class RadonComponent : public RadonNode, public BaseComponent {
  public:
-  enum class RenderType {
+  enum class RenderType : uint8_t {
     FirstRender,
     UpdateByNative,
     UpdateFromJSBySelf,
@@ -99,17 +101,21 @@ class RadonComponent : public RadonNode, public BaseComponent {
     get_derived_state_from_error_function_ = processor;
   }
 
-  void SetRenderError(const lepus::Value& error) { render_error_ = error; }
+  void SetRenderError(const lepus::Value& error) {
+    render_error_ = std::make_unique<lepus::Value>(error);
+  }
 
   void SetShouldComponentUpdateProcessor(const lepus::Value& processor) {
     should_component_update_function_ = processor;
   }
 
   void set_pre_properties(const lepus::Value& properties) {
-    pre_properties_ = properties;
+    pre_properties_ = std::make_unique<lepus::Value>(properties);
   }
 
-  void set_pre_data(const lepus::Value& data) { pre_data_ = data; }
+  void set_pre_data(const lepus::Value& data) {
+    pre_data_ = std::make_unique<lepus::Value>(data);
+  }
 
   // Only when a lazy bundle is loaded async, it could be empty.
   bool IsEmpty() const { return context_ == nullptr; }
@@ -142,7 +148,7 @@ class RadonComponent : public RadonNode, public BaseComponent {
     return list_need_remove_after_reused_;
   }
 
-  bool PreRender(const RenderType& render_type);
+  bool PreRender(RenderType render_type);
 
   // RadonLazyComponent will override this function
   virtual void DeriveFromMould(ComponentMould* data);
@@ -249,9 +255,9 @@ class RadonComponent : public RadonNode, public BaseComponent {
   RadonComponent* GetParentComponent();
   RadonComponent* GetComponentOfThisComponent() { return component(); }
 
-  virtual lepus::Value& GetComponentInfoMap(const std::string& entry_name = "");
+  virtual lepus::Value GetComponentInfoMap(const std::string& entry_name = "");
 
-  virtual lepus::Value& GetComponentPathMap(const std::string& entry_name = "");
+  virtual lepus::Value GetComponentPathMap(const std::string& entry_name = "");
 
   void OnReactComponentRenderBase(lepus::Value& new_data,
                                   bool should_component_update);
@@ -333,7 +339,7 @@ class RadonComponent : public RadonNode, public BaseComponent {
     return static_cast<ComponentElement*>(element());
   }
 
-  enum class InListStatus {
+  enum class InListStatus : uint8_t {
     Unknown,
     InList,
     NotInList,
@@ -359,6 +365,9 @@ class RadonComponent : public RadonNode, public BaseComponent {
   virtual void triggerNewLifecycle(const DispatchOption& option) override;
 
   int32_t tid_;
+  uint32_t component_id_{0};
+
+  bool compile_render_{false};
   bool data_dirty_{true};
   bool properties_dirty_{true};
   bool update_function_called_{false};
@@ -370,6 +379,12 @@ class RadonComponent : public RadonNode, public BaseComponent {
 
   // component should be removed from parent after being reused in list
   bool list_need_remove_after_reused_{false};
+
+  RenderType render_type_;
+
+  PackageInstanceDSL dsl_;
+
+  InListStatus in_list_status_ = InListStatus::Unknown;
 
   // used to set one component's `RemoveComponentElement` config.
   // If the component's `RemoveComponentElement` config has been set,
@@ -383,15 +398,17 @@ class RadonComponent : public RadonNode, public BaseComponent {
   lepus::Value get_derived_state_from_props_function_;
   lepus::Value should_component_update_function_;
   lepus::Value get_derived_state_from_error_function_;
-  lepus::Value render_error_{};
+  std::unique_ptr<lepus::Value> render_error_;
 
   // Key: base::String / value: lepus::Value
   // props and data should be initialized as Value_Nil and then get derived from
   // mould.
-  lepus::Value properties_{};
-  lepus::Value data_{};
-  lepus::Value init_properties_{};
-  lepus::Value init_data_{};
+  lepus::Value properties_;
+  lepus::Value data_;
+  lepus::Value init_properties_;
+  lepus::Value init_data_;
+  std::unique_ptr<lepus::Value> pre_properties_;
+  std::unique_ptr<lepus::Value> pre_data_;
 
   base::String name_;
   base::String path_;
@@ -401,28 +418,25 @@ class RadonComponent : public RadonNode, public BaseComponent {
   ComponentMould* mould_{nullptr};
   lepus::Context* context_{nullptr};
 
-  PackageInstanceDSL dsl_;
-
   // The style sheet containing only the corresponding css file's content.
   CSSFragment* intrinsic_style_sheet_ = nullptr;
   std::shared_ptr<CSSStyleSheetManager> style_sheet_manager_;
   // The lazy-constructed style sheet taking external classes into account.
   std::shared_ptr<CSSFragmentDecorator> style_sheet_;
 
-  lepus::Value component_info_map_ = lepus::Value(lepus::Dictionary::Create());
-  lepus::Value component_path_map_ = lepus::Value(lepus::Dictionary::Create());
-
-  InListStatus in_list_status_ = InListStatus::Unknown;
+  fml::RefPtr<lepus::Dictionary> component_info_map_{
+      lepus::Dictionary::Create()};
+  fml::RefPtr<lepus::Dictionary> component_path_map_{
+      lepus::Dictionary::Create()};
 
   // TODO(songshourui.null): In the future, a utility class related to CSS will
   // be added, and the class is used to unify the CSS logic of RadonComponent
   // and ComponentElement. And this function will be moved to the utility.
-  SetCSSVariableOpVector set_variable_ops_;
+  base::auto_create_optional<SetCSSVariableOpVector> set_variable_ops_;
 
-  lepus::Value pre_properties_;
-  lepus::Value pre_data_;
-
-  RenderType render_type_;
+  NameToSlotMap slots_{kRadonSlotMapAllocationSize};
+  NameToPlugMap plugs_;
+  std::unique_ptr<RadonSlotsHelper> radon_slots_helper_;
 
  private:
   // TODO(songshourui.null): In the future, a utility class related to
@@ -430,8 +444,8 @@ class RadonComponent : public RadonNode, public BaseComponent {
   // utility class to avoid the explosion of functions in RadonComponent.
   static lepus::Value GetDefaultValue(const lepus::Value& template_value);
 
-  bool PreRenderReact(const RenderType& render_type);
-  bool PreRenderTT(const RenderType& render_type);
+  bool PreRenderReact(RenderType render_type);
+  bool PreRenderTT(RenderType render_type);
   bool IsInList();
 
   bool GetNeedElementByEntry();
@@ -451,19 +465,12 @@ class RadonComponent : public RadonNode, public BaseComponent {
    */
   void RadonReusableDiffChildren(RadonComponent* old_radon_component,
                                  const DispatchOption& option);
-  bool NeedSavePreState(const RenderType& render_type) {
+  bool NeedSavePreState(RenderType render_type) {
     return should_component_update_function_.IsCallable() &&
            !(IsReact() && render_type == RenderType::UpdateFromJSBySelf);
   }
 
   bool ShouldRemoveComponentElement() const;
-
-  uint32_t component_id_{0};
-  bool compile_render_{false};
-
-  NameToSlotMap slots_{kRadonSlotMapAllocationSize};
-  NameToPlugMap plugs_;
-  std::unique_ptr<RadonSlotsHelper> radon_slots_helper_;
 };
 
 class RadonListComponent : public RadonComponent {

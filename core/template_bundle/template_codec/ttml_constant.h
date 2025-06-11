@@ -50,7 +50,7 @@ static constexpr const char* DSL_TYPE_REACT_NODIFF = "react_nodiff";
 static constexpr const char* DSL_TYPE_STANDALONE = "standalone";
 static constexpr const char* DSL_TYPE_REACT_UNKOWN = "unkown";
 
-enum class PackageInstanceDSL {
+enum class PackageInstanceDSL : unsigned char {
   TT,
   REACT,
   REACT_NODIFF,

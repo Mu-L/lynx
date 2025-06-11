@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "base/include/auto_create_optional.h"
 #include "base/include/debug/lynx_assert.h"
 #include "core/renderer/dom/attribute_holder.h"
 #include "core/renderer/dom/element.h"
@@ -414,7 +415,7 @@ class RadonNode : public RadonBase {
   bool style_invalidated_{false};
   bool force_calc_new_style_{true};
 
-  std::unique_ptr<ClassTransmitOption> class_transmit_option_;
+  base::auto_create_optional<ClassTransmitOption> class_transmit_option_;
 };
 
 }  // namespace tasm

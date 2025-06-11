@@ -348,8 +348,8 @@ class TemplateAssembler final
   BASE_EXPORT_FOR_DEVTOOL void SetLepusObserver(
       const std::shared_ptr<lepus::InspectorLepusObserver>& observer);
 
-  lepus::Value& GetComponentInfoMap(const std::string& entry_name) override;
-  lepus::Value& GetComponentPathMap(const std::string& entry_name) override;
+  lepus::Value GetComponentInfoMap(const std::string& entry_name) override;
+  lepus::Value GetComponentPathMap(const std::string& entry_name) override;
   bool SupportComponentJS() const override { return support_component_js_; }
 
   bool destroyed() { return destroyed_; }

@@ -1783,12 +1783,12 @@ void TemplateAssembler::GetDecodedJSSource(
   });
 }
 
-lepus::Value& TemplateAssembler::GetComponentInfoMap(
+lepus::Value TemplateAssembler::GetComponentInfoMap(
     const std::string& entry_name) {
   return FindEntry(entry_name)->component_info_map();
 }
 
-lepus::Value& TemplateAssembler::GetComponentPathMap(
+lepus::Value TemplateAssembler::GetComponentPathMap(
     const std::string& entry_name) {
   return FindEntry(entry_name)->component_path_map();
 }

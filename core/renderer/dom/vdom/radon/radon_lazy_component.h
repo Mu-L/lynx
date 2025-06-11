@@ -96,10 +96,10 @@ class RadonLazyComponent : public RadonComponent {
   void SetGlobalProps(const lepus::Value& global_props);
   void DeriveFromMould(ComponentMould* data) override;
 
-  virtual lepus::Value& GetComponentInfoMap(
+  virtual lepus::Value GetComponentInfoMap(
       const std::string& entry_name = "") override;
 
-  virtual lepus::Value& GetComponentPathMap(
+  virtual lepus::Value GetComponentPathMap(
       const std::string& entry_name = "") override;
 
   void UpdateDynamicCompTopLevelVariables(ComponentMould* data,

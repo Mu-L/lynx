@@ -8,7 +8,7 @@
 namespace lynx {
 namespace tasm {
 
-enum class BooleanProp {
+enum class BooleanProp : unsigned char {
   NotSet,
   TrueValue,
   FalseValue,

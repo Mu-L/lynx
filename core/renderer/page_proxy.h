@@ -83,10 +83,8 @@ class PageProxy {
     TasmDelegate() = default;
     virtual ~TasmDelegate() = default;
 
-    virtual lepus::Value &GetComponentInfoMap(
-        const std::string &entry_name) = 0;
-    virtual lepus::Value &GetComponentPathMap(
-        const std::string &entry_name) = 0;
+    virtual lepus::Value GetComponentInfoMap(const std::string &entry_name) = 0;
+    virtual lepus::Value GetComponentPathMap(const std::string &entry_name) = 0;
     virtual bool SupportComponentJS() const = 0;
 
     virtual PipelineContext *GetCurrentPipelineContext() = 0;
@@ -378,8 +376,8 @@ class PageProxy {
     return enable_feature_report_ && element_manager()->EnableEventReporter();
   };
 
-  lepus::Value &GetGlobalComponentInfoMap(const std::string &entry_name);
-  lepus::Value &GetGlobalComponentPathMap(const std::string &entry_name);
+  lepus::Value GetGlobalComponentInfoMap(const std::string &entry_name);
+  lepus::Value GetGlobalComponentPathMap(const std::string &entry_name);
 
   bool EraseFromEmptyComponentMap(RadonComponent *component);
   bool InsertEmptyComponent(RadonComponent *component);

@@ -1172,12 +1172,12 @@ lepus::Value PageProxy::OnScreenMetricsSet(const lepus::Value &input) {
   return lepus::Value();
 }
 
-lepus::Value &PageProxy::GetGlobalComponentInfoMap(
+lepus::Value PageProxy::GetGlobalComponentInfoMap(
     const std::string &entry_name) {
   return tasm_delegate_->GetComponentInfoMap(entry_name);
 }
 
-lepus::Value &PageProxy::GetGlobalComponentPathMap(
+lepus::Value PageProxy::GetGlobalComponentPathMap(
     const std::string &entry_name) {
   return tasm_delegate_->GetComponentPathMap(entry_name);
 }
