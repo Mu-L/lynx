@@ -22,6 +22,7 @@
 #import <Lynx/LynxUIComponent.h>
 #import <Lynx/LynxUIContext.h>
 #import <Lynx/LynxUIExposure.h>
+#import <Lynx/LynxUIFrame.h>
 #import <Lynx/LynxUIImage.h>
 #import <Lynx/LynxUIListContainer.h>
 #import <Lynx/LynxUIListLight.h>
@@ -1414,6 +1415,13 @@ extern NSString* const kDefaultComponentID;
 
 - (NSInteger)getRootSign {
   return _rootUI.rootView.tag;
+}
+
+- (void)setFrameAppBundle:(LynxTemplateBundle*)bundle withTag:(NSInteger)sign {
+  LynxUI* ui = _uiHolder[[NSNumber numberWithInteger:sign]];
+  if (ui && [ui isKindOfClass:[LynxUIFrame class]]) {
+    [(LynxUIFrame*)ui onReceiveAppBundle:bundle];
+  }
 }
 
 #pragma mark - View Hierarchy Management

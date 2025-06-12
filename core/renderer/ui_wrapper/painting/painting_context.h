@@ -94,6 +94,11 @@ class PaintingContext {
                                  node_index);
   }
 
+  void SetFrameAppBundle(int tag,
+                         const std::shared_ptr<LynxTemplateBundle>& bundle) {
+    platform_impl_->SetFrameAppBundle(tag, bundle);
+  }
+
   inline void SetKeyframes(fml::RefPtr<PropBundle> keyframes_data) {
     platform_impl_->SetKeyframes(std::move(keyframes_data));
   }

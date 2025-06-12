@@ -3,11 +3,14 @@
 // LICENSE file in the root directory of this source tree.
 
 #import <Lynx/LynxFrameView.h>
+#import <Lynx/LynxTemplateBundle.h>
 #import <Lynx/LynxUI.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface LynxUIFrame : LynxUI <LynxFrameView*>
+
+- (void)onReceiveAppBundle:(LynxTemplateBundle*)bundle;
 
 @end
 

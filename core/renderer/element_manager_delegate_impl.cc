@@ -28,15 +28,16 @@ void ElementManagerDelegateImpl::LoadFrameBundle(const std::string &src,
 
 void ElementManagerDelegateImpl::DidFrameBundleLoaded(
     const std::string &src, LynxTemplateBundle bundle) {
+  auto bundle_ptr = std::make_shared<LynxTemplateBundle>(std::move(bundle));
   for (auto element = frame_element_set_.begin();
        element != frame_element_set_.end();) {
-    if ((*element)->DidBundleLoaded(src, bundle)) {
+    if ((*element)->DidBundleLoaded(src, bundle_ptr)) {
       element = frame_element_set_.erase(element);
     } else {
       ++element;
     }
   }
-  frame_bundles_.try_emplace(src, std::move(bundle));
+  frame_bundles_.try_emplace(src, std::move(bundle_ptr));
 }
 
 void ElementManagerDelegateImpl::OnFrameRemoved(FrameElement *element) {

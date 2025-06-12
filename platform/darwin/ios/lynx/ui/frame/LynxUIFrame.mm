@@ -19,4 +19,8 @@ LYNX_REGISTER_UI("frame")
   return [[LynxFrameView alloc] init];
 }
 
+- (void)onReceiveAppBundle:(LynxTemplateBundle*)bundle {
+  // TODO(zhoupeng.z): post bundle to frame view
+}
+
 @end

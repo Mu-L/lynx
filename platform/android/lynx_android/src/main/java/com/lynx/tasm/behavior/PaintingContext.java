@@ -17,6 +17,7 @@ import com.lynx.react.bridge.mapbuffer.CompactArrayBuffer;
 import com.lynx.react.bridge.mapbuffer.ReadableCompactArrayBuffer;
 import com.lynx.react.bridge.mapbuffer.ReadableMapBuffer;
 import com.lynx.tasm.LynxEnv;
+import com.lynx.tasm.TemplateBundle;
 import com.lynx.tasm.base.CalledByNative;
 import com.lynx.tasm.base.LLog;
 import com.lynx.tasm.base.TraceEvent;
@@ -734,6 +735,11 @@ public final class PaintingContext {
     if (ui instanceof UIListContainer) {
       ((UIListContainer) ui).updateScrollInfo(smooth, estimatedOffset, scrolling);
     }
+  }
+
+  @CalledByNative
+  private void setFrameAppBundle(int sign, TemplateBundle bundle) {
+    mUIOwner.setFrameAppBundle(sign, bundle);
   }
 
   private native void nativeInvokeCallback(long context, int callback, WritableArray array);

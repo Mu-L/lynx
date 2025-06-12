@@ -5,6 +5,7 @@
 #include "core/renderer/ui_wrapper/painting/android/painting_context_android.h"
 
 #include <future>
+#include <memory>
 #include <utility>
 
 #include "base/trace/native/trace_event.h"
@@ -14,6 +15,7 @@
 #include "core/renderer/css/css_property.h"
 #include "core/renderer/css/css_style_utils.h"
 #include "core/renderer/dom/android/lepus_message_consumer.h"
+#include "core/renderer/dom/android/lynx_template_bundle_android.h"
 #include "core/renderer/tasm/react/android/mapbuffer/readable_compact_array_buffer.h"
 #include "core/renderer/ui_wrapper/common/android/platform_extra_bundle_android.h"
 #include "core/renderer/ui_wrapper/common/android/prop_bundle_android.h"
@@ -691,6 +693,21 @@ void PaintingContextAndroid::UpdatePaintingNode(
     Java_PaintingContext_updateProps(env, local_ref.Get(), id, tend_to_flatten,
                                      props_ref.Get(), styles_ref.Get(),
                                      listeners_ref.Get(), gestures_ref.Get());
+  });
+}
+
+void PaintingContextAndroid::SetFrameAppBundle(
+    int sign, const std::shared_ptr<LynxTemplateBundle>& bundle) {
+  Enqueue([impl = impl_, sign, bundle]() mutable {
+    JNIEnv* env = base::android::AttachCurrentThread();
+    base::android::ScopedLocalJavaRef<jobject> local_ref(*impl);
+    if (local_ref.IsNull()) {
+      return;
+    }
+    // TODO(zhoupeng.z): adopt shared_ptr directly to avoid copy
+    auto bundle_ref = ConstructJTemplateBundleFromNative(*bundle);
+    Java_PaintingContext_setFrameAppBundle(env, local_ref.Get(), sign,
+                                           bundle_ref.Get());
   });
 }
 

@@ -37,7 +37,8 @@ class ElementManagerDelegateImpl : public ElementManagerDelegate {
 
  private:
   std::unordered_set<FrameElement *> frame_element_set_;
-  std::unordered_map<std::string, LynxTemplateBundle> frame_bundles_{};
+  std::unordered_map<std::string, std::shared_ptr<LynxTemplateBundle>>
+      frame_bundles_{};
   std::shared_ptr<LazyBundleLoader> bundle_loader_{nullptr};
 };
 

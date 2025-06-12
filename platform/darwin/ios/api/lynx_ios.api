@@ -3948,6 +3948,10 @@ public class LynxUIExposureDetail : NSObject {
   public LynxUI* LynxUIExposureDetail::ui ui;
 }
 
+public class LynxUIFrame : LynxUI, <LynxFrameView> {
+  public void LynxUIFrame::onReceiveAppBundle:(LynxTemplateBundle *bundle);
+}
+
 public class LynxUIImage : LynxUI, <UIImageView> {
   public BOOL LynxUIImage::animated animated;
   public id LynxUIImage::customImageRequest customImageRequest;
@@ -4249,6 +4253,7 @@ public class LynxUIOwner : NSObject {
   public LynxUI * LynxUIOwner(Private)::createUIAsyncWithSign:tagName:clazz:supportedState:eventSet:lepusEventSet:props:nodeIndex:gestureDetectorSet:(NSInteger sign, [tagName] NSString *tagName, [clazz] Class clazz, [supportedState] TagSupportedState state, [eventSet] NSSet< NSString * > *eventSet, [lepusEventSet] NSSet< NSString * > *lepusEventSet, [props] NSDictionary *props, [nodeIndex] uint32_t nodeIndex, [gestureDetectorSet] NSSet< LynxGestureDetectorDarwin * > *gestureDetectorSet);
   public void LynxUIOwner(Private)::processUIOnMainThread:withSign:tagName:props:(LynxUI *ui, [withSign] NSInteger sign, [tagName] NSString *tagName, [props] NSDictionary *props);
   public LynxThreadStrategyForRender LynxUIOwner(Private)::getThreadStrategyForRender();
+  public void LynxUIOwner(Private)::setFrameAppBundle:withTag:(LynxTemplateBundle *bundle, [withTag] NSInteger sign);
 }
 
 public interface LynxUIOwner(Accessibility) {
@@ -4268,6 +4273,7 @@ public interface LynxUIOwner(Private) {
   public LynxUI * LynxUIOwner(Private)::createUIAsyncWithSign:tagName:clazz:supportedState:eventSet:lepusEventSet:props:nodeIndex:gestureDetectorSet:(NSInteger sign,[tagName] NSString *tagName,[clazz] Class clazz,[supportedState] TagSupportedState state,[eventSet] NSSet< NSString * > *eventSet,[lepusEventSet] NSSet< NSString * > *lepusEventSet,[props] NSDictionary *props,[nodeIndex] uint32_t nodeIndex,[gestureDetectorSet] NSSet< LynxGestureDetectorDarwin * > *gestureDetectorSet);
   public void LynxUIOwner(Private)::processUIOnMainThread:withSign:tagName:props:(LynxUI *ui,[withSign] NSInteger sign,[tagName] NSString *tagName,[props] NSDictionary *props);
   public LynxThreadStrategyForRender LynxUIOwner(Private)::getThreadStrategyForRender();
+  public void LynxUIOwner(Private)::setFrameAppBundle:withTag:(LynxTemplateBundle *bundle,[withTag] NSInteger sign);
 }
 
 public protocol LynxUIRendererProtocol-p : <NSObject> {

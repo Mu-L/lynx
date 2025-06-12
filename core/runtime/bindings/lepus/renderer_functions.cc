@@ -28,6 +28,7 @@
 #include "core/renderer/dom/fiber/block_element.h"
 #include "core/renderer/dom/fiber/fiber_element.h"
 #include "core/renderer/dom/fiber/for_element.h"
+#include "core/renderer/dom/fiber/frame_element.h"
 #include "core/renderer/dom/fiber/if_element.h"
 #include "core/renderer/dom/fiber/image_element.h"
 #include "core/renderer/dom/fiber/list_element.h"

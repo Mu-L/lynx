@@ -35,7 +35,6 @@
 #include "core/renderer/dom/element_context_task_queue.h"
 #include "core/renderer/dom/element_manager_delegate.h"
 #include "core/renderer/dom/element_vsync_proxy.h"
-#include "core/renderer/dom/fiber/frame_element.h"
 #include "core/renderer/dom/fiber/page_element.h"
 #include "core/renderer/dom/vdom/radon/radon_element.h"
 #include "core/renderer/dom/vdom/radon/radon_types.h"

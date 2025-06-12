@@ -5,6 +5,7 @@
 #ifndef CORE_RENDERER_DOM_FIBER_FRAME_ELEMENT_H_
 #define CORE_RENDERER_DOM_FIBER_FRAME_ELEMENT_H_
 
+#include <memory>
 #include <string>
 
 #include "core/renderer/dom/element_manager.h"
@@ -22,14 +23,14 @@ class FrameElement : public FiberElement {
                     bool need_update_data_model = true) override;
 
   bool DidBundleLoaded(const std::string& src,
-                       const LynxTemplateBundle& bundle);
+                       const std::shared_ptr<LynxTemplateBundle>& bundle);
 
  protected:
   void OnNodeAdded(FiberElement* child) override;
 
  private:
   // post bundle to UI node
-  void PostBundle(const LynxTemplateBundle& bundle);
+  void PostBundle(const std::shared_ptr<LynxTemplateBundle>& bundle);
 
   // load bundle if src is set
   void OnSetSrc(const base::String& key, const lepus::Value& value);

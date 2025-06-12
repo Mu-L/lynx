@@ -29,6 +29,7 @@
 #import <Lynx/LynxLog.h>
 #import <Lynx/LynxNewGestureDelegate.h>
 #import <Lynx/LynxShadowNodeOwner.h>
+#import <Lynx/LynxTemplateBundle+Converter.h>
 #import <Lynx/LynxUI+Internal.h>
 #import <Lynx/LynxUIImage.h>
 #import <Lynx/LynxUIMethodProcessor.h>
@@ -398,6 +399,15 @@ void PaintingContextDarwin::UpdateLayout(int sign, float x, float y, float width
                sticky:stickyArr];
   });
 #undef UI_EDGE_INSETS
+}
+
+void PaintingContextDarwin::SetFrameAppBundle(int tag,
+                                              const std::shared_ptr<LynxTemplateBundle>& bundle) {
+  __weak LynxUIOwner* uiOwner = uiOwner_;
+  auto platform_bundle = ConstructTemplateBundleFromNative(*bundle);
+  Enqueue([uiOwner, tag, platform_bundle]() {
+    [uiOwner setFrameAppBundle:platform_bundle withTag:tag];
+  });
 }
 
 void PaintingContextDarwin::Flush() { queue_->Flush(); }

@@ -66,6 +66,8 @@ typedef enum : NSInteger {
 
 - (LynxThreadStrategyForRender)getThreadStrategyForRender;
 
+- (void)setFrameAppBundle:(LynxTemplateBundle*)bundle withTag:(NSInteger)sign;
+
 @end
 
 NS_ASSUME_NONNULL_END

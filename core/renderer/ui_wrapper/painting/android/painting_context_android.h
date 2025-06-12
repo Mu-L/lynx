@@ -96,6 +96,8 @@ class PaintingContextAndroid : public PaintingCtxPlatformImpl {
                     uint32_t node_index = 0) override;
   void UpdatePlatformExtraBundle(int32_t id,
                                  PlatformExtraBundle* bundle) override;
+  void SetFrameAppBundle(
+      int tag, const std::shared_ptr<LynxTemplateBundle>& bundle) override;
   void Flush() override;
   void FlushImmediately() override;
   void HandleValidate(int tag) override;

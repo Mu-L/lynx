@@ -26,6 +26,7 @@ import com.lynx.tasm.LynxEnvKey;
 import com.lynx.tasm.LynxError;
 import com.lynx.tasm.LynxSubErrorCode;
 import com.lynx.tasm.NativeFacade;
+import com.lynx.tasm.TemplateBundle;
 import com.lynx.tasm.animation.keyframe.KeyframeManager;
 import com.lynx.tasm.animation.transition.TransitionAnimationManager;
 import com.lynx.tasm.base.LLog;
@@ -1857,5 +1858,10 @@ public class LynxUIOwner {
 
   public void setAttachLynxPageUICallback(UIBodyView.attachLynxPageUICallback callback) {
     mAttachLynxPageUICallback = callback;
+  }
+
+  @RestrictTo(RestrictTo.Scope.LIBRARY)
+  void setFrameAppBundle(int tag, TemplateBundle bundle) {
+    // TODO(zhoupeng.z): post to frame ui
   }
 }

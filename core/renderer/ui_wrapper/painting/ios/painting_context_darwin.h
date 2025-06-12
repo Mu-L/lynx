@@ -91,6 +91,9 @@ class PaintingContextDarwin : public PaintingCtxPlatformImpl {
   void UpdatePlatformExtraBundle(int32_t signature,
                                  PlatformExtraBundle* bundle) override;
 
+  void SetFrameAppBundle(
+      int tag, const std::shared_ptr<LynxTemplateBundle>& bundle) override;
+
   void Flush() override;
   void HandleValidate(int tag) override {
     // TODO(liujilong): Implement.

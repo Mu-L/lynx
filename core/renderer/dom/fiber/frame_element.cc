@@ -47,8 +47,8 @@ void FrameElement::OnSetSrc(const base::String& key,
   }
 }
 
-bool FrameElement::DidBundleLoaded(const std::string& src,
-                                   const LynxTemplateBundle& bundle) {
+bool FrameElement::DidBundleLoaded(
+    const std::string& src, const std::shared_ptr<LynxTemplateBundle>& bundle) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, FRAME_ELEMENT_DID_BUNDLED_LOADED, "src",
               src);
   if (src_ != src) {
@@ -58,8 +58,9 @@ bool FrameElement::DidBundleLoaded(const std::string& src,
   return true;
 }
 
-void FrameElement::PostBundle(const LynxTemplateBundle& bundle) {
-  // TODO(zhoupeng.z): post bundle to UI node
+void FrameElement::PostBundle(
+    const std::shared_ptr<LynxTemplateBundle>& bundle) {
+  painting_context()->SetFrameAppBundle(id_, bundle);
 }
 
 }  // namespace tasm
