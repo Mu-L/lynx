@@ -9,6 +9,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class LynxViewBuilder;
+
 @protocol LynxServiceProtocol;
 
 @protocol LynxServiceTrailProtocol <LynxServiceProtocol>
@@ -30,6 +32,11 @@ NS_ASSUME_NONNULL_BEGIN
  * Get all values for key from experiment.
  */
 - (NSDictionary *)getAllValues;
+
+/**
+ * parse configs of LynxViewBuilder
+ */
+- (void)parseLynxViewBuilder:(LynxViewBuilder *)builder;
 
 @end
 

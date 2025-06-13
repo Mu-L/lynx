@@ -186,4 +186,17 @@
   return _lynxUIRenderer;
 }
 
+- (void)insertLynxViewConfig:(id)config forKey:(NSString*)key {
+  if (!key || !config) {
+    return;
+  }
+  if (!_lynxViewConfig) {
+    _lynxViewConfig = [[NSMutableDictionary alloc] initWithObjectsAndKeys:config, key, nil];
+  } else {
+    if (![_lynxViewConfig objectForKey:key]) {
+      [_lynxViewConfig setObject:config forKey:key];
+    }
+  }
+}
+
 @end

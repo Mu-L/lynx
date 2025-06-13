@@ -16,6 +16,11 @@
 #import <Lynx/LynxTemplateResourceFetcher.h>
 #import <Lynx/LynxViewEnum.h>
 
+/**
+ * Key for set platform config to LynxViewConfig
+ */
+static NSString* _Nonnull const KEY_LYNX_PLATFORM_CONFIG = @"platform_config";
+
 @interface LynxViewBuilder : NSObject
 
 @property(nonatomic, nullable) LynxConfig* config;
@@ -105,6 +110,11 @@
     "try to set 'threadStrategy' variable if you want to change the thread strategy for rendering"))
 );
 
+/**
+ * URL for LynxView, which will be parsed by LynxServiceTrailProtocol in building LynxView.
+ */
+@property(nonatomic, strong, nullable) NSURL* uri;
+
 - (void)setThreadStrategyForRender:(LynxThreadStrategyForRender)threadStrategy;
 - (LynxThreadStrategyForRender)getThreadStrategyForRender;
 
@@ -130,6 +140,11 @@
 - (void)registerFont:(UIFont* _Nonnull)font forName:(NSString* _Nonnull)name;
 - (void)registerFamilyName:(NSString* _Nonnull)fontFamilyName
              withAliasName:(NSString* _Nonnull)aliasName;
+
+/**
+ * insert a key-value pair into lynxViewConfig if the key does not exist, otherwise ignored.
+ */
+- (void)insertLynxViewConfig:(id _Nonnull)config forKey:(NSString* _Nonnull)key;
 
 @end
 

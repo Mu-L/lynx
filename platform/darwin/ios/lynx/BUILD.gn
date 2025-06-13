@@ -340,7 +340,6 @@ subspec_target("lynx") {
     "utils/LynxPropertyDiffMap.m",
     "utils/LynxUIKitAPIAdapter.m",
     "utils/LynxUIUnitUtils.m",
-    "utils/LynxViewConfigProcessor.mm",
   ]
   public_header_files = [
     "public/LynxViewBuilder.h",
@@ -423,7 +422,6 @@ subspec_target("UnitTests") {
     "ui/scroll_view/LynxUIScrollerUnitTestUtils.h",
     "ui/scroll_view/LynxUIScrollerUnitTestUtils.m",
     "utils/LynxColorUtilsUnitTest.m",
-    "utils/LynxConfigProcessorUnitTest.m",
     "utils/LynxConvertUtilsUnitTest.m",
     "utils/LynxGradientUtilsUnitTest.m",
     "utils/LynxHtmlEscapeUnitTest.m",

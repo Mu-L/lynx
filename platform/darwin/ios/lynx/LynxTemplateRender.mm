@@ -25,7 +25,6 @@
 #import <Lynx/LynxTraceEvent.h>
 #import <Lynx/LynxTraceEventDef.h>
 #import <Lynx/LynxView.h>
-#import <Lynx/LynxViewConfigProcessor.h>
 #import "LynxAccessibilityModule.h"
 #import "LynxBackgroundRuntime+Internal.h"
 #import "LynxCallStackUtil.h"
@@ -104,7 +103,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
     if (block) {
       TRACE_EVENT(LYNX_TRACE_CATEGORY, TEMPLATE_RENDER_CUSTOM_BUILDER);
       block(builder);
-      [LynxViewConfigProcessor processorMap:builder.lynxViewConfig lynxViewBuilder:builder];
+      [LynxTrail parseLynxViewBuilder:builder];
     }
 
     /// Runtime Options
