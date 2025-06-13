@@ -8,7 +8,7 @@
 
 typedef struct {
   BOOL isLocalScheme;
-  BOOL isTestBenchSchema;
+  BOOL isLynxRecorderSchema;
   NSData* data;
   NSString* url;
   NSString* query;

@@ -8,10 +8,10 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import com.facebook.imagepipeline.memory.PoolConfig;
 import com.facebook.imagepipeline.memory.PoolFactory;
-import com.lynx.devtool.testbench.TestBenchPageManager;
+import com.lynx.devtool.recorder.LynxRecorderPageManager;
 import com.lynx.explorer.modules.LynxModuleAdapter;
 import com.lynx.explorer.provider.DemoTemplateProvider;
-import com.lynx.explorer.shell.TestBenchDefaultActionCallback;
+import com.lynx.explorer.shell.LynxRecorderDefaultActionCallback;
 import com.lynx.service.devtool.LynxDevToolService;
 import com.lynx.service.http.LynxHttpService;
 import com.lynx.service.image.LynxImageService;
@@ -30,15 +30,15 @@ public class ExplorerApplication extends Application {
     initLynxEnv();
     installLynxJSModule(); // register native module.
     initFresco();
-    initTestBench();
+    initLynxRecorder();
   }
 
   private void initLynxEnv() {
     LynxEnv.inst().init(this, null, new DemoTemplateProvider(), null, null);
   }
 
-  private void initTestBench() {
-    TestBenchPageManager.getInstance().registerCallback(new TestBenchDefaultActionCallback());
+  private void initLynxRecorder() {
+    LynxRecorderPageManager.getInstance().registerCallback(new LynxRecorderDefaultActionCallback());
   }
 
   private void initLynxService() {

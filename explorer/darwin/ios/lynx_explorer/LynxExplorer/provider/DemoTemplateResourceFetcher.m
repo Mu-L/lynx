@@ -5,7 +5,7 @@
 #import "DemoTemplateResourceFetcher.h"
 #import <Lynx/LynxService.h>
 #import <Lynx/LynxServiceDevToolProtocol.h>
-#import <LynxDevtool/TestBenchEnv.h>
+#import <LynxDevtool/LynxRecorderEnv.h>
 
 @implementation DemoTemplateResourceFetcher
 
@@ -33,8 +33,8 @@
                                    ofType:@"bundle"];
       }
       res.data = [NSData dataWithContentsOfFile:res.url];
-    } else if ([url hasPrefix:[TestBenchEnv sharedInstance].testBenchUrlPrefix]) {
-      res.isTestBenchSchema = YES;
+    } else if ([url hasPrefix:[LynxRecorderEnv sharedInstance].lynxRecorderUrlPrefix]) {
+      res.isLynxRecorderSchema = YES;
       res.url = url;
     }
   }

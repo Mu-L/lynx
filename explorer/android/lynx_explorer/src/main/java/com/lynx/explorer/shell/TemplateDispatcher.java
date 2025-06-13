@@ -41,7 +41,7 @@ public abstract class TemplateDispatcher {
     sDispatchers = new HashMap() {
       {
         put(HttpTemplateDispatcher.class.getSimpleName(), new HttpTemplateDispatcher());
-        put(TestBenchDispatcher.class.getSimpleName(), new TestBenchDispatcher());
+        put(LynxRecorderDispatcher.class.getSimpleName(), new LynxRecorderDispatcher());
         put(LocalTemplateDispatcher.class.getSimpleName(), new LocalTemplateDispatcher());
       }
     };

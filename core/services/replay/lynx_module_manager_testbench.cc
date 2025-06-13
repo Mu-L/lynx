@@ -18,7 +18,7 @@ void ModuleManagerTestBench::Destroy() {}
 void ModuleManagerTestBench::initRecordModuleData(
     Runtime *rt, InitRecordModuleDataCallback callback) {
   PropNameID module_name =
-      PropNameID::forAscii(*rt, "TestBenchReplayDataModule");
+      PropNameID::forAscii(*rt, "LynxRecorderReplayDataModule");
   piper::Value module =
       bindingPtr->getLynxModuleManagerPtr()->get(rt, module_name);
   if (module.isNull()) {

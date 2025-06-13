@@ -84,8 +84,8 @@ std::shared_ptr<piper::App> JSExecutor::createNativeAppInstance(
       *js_runtime_, module_manager_.get()->bindingPtr);
 #if ENABLE_TESTBENCH_REPLAY
   piper::Value module = module_manager_->bindingPtr->get(
-      js_runtime_.get(),
-      piper::PropNameID::forAscii(*js_runtime_, "TestBenchReplayDataModule"));
+      js_runtime_.get(), piper::PropNameID::forAscii(
+                             *js_runtime_, "LynxRecorderReplayDataModule"));
   if (!module.isNull()) {
     module_manager_testBench_ = std::make_shared<ModuleManagerTestBench>();
     module_manager_testBench_->SetGroupInterceptor(

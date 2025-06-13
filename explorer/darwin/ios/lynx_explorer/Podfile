@@ -26,7 +26,7 @@ target 'LynxExplorer' do
 
   pod 'LynxDevtool', :path => '../../../../..', :subspecs => [
    'Framework',
-   'TestBenchReplay',
+   'LynxRecorder',
   ],:testspecs => [ 'UnitTests' ]
 
   pod 'BaseDevtool', :path => '../../../../..'
