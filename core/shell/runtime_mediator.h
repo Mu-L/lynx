@@ -171,6 +171,7 @@ class RuntimeMediator : public runtime::TemplateDelegate {
       runtime::MessageEvent event) override;
 
   std::string LoadJSSource(const std::string& name) override;
+  std::shared_ptr<piper::Buffer> LoadBytecode(const std::string& url) override;
 
   RuntimeMediator(const RuntimeMediator&) = delete;
   RuntimeMediator& operator=(const RuntimeMediator&) = delete;

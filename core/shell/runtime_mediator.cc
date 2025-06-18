@@ -501,6 +501,16 @@ std::string RuntimeMediator::LoadJSSource(const std::string& name) {
   return str;
 }
 
+std::shared_ptr<piper::Buffer> RuntimeMediator::LoadBytecode(
+    const std::string& url) {
+  auto info = external_resource_loader_->LoadByteCode(url, 5 /* 5s timeout */);
+  std::shared_ptr<piper::Buffer> buffer;
+  if (info.Success()) {
+    buffer = std::make_shared<piper::ByteBuffer>(std::move(info.data));
+  }
+  return buffer;
+}
+
 void RuntimeMediator::AddEventListenersToWhiteBoard(
     runtime::ContextProxy* js_context_proxy) {
   if (white_board_delegate_) {

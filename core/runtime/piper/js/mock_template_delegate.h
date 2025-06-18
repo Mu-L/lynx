@@ -45,6 +45,10 @@ class MockTemplateDelegate : public runtime::TemplateDelegate {
   void LoadScriptAsync(const std::string& url,
                        piper::ApiCallBack callback) override {}
 
+  std::shared_ptr<piper::Buffer> LoadBytecode(const std::string& url) override {
+    return nullptr;
+  }
+
   void AddFont(const lepus::Value& font,
                const piper::ApiCallBack& callback) override {}
 

@@ -62,11 +62,11 @@ runtime::RuntimeManager* JSExecutor::GetCurrentRuntimeManagerInstance() {
 void JSExecutor::loadPreJSBundle(
     std::vector<std::pair<std::string, std::string>>& js_pre_sources,
     bool ensure_console, int64_t rt_id, bool enable_user_bytecode,
-    const std::string& bytecode_source_url) {
+    const std::string& bytecode_source_url, BytecodeGetter bytecode_getter) {
   js_runtime_ = runtimeManagerInstance()->CreateJSRuntime(
       group_id_, exception_handler_, js_pre_sources,
       force_use_light_weight_js_engine_, *this, rt_id, ensure_console,
-      enable_user_bytecode, bytecode_source_url);
+      enable_user_bytecode, bytecode_source_url, std::move(bytecode_getter));
 }
 
 void JSExecutor::invokeCallback(std::shared_ptr<piper::ModuleCallback> callback,

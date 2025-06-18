@@ -79,7 +79,8 @@ class BASE_EXPORT_FOR_DEVTOOL RuntimeManager
       std::vector<std::pair<std::string, std::string>>& js_pre_sources,
       bool forceUseLightweightJSEngine, piper::JSExecutor& executor,
       int64_t rt_id, bool ensure_console, bool enable_bytecode,
-      const std::string& bytecode_source_url);
+      const std::string& bytecode_source_url,
+      piper::BytecodeGetter bytecode_getter);
 
   void OnRelease(const std::string& group_id) override;
 
@@ -97,7 +98,8 @@ class BASE_EXPORT_FOR_DEVTOOL RuntimeManager
       const std::string& group_id,
       std::shared_ptr<piper::JSIExceptionHandler> exception_handler,
       bool force_use_lightweight_js_engine, int64_t rt_id, bool enable_bytecode,
-      const std::string& bytecode_source_url);
+      const std::string& bytecode_source_url,
+      piper::BytecodeGetter bytecode_getter);
 
   std::shared_ptr<piper::JSIContext> GetSharedJSContext(
       const std::string& group_id);

@@ -195,7 +195,8 @@ std::shared_ptr<piper::Runtime> RuntimeManager::CreateJSRuntime(
     std::vector<std::pair<std::string, std::string>>& js_pre_sources,
     bool force_use_lightweight_js_engine, piper::JSExecutor& executor,
     int64_t rt_id, bool ensure_console, bool enable_bytecode,
-    const std::string& bytecode_source_url) {
+    const std::string& bytecode_source_url,
+    piper::BytecodeGetter bytecode_getter) {
   // call inspect's prepare
   if (IsInspectEnabled(force_use_lightweight_js_engine)) {
     runtime_manager_delegate_->BeforeRuntimeCreate(
@@ -208,9 +209,9 @@ std::shared_ptr<piper::Runtime> RuntimeManager::CreateJSRuntime(
   // and the context is being shared.
   bool need_create_context_wrapper = true;
   if (is_single_context) {
-    js_runtime = CreateRuntime(group_id, exception_handler,
-                               force_use_lightweight_js_engine, rt_id,
-                               enable_bytecode, bytecode_source_url);
+    js_runtime = CreateRuntime(
+        group_id, exception_handler, force_use_lightweight_js_engine, rt_id,
+        enable_bytecode, bytecode_source_url, std::move(bytecode_getter));
     js_context = CreateJSIContext(js_runtime, group_id);
     LOGI("create single_context:" << js_context.get());
   } else {
@@ -247,18 +248,18 @@ std::shared_ptr<piper::Runtime> RuntimeManager::CreateJSRuntime(
         }
       }
       need_create_context_wrapper = false;
-      js_runtime = CreateRuntime(group_id, exception_handler,
-                                 force_use_lightweight_js_engine, rt_id,
-                                 enable_bytecode, bytecode_source_url);
+      js_runtime = CreateRuntime(
+          group_id, exception_handler, force_use_lightweight_js_engine, rt_id,
+          enable_bytecode, bytecode_source_url, std::move(bytecode_getter));
       js_runtime->setCreatedType(
           piper::JSRuntimeCreatedType::none_vm_none_context);
       LOGI("get shared_context success, context:" << js_context.get()
                                                   << ", group:" << group_id);
     } else {
       // share context first create.
-      js_runtime = CreateRuntime(group_id, exception_handler,
-                                 force_use_lightweight_js_engine, rt_id,
-                                 enable_bytecode, bytecode_source_url);
+      js_runtime = CreateRuntime(
+          group_id, exception_handler, force_use_lightweight_js_engine, rt_id,
+          enable_bytecode, bytecode_source_url, std::move(bytecode_getter));
       js_context = CreateJSIContext(js_runtime, group_id);
       LOGI("get shared_context failed, create context:"
            << js_context.get() << ", group:" << group_id);
@@ -327,11 +328,13 @@ std::shared_ptr<piper::Runtime> RuntimeManager::CreateRuntime(
     const std::string& group_id,
     std::shared_ptr<piper::JSIExceptionHandler> exception_handler,
     bool force_use_lightweight_js_engine, int64_t rt_id, bool enable_bytecode,
-    const std::string& bytecode_source_url) {
+    const std::string& bytecode_source_url,
+    piper::BytecodeGetter bytecode_getter) {
   auto js_runtime = MakeRuntime(force_use_lightweight_js_engine);
   js_runtime->setRuntimeId(rt_id);
   js_runtime->SetEnableUserBytecode(enable_bytecode);
   js_runtime->SetBytecodeSourceUrl(bytecode_source_url);
+  js_runtime->SetBytecodeGetter(std::move(bytecode_getter));
   return js_runtime;
 }
 

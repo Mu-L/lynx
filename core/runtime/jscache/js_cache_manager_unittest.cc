@@ -363,6 +363,63 @@ TEST_F(JsCacheManagerTest, TryGetCacheMultipleTasks) {
   EXPECT_TRUE(buffer4);
 }
 
+TEST_F(JsCacheManagerTest, TryGetCacheForExternal) {
+  auto &instance = QuickjsCacheManagerForTesting::GetInstance();
+  auto js_file_buffer = std::make_shared<StringBuffer>("");
+  {
+    // dynamic url
+    const std::string dynamic_url = "/from_external.js";
+    auto bytecode_getter = std::make_unique<piper::BytecodeGetter>(
+        [&dynamic_url](const std::string &url) {
+          EXPECT_EQ(url, dynamic_url);
+          return std::make_shared<piper::StringBuffer>("from_external");
+        });
+    auto buffer =
+        instance.TryGetCache(dynamic_url, k_template_url, 0, js_file_buffer,
+                             std::make_unique<TestingCacheGenerator>(
+                                 dynamic_url, js_file_buffer, ""),
+                             bytecode_getter.get());
+    EXPECT_TRUE(buffer);
+    CheckOnGetBytecodeEvent(JSRuntimeType::quickjs, dynamic_url,
+                            JsCacheType::EXTERNAL, true, true, true, 0ul, 0ul);
+  }
+  {
+    // packaged url for app-service.js
+    auto bytecode_getter =
+        std::make_unique<piper::BytecodeGetter>([](const std::string &url) {
+          EXPECT_EQ(url, std::string(k_template_url) + std::string("##") +
+                             std::string(k_source_url));
+          return std::make_shared<piper::StringBuffer>("from_package");
+        });
+    auto buffer =
+        instance.TryGetCache(k_source_url, k_template_url, 0, js_file_buffer,
+                             std::make_unique<TestingCacheGenerator>(
+                                 k_source_url, js_file_buffer, ""),
+                             bytecode_getter.get());
+    EXPECT_TRUE(buffer);
+    CheckOnGetBytecodeEvent(JSRuntimeType::quickjs, k_source_url,
+                            JsCacheType::EXTERNAL, true, true, true, 0ul, 0ul);
+  }
+  {
+    // packaged url for lynx://
+    const std::string package_url = "lynx://package.js";
+    auto bytecode_getter = std::make_unique<piper::BytecodeGetter>(
+        [&package_url](const std::string &url) {
+          EXPECT_EQ(url, std::string(k_template_url) + std::string("##") +
+                             package_url);
+          return std::make_shared<piper::StringBuffer>("from_lynx");
+        });
+    auto buffer =
+        instance.TryGetCache(package_url, k_template_url, 0, js_file_buffer,
+                             std::make_unique<TestingCacheGenerator>(
+                                 package_url, js_file_buffer, ""),
+                             bytecode_getter.get());
+    EXPECT_TRUE(buffer);
+    CheckOnGetBytecodeEvent(JSRuntimeType::quickjs, package_url,
+                            JsCacheType::EXTERNAL, true, true, true, 0ul, 0ul);
+  }
+}
+
 TEST_F(JsCacheManagerTest, RequestCacheGenerationApp) {
   auto &instance = QuickjsCacheManagerForTesting::GetInstance();
   auto js_file_buffer = std::make_shared<StringBuffer>(js_file);
@@ -443,16 +500,35 @@ TEST_F(JsCacheManagerTest, RequestCacheGenerationCallback) {
   auto &instance = QuickjsCacheManagerForTesting::GetInstance();
   bool called = false;
   std::vector<std::unique_ptr<CacheGenerator>> generators;
+  const std::string cache_key = "RequestCacheGeneration.js";
+  const std::string package_url = "lynx://external.js";
+  const std::string external_url = "/external.js";
   generators.push_back(std::make_unique<TestingCacheGenerator>(
       k_source_url, std::make_shared<StringBuffer>(js_file), js_file));
+  generators.push_back(std::make_unique<TestingCacheGenerator>(
+      package_url, std::make_shared<StringBuffer>(js_file), js_file));
+  generators.push_back(std::make_unique<TestingCacheGenerator>(
+      external_url, std::make_shared<StringBuffer>(js_file), js_file));
   instance.RequestCacheGeneration(
-      "RequestCacheGeneration.js", std::move(generators), false,
+      cache_key, std::move(generators), false,
       std::make_unique<BytecodeGenerateCallback>(
-          [&called](std::string msg,
-                    std::unordered_map<std::string, std::shared_ptr<Buffer>>
-                        buffers) {
-            EXPECT_EQ(buffers.size(), 1);
-            EXPECT_EQ(std::string((char *)buffers[k_source_url]->data()),
+          [&called, &cache_key, &package_url, &external_url](
+              std::string msg,
+              std::unordered_map<std::string, std::shared_ptr<Buffer>>
+                  buffers) {
+            EXPECT_EQ(buffers.size(), 3);
+            const std::string app_service_url = cache_key + "##" + k_source_url;
+            EXPECT_NE(buffers.find(app_service_url), buffers.end());
+            EXPECT_EQ(std::string((char *)buffers[app_service_url]->data()),
+                      std::string(js_file));
+
+            const std::string cb_package_url = cache_key + "##" + package_url;
+            EXPECT_NE(buffers.find(cb_package_url), buffers.end());
+            EXPECT_EQ(std::string((char *)buffers[cb_package_url]->data()),
+                      std::string(js_file));
+
+            EXPECT_NE(buffers.find(external_url), buffers.end());
+            EXPECT_EQ(std::string((char *)buffers[external_url]->data()),
                       std::string(js_file));
             called = true;
           }));

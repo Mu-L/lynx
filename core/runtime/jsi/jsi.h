@@ -65,6 +65,21 @@ class StringBuffer : public Buffer {
   std::string s_;
 };
 
+class ByteBuffer : public Buffer {
+ public:
+  explicit ByteBuffer(std::vector<uint8_t>&& data) : data_(std::move(data)) {}
+  size_t size() const override { return data_.size(); }
+  const uint8_t* data() const override {
+    return reinterpret_cast<const uint8_t*>(data_.data());
+  }
+
+ private:
+  std::vector<uint8_t> data_;
+};
+
+using BytecodeGetter =
+    base::MoveOnlyClosure<std::shared_ptr<piper::Buffer>, const std::string&>;
+
 /// PreparedJavaScript is a base class repesenting JavaScript which is in a form
 /// optimized for execution, in a runtime-specific way. Construct one via
 /// piper::Runtime::prepareJavaScript().
@@ -351,6 +366,14 @@ class BASE_EXPORT Runtime {
     bytecode_source_url_ = url;
   }
 
+  void SetBytecodeGetter(BytecodeGetter getter) {
+    if (getter) {
+      bytecode_getter_ = std::make_unique<BytecodeGetter>(std::move(getter));
+    } else {
+      bytecode_getter_.reset();
+    }
+  }
+
   // Post a GC request.
   // In QuickJS and V8 engine, `RequestGC` will trigger a synchronized full
   // GC, which will block the current thread until the GC is finished. In
@@ -539,6 +562,7 @@ class BASE_EXPORT Runtime {
   std::string bytecode_source_url_;  // url of template.js file
   bool enable_js_binding_api_throw_exception_{false};
   bool gc_flag_{false};
+  std::unique_ptr<BytecodeGetter> bytecode_getter_;
 
  private:
   std::unordered_map<HostObject*, std::shared_ptr<HostObject>>

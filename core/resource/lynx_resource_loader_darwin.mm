@@ -277,6 +277,7 @@ void LynxResourceLoaderDarwin::LoadResource(
     // invoke callback directly if no provider or fetcher set;
     pub::LynxResourceResponse resp{.err_code = -1, .err_msg = "No available provider or fetcher."};
     copyable_callback(resp);
+    return;
   }
 
   // fetch ExternalJS

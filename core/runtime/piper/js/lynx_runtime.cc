@@ -213,7 +213,10 @@ void LynxRuntime::InitExecutor(
   js_executor_->loadPreJSBundle(
       preload_js_sources, true, GetRuntimeId(),
       runtime_flags_ & LynxRuntimeFlags::ENABLE_USER_BYTECODE,
-      bytecode_source_url_);
+      bytecode_source_url_,
+      [delegate_ptr = delegate_.get()](const std::string& url) {
+        return delegate_ptr->LoadBytecode(url);
+      });
 
   TRACE_EVENT_END(LYNX_TRACE_CATEGORY_VITALS);
   tasm::TimingCollector::Instance()->Mark(tasm::timing::kLoadCoreEnd);
@@ -704,13 +707,13 @@ bool LynxRuntime::TryToDestroy() {
   // the app_ object. But in shared context mode, we must check the validity of
   // the JSRuntime in case it is release by its shell owner or other Lynx
   // instance.
-  if (js_executor_->GetJSRuntime() && js_executor_->GetJSRuntime()->Valid()) {
+  auto js_runtime = js_executor_->GetJSRuntime();
+  if (js_runtime && js_runtime->Valid()) {
     auto native_context_proxy =
         app_->GetContextProxy(runtime::ContextProxy::Type::kNative);
     if (native_context_proxy != nullptr &&
         native_context_proxy->HasEventListener(
             kMessageEventTypeDestroyLifetime)) {
-      auto js_runtime = GetJSRuntime();
       MessageEvent jsContextEvent(
           kMessageEventTypeDestroyLifetime, ContextProxy::Type::kNative,
           ContextProxy::Type::kJSContext,
@@ -722,12 +725,14 @@ bool LynxRuntime::TryToDestroy() {
     } else {
       app_->CallDestroyLifetimeFun();
     }
+    // clear bytecode getter
+    js_runtime->SetBytecodeGetter(nullptr);
     // After reloading, the old LynxRuntime may be destroyed later than the new
     // LynxRuntime is created, and the inspector-related object
     // InspectorClientNG is a thread-local singleton, in this case, the members
     // it maintaines will be damaged, so that we need to call DestroyInspector()
     // now.
-    js_executor_->GetJSRuntime()->DestroyInspector();
+    js_runtime->DestroyInspector();
   }
 
   destroy_js_app_early_ = tasm::LynxEnv::GetInstance().GetBoolEnv(

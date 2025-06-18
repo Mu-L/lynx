@@ -30,6 +30,7 @@ enum class JsCacheType {
   NONE,
   MEMORY,
   FILE,
+  EXTERNAL,
 };
 
 enum class JsScriptType {

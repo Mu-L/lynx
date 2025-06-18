@@ -53,10 +53,24 @@ namespace lynx {
 namespace piper {
 namespace cache {
 
+namespace {
 static constexpr size_t MAX_SIZE = 50 * 1024 * 1024;  // 50MB
 
 constexpr char METADATA_FILE_NAME[] = "meta.json";
 constexpr auto MIN_ACCESS_TIME_UPDATE_INTERVAL = std::chrono::hours(24);
+
+constexpr char TEMPLATE_KEY_SOURCE_URL_SEP[] = "##";
+
+const std::string GetCacheUrlFromIdentifier(
+    const JsFileIdentifier &identifier) {
+  if (identifier.category == MetaData::PACKAGED) {
+    return identifier.template_url + TEMPLATE_KEY_SOURCE_URL_SEP +
+           identifier.url;
+  }
+  return identifier.url;
+}
+
+}  // namespace
 
 JsCacheManager &JsCacheManager::GetQuickjsInstance() noexcept {
   static base::NoDestructor<JsCacheManager> instance(JSRuntimeType::quickjs);
@@ -191,7 +205,8 @@ bool JsCacheManager::IsCacheEnabled() {
 std::shared_ptr<Buffer> JsCacheManager::TryGetCache(
     const std::string &source_url, const std::string &template_url,
     int64_t runtime_id, const std::shared_ptr<const Buffer> &buffer,
-    std::unique_ptr<CacheGenerator> cache_generator) {
+    std::unique_ptr<CacheGenerator> cache_generator,
+    BytecodeGetter *bytecode_getter) {
   auto cost_start = base::CurrentTimeMilliseconds();
   if (!IsCacheEnabledForTemplate(template_url)) {
     JsCacheTracker::OnGetBytecodeDisable(runtime_id, engine_type_, source_url,
@@ -229,6 +244,19 @@ std::shared_ptr<Buffer> JsCacheManager::TryGetCache(
   }
 
   auto identifier = BuildIdentifier(source_url, template_url);
+  // try get bytecode from external
+  if (bytecode_getter) {
+    auto maybe_bytecode =
+        (*bytecode_getter)(GetCacheUrlFromIdentifier(identifier));
+    if (maybe_bytecode) {
+      JsCacheTracker::OnGetBytecode(
+          runtime_id, engine_type_, source_url, true, true, true,
+          JsCacheType::EXTERNAL, JsCacheErrorCode::NO_ERROR,
+          base::CurrentTimeMilliseconds() - cost_start, maybe_bytecode->size());
+      return maybe_bytecode;
+    }
+  }
+
   auto file_info = GetMetaData().GetFileInfo(identifier);
   JsCacheErrorCode error_code = JsCacheErrorCode::META_FILE_READ_ERROR;
   if (file_info) {
@@ -393,7 +421,8 @@ void JsCacheManager::RunTask(TaskInfo &task) {
         if (auto cache = LoadCacheFromStorage(
                 *info, EnsureMd5(generator->SrcBuffer(), md5_optional))) {
           if (callback) {
-            generator_results[identifier.url] = std::move(cache);
+            generator_results[GetCacheUrlFromIdentifier(identifier)] =
+                std::move(cache);
           }
           continue;
         }
@@ -420,7 +449,8 @@ void JsCacheManager::RunTask(TaskInfo &task) {
       continue;
     } else {
       if (callback) {
-        generator_results[identifier.url] = std::move(cache_buffer);
+        generator_results[GetCacheUrlFromIdentifier(identifier)] =
+            std::move(cache_buffer);
         continue;
       }
     }

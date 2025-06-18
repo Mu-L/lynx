@@ -198,6 +198,8 @@ class TemplateDelegate : public ContextProxy::Delegate {
       runtime::ContextProxy* js_context_proxy) = 0;
 
   virtual std::string LoadJSSource(const std::string& name) = 0;
+  virtual std::shared_ptr<piper::Buffer> LoadBytecode(
+      const std::string& url) = 0;
 
   virtual void GetSessionStorageItem(const std::string& key,
                                      const piper::ApiCallBack& callback) = 0;
