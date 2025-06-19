@@ -39,7 +39,20 @@ def generate_objc_interface(class_name, definition, file_imports):
     for prop, value in properties.items():
         origin_type = value.get('type')
         if origin_type == 'map':
-            prop_type = 'NSDictionary*'
+            key_type = value.get('keyType')
+            key_type = map_type_to_objc(key_type)
+            value_type = value.get('valueType')
+            if isinstance(value_type, dict):
+                ref_value = value_type.get('$ref') 
+                value_type = value_type.get('$ref').split('#/')[-1].split('/')[-1]
+                value_type = f'{objc_lynx_prefix}{value_type}'
+                import_statement = f'#import "{value_type}.h"'
+                file_imports.append(import_statement)
+            else:
+                value_type = map_type_to_objc(value_type)
+
+            prop_type = f'NSDictionary<{key_type}*, {value_type}*>*'
+
         elif origin_type is None:
             prop_type = value.get('$ref')
             if (prop_type is not None):
@@ -213,12 +226,31 @@ def process_primary_type(type_name):
     elif type_name == 'boolean':
         default_value = 'NO'
         prop_type = 'BOOL'
+    elif type_name == 'map':
+        default_value = None
+        prop_type = 'NSDictionary*'
+    elif type_name == 'array':
+        default_value = None
+        prop_type = 'NSArray*'
     else:
         prop_type = None
         default_value = None
     return prop_type, default_value
+
 def update_import_statements(file_imports, class_name):
     lynx_class_name = objc_lynx_prefix + class_name
     import_statement = f'#import "{lynx_class_name}.h"'
     if not import_statement in file_imports:
         file_imports.append(import_statement)
+
+def map_type_to_objc(type_name):
+    OBJC_TYPE_MAPPING = {
+        'integer': 'NSNumber',
+        'number': 'NSNumber',
+        'timestamp': 'NSNumber',
+        'string': 'NSString',
+        'boolean': 'BOOL',
+        'map': 'NSDictionary',
+        'array': 'NSArray'
+    }
+    return OBJC_TYPE_MAPPING.get(type_name)

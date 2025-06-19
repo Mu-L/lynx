@@ -6469,6 +6469,19 @@ public interface com::lynx::devtoolwrapper::MemoryListener::MemoryReporter {
   public void com.lynx.devtoolwrapper.MemoryListener.MemoryReporter.uploadImageInfo(JSONObject data);
 }
 
+public class com::lynx::tasm::performance::performanceobserver::MemoryUsageEntry : com.lynx.tasm.performance.performanceobserver.PerformanceEntry {
+  public double com.lynx.tasm.performance.performanceobserver.MemoryUsageEntry.sizeKb sizeKb;
+  public HashMap<String, MemoryUsageItem> com.lynx.tasm.performance.performanceobserver.MemoryUsageEntry.detail detail;
+  public com.lynx.tasm.performance.performanceobserver.MemoryUsageEntry.MemoryUsageEntry(HashMap< String, Object > props);
+}
+
+public class com::lynx::tasm::performance::performanceobserver::MemoryUsageItem :  {
+  public String com.lynx.tasm.performance.performanceobserver.MemoryUsageItem.category category;
+  public double com.lynx.tasm.performance.performanceobserver.MemoryUsageItem.sizeKb sizeKb;
+  public HashMap<String, String> com.lynx.tasm.performance.performanceobserver.MemoryUsageItem.detail detail;
+  public com.lynx.tasm.performance.performanceobserver.MemoryUsageItem.MemoryUsageItem(HashMap< String, Object > props);
+}
+
 public interface com::lynx::tasm::common::MessageCodec {
   public ByteBuffer com.lynx.tasm.common.MessageCodec.encodeMessage(@NonNull Object message);
   public Object com.lynx.tasm.common.MessageCodec.decodeMessage(@NonNull ByteBuffer message);

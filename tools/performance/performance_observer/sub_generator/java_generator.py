@@ -125,6 +125,7 @@ def generate_java_constructor(class_name, definition, properties, java_code, fil
                 # ref type require construction
                 refType = valueType['$ref'].split('#/')[-1]
                 java_code += f'''        HashMap<String, Object> originMap = props.get("{prop}")!= null? (HashMap<String, Object>) props.get("{prop}") : new HashMap<>();
+        this.{prop} = new HashMap<>();
         for (Map.Entry<String, Object> entry : originMap.entrySet()) {{
             this.{prop}.put(entry.getKey(), new {refType}((HashMap<String, Object>) entry.getValue()));
         }}\n'''

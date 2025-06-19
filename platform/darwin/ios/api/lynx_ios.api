@@ -1867,7 +1867,7 @@ public class LynxInitContainerEntry : LynxPerformanceEntry {
   public NSNumber* LynxInitContainerEntry::containerInitEnd containerInitEnd;
   public NSNumber* LynxInitContainerEntry::prepareTemplateStart prepareTemplateStart;
   public NSNumber* LynxInitContainerEntry::prepareTemplateEnd prepareTemplateEnd;
-  public NSDictionary* LynxInitContainerEntry::extraTiming extraTiming;
+  public NSDictionary<NSString*, NSNumber*>* LynxInitContainerEntry::extraTiming extraTiming;
   public instancetype LynxInitContainerEntry::initWithDictionary:(NSDictionary *dictionary);
 }
 
@@ -2401,6 +2401,19 @@ public class LynxMemoryRecord : NSObject {
 
 public protocol LynxMemoryReporter-p : <NSObject> {
   public void LynxMemoryReporter-p::uploadImageInfo:(NSDictionary *data);
+}
+
+public class LynxMemoryUsageEntry : LynxPerformanceEntry {
+  public NSNumber* LynxMemoryUsageEntry::sizeKb sizeKb;
+  public NSDictionary<NSString*, LynxMemoryUsageItem*>* LynxMemoryUsageEntry::detail detail;
+  public instancetype LynxMemoryUsageEntry::initWithDictionary:(NSDictionary *dictionary);
+}
+
+public class LynxMemoryUsageItem : NSObject {
+  public NSString* LynxMemoryUsageItem::category category;
+  public NSNumber* LynxMemoryUsageItem::sizeKb sizeKb;
+  public NSDictionary<NSString*, NSString*>* LynxMemoryUsageItem::detail detail;
+  public instancetype LynxMemoryUsageItem::initWithDictionary:(NSDictionary *dictionary);
 }
 
 public class LynxMetricActualFmpEntry : LynxPerformanceEntry {
