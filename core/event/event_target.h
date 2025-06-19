@@ -62,7 +62,9 @@ class EventTarget {
   virtual bool RemoveEventListener(const std::string& type,
                                    std::shared_ptr<EventListener> listener);
 
-  EventListenerMap* GetEventListenerMap() { return event_listener_map_.get(); }
+  EventListenerMap* GetEventListenerMap() const {
+    return event_listener_map_.get();
+  }
 
   bool HasEventListener(const std::string& event_type) {
     return event_listener_map_->Contains(event_type);
