@@ -1,3 +1,6 @@
+# 0.0.11
+* add renderer functions for simple styling mode `__CreateStyleObject`, `__SetStyleObject` and `__UpdateStyleObject`.
+
 # 0.0.10
 * remove `FeatureCount` from template_codec module.
 
