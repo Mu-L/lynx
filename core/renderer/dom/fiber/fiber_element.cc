@@ -801,6 +801,11 @@ void FiberElement::SetBuiltinAttribute(ElementBuiltInAttributeEnum key,
         DCHECK(false);
       }
       break;
+    case ElementBuiltInAttributeEnum::IS_TEMPLATE_PART:
+      if (value.Bool()) {
+        MarkTemplateElement();
+      }
+      break;
     default:
       key_is_legal = false;
       break;
