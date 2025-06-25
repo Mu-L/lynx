@@ -14,7 +14,7 @@ public class PerformanceEntryConverterTest {
   @Test
   public void testPipelineEntryCreation() {
     verifyEntryCreation("pipeline", "updateTriggeredByBts", PipelineEntry.class);
-    verifyEntryCreation("pipeline", "reactHydrate", PipelineEntry.class);
+    verifyEntryCreation("pipeline", "reactLynxHydrate", PipelineEntry.class);
   }
 
   @Test
