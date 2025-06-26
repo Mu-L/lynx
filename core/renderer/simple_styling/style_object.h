@@ -14,7 +14,6 @@
 #include "base/include/value/ref_counted_class.h"
 #include "base/include/vector.h"
 #include "core/renderer/simple_styling/style_object_decoder.h"
-#include "core/renderer/simple_styling/style_property_map.h"
 #include "core/template_bundle/template_codec/template_binary.h"
 
 namespace lynx::style {
@@ -22,8 +21,8 @@ class SimpleStyleNode;
 
 class StyleObject : public lepus::RefCounted {
  public:
-  explicit StyleObject(const tasm::StyleMap& style_map)
-      : style_map_(std::make_unique<StylePropertyMap>(style_map)),
+  explicit StyleObject(tasm::StyleMap style_map)
+      : style_map_(std::move(style_map)),
         data_(nullptr),
         length_(0),
         creator_(nullptr) {}
@@ -63,14 +62,15 @@ class StyleObject : public lepus::RefCounted {
    */
   void ResetStylesInElement(SimpleStyleNode* element) const;
 
-  auto begin() const { return style_map_->begin(); }
-  auto end() const { return style_map_->end(); }
-  StylePropertyMap* Properties() const { return style_map_.get(); }
+  auto begin() const { return style_map_.begin(); }
+  auto end() const { return style_map_.end(); }
   void FromBinary();
   lepus::RefType GetRefType() const override;
 
+  const tasm::StyleMap& Properties() const { return style_map_; }
+
  protected:
-  std::unique_ptr<StylePropertyMap> style_map_;
+  tasm::StyleMap style_map_;
 
  private:
   void DecodeImmediately();
@@ -85,8 +85,8 @@ class StyleObject : public lepus::RefCounted {
 
 class DynamicStyleObject : public StyleObject {
  public:
-  explicit DynamicStyleObject(const tasm::StyleMap& style_map)
-      : StyleObject(style_map) {}
+  explicit DynamicStyleObject(tasm::StyleMap style_map)
+      : StyleObject(std::move(style_map)) {}
   void BindToElement(SimpleStyleNode* element) override;
   void UnbindFromElement(SimpleStyleNode* element) override;
   void UpdateStyleMap(const tasm::StyleMap& style_map);
@@ -95,6 +95,20 @@ class DynamicStyleObject : public StyleObject {
  private:
   base::InlineVector<SimpleStyleNode*, 1> elements_;
 };
+struct StyleObjectArrayDeleter {
+  StyleObjectArrayDeleter() = default;
+  void operator()(StyleObject** obj_array) const {
+    StyleObject** array = obj_array;
+    while (*obj_array) {
+      (*obj_array)->Release();
+      ++obj_array;
+    }
+    free(array);
+  }
+};
+
+std::unique_ptr<StyleObject*, StyleObjectArrayDeleter> CreateStyleObjectArray(
+    int capacity);
 
 }  // namespace lynx::style
 

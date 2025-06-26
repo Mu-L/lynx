@@ -438,7 +438,7 @@ void TemplateBinaryWriter::EncodeSimpleStyleObjects() {
     std::for_each(style_objects.begin(), style_objects.end(),
                   [descriptor_offset, &route, &start, &end,
                    this](const style::StyleObject& style_obj) {
-                    EncodeCSSAttributes(style_obj.Properties()->GetStyleMap());
+                    EncodeCSSAttributes(style_obj.Properties());
                     end = stream()->size() - descriptor_offset;
                     route.style_object_ranges.emplace_back(start, end);
                     start = end;

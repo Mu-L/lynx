@@ -16,7 +16,7 @@ void StyleObject::BindToElement(SimpleStyleNode* element) {}
 void StyleObject::UnbindFromElement(SimpleStyleNode* element) {}
 
 void StyleObject::ResetStylesInElement(SimpleStyleNode* element) const {
-  for (const auto& pair : *style_map_) {
+  for (const auto& pair : style_map_) {
     element->ResetSimpleStyle(pair.first);
   }
 }
@@ -30,16 +30,19 @@ lepus::RefType StyleObject::GetRefType() const {
 }
 
 void StyleObject::DecodeImmediately() {
-  const auto decoder = creator_(data_, length_);
-  tasm::StyleMap attr;
-  decoder->DecodeStyleObject(attr, range_);
-  style_map_ = std::make_unique<StylePropertyMap>(attr);
+  // No decode needed for a predecoded StyleObject.
+  if (!creator_) {
+    return;
+  }
+
+  if (const auto decoder = creator_(data_, length_); decoder) {
+    decoder->DecodeStyleObject(style_map_, range_);
+  }
 }
 
 void DynamicStyleObject::UpdateStyleMap(const tasm::StyleMap& style_map) {
-  std::for_each(style_map.begin(), style_map.end(), [this](const auto& pair) {
-    style_map_->SetProperty(pair.first, pair.second);
-  });
+  style_map_.merge(style_map);
+
   for (auto element : elements_) {
     element->UpdateSimpleStyles(style_map);
   }
@@ -60,6 +63,13 @@ void DynamicStyleObject::Reset() {
   for (auto* element : elements_) {
     ResetStylesInElement(element);
   }
+}
+
+std::unique_ptr<StyleObject*, StyleObjectArrayDeleter> CreateStyleObjectArray(
+    int capacity) {
+  auto* array =
+      static_cast<StyleObject**>(malloc(capacity * sizeof(StyleObject*)));
+  return std::unique_ptr<StyleObject*, StyleObjectArrayDeleter>(array);
 }
 
 }  // namespace lynx::style

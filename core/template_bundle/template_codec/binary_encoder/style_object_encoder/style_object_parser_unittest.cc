@@ -115,9 +115,9 @@ TEST(StyleObjectParser, ParseSimpleStyleObject) {
     auto& style_objects = style_object_parser->StyleObjects();
     ASSERT_EQ(style_objects.size(), 28);
     auto& style_rule_min_height = style_objects.front();
-    ASSERT_EQ(style_rule_min_height.Properties()->GetStyleMap().size(), 1);
-    ASSERT_TRUE(style_rule_min_height.Properties()->GetStyleMap().contains(
-        kPropertyIDMinHeight));
+    ASSERT_EQ(style_rule_min_height.Properties().size(), 1);
+    ASSERT_TRUE(
+        style_rule_min_height.Properties().contains(kPropertyIDMinHeight));
   }
 }
 }  // namespace lynx::tasm::test

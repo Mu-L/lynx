@@ -12,6 +12,7 @@
 
 namespace lynx::style {
 class StyleObject;
+struct StyleObjectArrayDeleter;
 using StyleObjectRef = fml::RefPtr<StyleObject>;
 
 class SimpleStyleNode {
@@ -19,7 +20,7 @@ class SimpleStyleNode {
   SimpleStyleNode() = default;
   virtual ~SimpleStyleNode() = default;
   virtual void SetStyleObjects(
-      std::unique_ptr<StyleObject*, void (*)(StyleObject**)> style_object) = 0;
+      std::unique_ptr<StyleObject*, StyleObjectArrayDeleter> style_object) = 0;
   virtual void UpdateSimpleStyles(const tasm::StyleMap& style_map) = 0;
   virtual void ResetSimpleStyle(tasm::CSSPropertyID id) = 0;
 };

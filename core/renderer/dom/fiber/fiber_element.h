@@ -27,6 +27,7 @@
 #include "core/renderer/dom/layout_bundle.h"
 #include "core/renderer/dom/selector/selector_item.h"
 #include "core/renderer/simple_styling/simple_style_node.h"
+#include "core/renderer/simple_styling/style_object.h"
 #include "core/renderer/utils/base/element_template_info.h"
 
 namespace lynx {
@@ -535,7 +536,7 @@ class FiberElement : public Element,
    *                    along with a custom deleter function for the array.
    */
   void SetStyleObjects(
-      std::unique_ptr<style::StyleObject*, void (*)(style::StyleObject**)>
+      std::unique_ptr<style::StyleObject*, style::StyleObjectArrayDeleter>
           object_list) override final;
 
   /**
@@ -1187,12 +1188,12 @@ class FiberElement : public Element,
   std::unique_ptr<ListItemSchedulerAdapter> scheduler_adapter_;
 
   // nullptr ended array for storing style objects.
-  std::unique_ptr<style::StyleObject*, void (*)(style::StyleObject**)>
-      style_objects_{nullptr, nullptr};
+  std::unique_ptr<style::StyleObject*, style::StyleObjectArrayDeleter>
+      style_objects_{nullptr};
 
   // For fast style object diff.
-  std::unique_ptr<style::StyleObject*, void (*)(style::StyleObject**)>
-      last_style_objects_{nullptr, nullptr};
+  std::unique_ptr<style::StyleObject*, style::StyleObjectArrayDeleter>
+      last_style_objects_{nullptr};
 
  protected:
   ElementContextDelegate* element_context_delegate_{nullptr};

@@ -82,7 +82,7 @@ static void HandleAddedStyleObject(style::StyleObject**& new_ptr,
   if (new_ptr && *new_ptr) {
     (*new_ptr)->FromBinary();
     (*new_ptr)->BindToElement(element);
-    element->UpdateSimpleStyles((*new_ptr)->Properties()->GetStyleMap());
+    element->UpdateSimpleStyles((*new_ptr)->Properties());
     ++new_ptr;
   }
 }

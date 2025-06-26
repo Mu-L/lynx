@@ -7052,13 +7052,6 @@ RENDERER_FUNCTION_CC(CreateStyleObject) {
   return lepus::Value(style_property_map_ref);
 }
 
-static void ReleaseStyleObjectArray(style::StyleObject** arr) {
-  for (auto** p = arr; *p != nullptr; ++p) {
-    (*p)->Release();
-  }
-  free(arr);
-}
-
 static void PushStyleObjectToArray(const lepus::Value& value,
                                    style::StyleObject**& arr,
                                    style::StyleObject** global_style_object,
@@ -7097,29 +7090,27 @@ RENDERER_FUNCTION_CC(SetStyleObject) {
   CHECK_ARGC_GE(SetStyleObject, 2);
   CONVERT_ARG_AND_CHECK(arg0, 0, RefCounted, SetStyleObject);
   const auto* arg1 = argv + 1;
-  std::unique_ptr<style::StyleObject*, void (*)(style::StyleObject**)>
-      style_object_list{nullptr, nullptr};
+  std::unique_ptr<style::StyleObject*, style::StyleObjectArrayDeleter>
+      style_object_list = nullptr;
+
   auto* tasm = GET_TASM_POINTER();
   if (arg1->IsArrayOrJSArray()) {
-    int capacity = 16;
-    auto** style_object_raw_array = static_cast<style::StyleObject**>(
-        malloc((capacity * sizeof(style::StyleObject*))));
+    int capacity = 6;
+    style_object_list = style::CreateStyleObjectArray(capacity);
+    auto* style_object_raw_array = style_object_list.get();
 
     style::StyleObject** global_style_objects =
         tasm->StyleObjectList(DEFAULT_ENTRY_NAME).get();
     int idx = 0;
 
-    ForEachLepusValue(
-        *arg1, [&style_object_raw_array, global_style_objects, &idx, &capacity](
-                   const lepus::Value&, const lepus::Value& value) {
-          PushStyleObjectToArray(value, style_object_raw_array,
-                                 global_style_objects, idx, capacity);
-        });
+    PushStyleObjectToArray(*arg1, style_object_raw_array, global_style_objects,
+                           idx, capacity);
 
-    style_object_raw_array[idx] = nullptr;
-    style_object_list =
-        std::unique_ptr<style::StyleObject*, void (*)(style::StyleObject**)>(
-            style_object_raw_array, ReleaseStyleObjectArray);
+    // Reset the raw array here, because the array may be reallocated
+    // in PushStyleObjectToArray.
+    style_object_list.release();
+    style_object_list.reset(style_object_raw_array);
+    (style_object_list.get())[idx] = nullptr;
   }
 
   if (const auto element_ref = arg0->RefCounted();
