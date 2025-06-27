@@ -558,5 +558,62 @@ void LynxResourceLoaderHarmony::PostTaskOnUIThread(base::closure task) {
   }
 }
 
+bool LynxResourceLoaderHarmony::IsLocalResource(const std::string& url) {
+  base::NapiHandleScope scope(env_);
+  napi_value media_fetcher =
+      base::NapiUtil::GetReferenceNapiValue(env_, media_fetcher_);
+  if (!media_fetcher) {
+    return false;
+  }
+
+  napi_value call_args[1];
+  napi_create_object(env_, &call_args[0]);
+
+  napi_create_string_utf8(env_, url.c_str(), NAPI_AUTO_LENGTH, &call_args[0]);
+
+  napi_value result = nullptr;
+  napi_status status = base::NapiUtil::InvokeJsMethod(
+      env_, media_fetcher, "isLocalResource", 1, call_args, &result);
+  if (status != napi_ok) {
+    LOGE("InvokeJsMethod isLocalResource failed:" << status);
+    return false;
+  }
+  int res = -1;
+  if (result) {
+    napi_get_value_int32(env_, result, &res);
+  }
+  return res == 0 ? true : false;
+}
+
+std::string LynxResourceLoaderHarmony::ShouldRedirectUrl(
+    const pub::LynxResourceRequest& request) {
+  base::NapiHandleScope scope(env_);
+
+  napi_value media_fetcher =
+      base::NapiUtil::GetReferenceNapiValue(env_, media_fetcher_);
+  if (!media_fetcher) {
+    return request.url;
+  }
+
+  napi_value call_args[1];
+  napi_create_object(env_, &call_args[0]);
+  BuildResourceRequestValue(env_, call_args[0], request.url,
+                            static_cast<uint32_t>(request.type));
+
+  std::string url = request.url;
+  napi_value result = nullptr;
+  napi_status status = base::NapiUtil::InvokeJsMethod(
+      env_, media_fetcher, "shouldRedirectUrl", 1, call_args, &result);
+
+  if (status != napi_ok) {
+    LOGE("InvokeJsMethod shouldRedirectUrl failed:" << status);
+    return url;
+  }
+  if (result) {
+    url = base::NapiUtil::ConvertToString(env_, result);
+  }
+  return url;
+}
+
 }  // namespace harmony
 }  // namespace lynx

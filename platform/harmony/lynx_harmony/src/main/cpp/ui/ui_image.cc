@@ -38,7 +38,8 @@ namespace harmony {
 static constexpr const char* const kModeAspectFit = "aspectFit";
 static constexpr const char* const kModeAspectFill = "aspectFill";
 static constexpr const char* const kModeScaleToFill = "scaleToFill";
-static constexpr const char* const kHttpScheme = "http";
+static constexpr const char* const kBase64Scheme = "data:image";
+static constexpr const char* const kLocalScheme = "file://";
 static constexpr const char* const kLoadEventName = "load";
 static constexpr const char* const kLoadEventImageWidth = "width";
 static constexpr const char* const kLoadEventImageHeight = "height";
@@ -70,7 +71,8 @@ std::unordered_map<std::string, ImagePropSetter> UIImage::prop_setters_ = {
     {"tint-color", &UIImage::UpdateTintColor},
     {"drop-shadow", &UIImage::UpdateDropShadow},
     {"cap-insets", &UIImage::UpdateCapInsets},
-    {"cap-insets-scale", &UIImage::UpdateCapInsetScale}};
+    {"cap-insets-scale", &UIImage::UpdateCapInsetScale},
+    {"skip-redirection", &UIImage::UpdateSkipRedirection}};
 
 void UIImage::OnPropUpdate(const std::string& name, const lepus::Value& value) {
   UIBase::OnPropUpdate(name, value);
@@ -243,27 +245,69 @@ void UIImage::UpdateBlurRadius(const lepus::Value& value) {
   }
 }
 
+void UIImage::SetImageSrcFromPath(const std::string& url, bool placeholder) {
+  ArkUI_NodeAttributeType type = placeholder ? NODE_IMAGE_ALT : NODE_IMAGE_SRC;
+  char* result = nullptr;
+  OH_FileUri_GetUriFromPath(url.data(), url.size(), &result);
+  ArkUI_AttributeItem item{.string = result};
+  NodeManager::Instance().SetAttribute(Node(), type, &item);
+  free(result);
+}
+
+void UIImage::LoadImageFromURL(bool placeholder) {
+  const std::string& url = placeholder ? place_holder_ : src_;
+  bool is_base64 = base::BeginsWith(url, kBase64Scheme);
+  if (is_base64) {
+    if (placeholder) {
+      ArkUI_AttributeItem item{.string = url.c_str()};
+      NodeManager::Instance().SetAttribute(Node(), NODE_IMAGE_ALT, &item);
+    } else {
+      SetImageSrcAttribute(url, true);
+    }
+    return;
+  }
+  bool is_local = base::BeginsWith(url, kLocalScheme);
+  if (is_local) {
+    ArkUI_NodeAttributeType type =
+        placeholder ? NODE_IMAGE_ALT : NODE_IMAGE_SRC;
+    ArkUI_AttributeItem item{.string = url.c_str()};
+    NodeManager::Instance().SetAttribute(Node(), type, &item);
+    return;
+  }
+
+  if (skip_redirection_) {
+    LoadImageResource(url, &UIImage::HandleImageSrcResponse);
+    return;
+  }
+
+  auto resource_loader = context_->GetResourceLoader();
+  if (!resource_loader) {
+    return;
+  }
+  auto request = pub::LynxResourceRequest{url, pub::LynxResourceType::kImage};
+  std::string redirect_url = resource_loader->ShouldRedirectUrl(request);
+  if (redirect_url != url) {
+    if (placeholder) {
+      SetImageSrcFromPath(redirect_url, true);
+    } else {
+      SetImageSrcAttribute(redirect_url, false);
+    }
+  } else {
+    LoadImageResource(url, &UIImage::HandleImageSrcResponse);
+  }
+}
+
 void UIImage::OnNodeReady() {
   UIBase::OnNodeReady();
   if ((dirty_flags_ & kFlagPlaceholderChanged) != 0) {
-    if (base::BeginsWith(place_holder_, kHttpScheme)) {
-      LoadImageResource(place_holder_,
-                        &UIImage::HandleImagePlaceHolderResponse);
-    } else {
-      ArkUI_AttributeItem item{.string = place_holder_.c_str()};
-      NodeManager::Instance().SetAttribute(Node(), NODE_IMAGE_ALT, &item);
-    }
+    LoadImageFromURL(true);
   }
   if ((dirty_flags_ & (kFlagSrcChanged | kFlagDropShadowChanged |
                        kFlagCapInsetsChanged)) != 0) {
     if (!defer_src_invalidation_) {
       NodeManager::Instance().ResetAttribute(Node(), NODE_IMAGE_SRC);
     }
-    if (base::BeginsWith(src_, kHttpScheme)) {
-      LoadImageResource(src_, &UIImage::HandleImageSrcResponse);
-    } else {
-      SetImageSrcAttribute(src_, false);
-    }
+    LoadImageFromURL();
   }
   if ((dirty_flags_ & kFlagImageRenderingChanged) != 0) {
     if (rendering_type_ == starlight::ImageRenderingType::kPixelated) {
@@ -307,35 +351,29 @@ void UIImage::UpdatePlaceholder(const lepus::Value& value) {
   }
 }
 
-void UIImage::SetImageSrcAttribute(const std::string& value,
-                                   bool local_resource) {
+void UIImage::SetImageSrcAttribute(const std::string& value, bool is_base64) {
   if (effect_type_ != LynxImageEffectProcessor::ImageEffect::kNone) {
     if (effect_type_ == LynxImageEffectProcessor::ImageEffect::kCapInsets) {
       LynxImageEffectProcessor::CapInsetParams cap_insets_params{
           cap_insets_[3], cap_insets_[0],   cap_insets_[1],
           cap_insets_[2], cap_inset_scale_, GenerateCommonViewParams(),
       };
-      HandleImageWithProcessor(value, local_resource, effect_type_,
+      HandleImageWithProcessor(value, is_base64, effect_type_,
                                cap_insets_params);
     } else if (effect_type_ ==
                LynxImageEffectProcessor::ImageEffect::kDropShadow) {
       LynxImageEffectProcessor::DropShadowParams shadow_params{
           shadow_radius_, shadow_color_, shadow_offset_x_, shadow_offset_y_,
           GenerateCommonViewParams()};
-      HandleImageWithProcessor(value, local_resource, effect_type_,
-                               shadow_params);
+      HandleImageWithProcessor(value, is_base64, effect_type_, shadow_params);
     }
   } else {
     has_src_ = true;
-    if (local_resource) {
-      char* result = nullptr;
-      OH_FileUri_GetUriFromPath(value.data(), value.size(), &result);
-      ArkUI_AttributeItem item{.string = result};
-      NodeManager::Instance().SetAttribute(Node(), NODE_IMAGE_SRC, &item);
-      free(result);
-    } else {
+    if (is_base64) {
       ArkUI_AttributeItem item{.string = value.data()};
       NodeManager::Instance().SetAttribute(Node(), NODE_IMAGE_SRC, &item);
+    } else {
+      SetImageSrcFromPath(value);
     }
   }
 }
@@ -369,7 +407,7 @@ void UIImage::LoadImageResource(const std::string& url,
           return;
         }
         auto ui_image = std::static_pointer_cast<UIImage>(self);
-        if (ui_image->GetSrc() == url || ui_image->GetPlaceHolder() == url) {
+        if (ui_image->GetSrc() == url || ui_image->GetPlaceholder() == url) {
           (ui_image.get()->*handler)(response);
         }
       });
@@ -378,7 +416,7 @@ void UIImage::LoadImageResource(const std::string& url,
 void UIImage::HandleImageSrcResponse(pub::LynxPathResponse& response) {
   if (response.Success()) {
     //    std::string str(response.data.begin(), response.data.end());
-    SetImageSrcAttribute(response.path, true);
+    SetImageSrcAttribute(response.path, false);
   } else if (response.err_code == error::E_RESOURCE_IMAGE_PIC_SOURCE) {
     // TODO(chengjunnan)
     //  During a cold start, the image library may occasionally experience
@@ -391,14 +429,9 @@ void UIImage::HandleImageSrcResponse(pub::LynxPathResponse& response) {
   }
 }
 
-void UIImage::HandleImagePlaceHolderResponse(pub::LynxPathResponse& response) {
+void UIImage::HandleImagePlaceholderResponse(pub::LynxPathResponse& response) {
   if (response.Success()) {
-    char* result = nullptr;
-    OH_FileUri_GetUriFromPath(response.path.c_str(), response.path.length(),
-                              &result);
-    ArkUI_AttributeItem item{.string = result};
-    NodeManager::Instance().SetAttribute(Node(), NODE_IMAGE_ALT, &item);
-    free(result);
+    SetImageSrcFromPath(response.path, true);
   }
 }
 
@@ -427,6 +460,10 @@ void UIImage::UpdateCapInsets(const lepus::Value& value) {
 void UIImage::UpdateCapInsetScale(const lepus::Value& value) {
   const auto& value_str = value.StdString();
   base::StringToFloat(value_str, cap_inset_scale_);
+}
+
+void UIImage::UpdateSkipRedirection(const lepus::Value& value) {
+  skip_redirection_ = value.Bool();
 }
 
 void UIImage::UpdateDeferSrcInvalidation(const lepus::Value& value) {
@@ -489,11 +526,11 @@ LynxImageEffectProcessor::CommonViewParams UIImage::GenerateCommonViewParams() {
 }
 
 void UIImage::HandleImageWithProcessor(
-    const std::string& url, bool local_resource,
+    const std::string& url, bool is_base64,
     LynxImageEffectProcessor::ImageEffect effect_type,
     const LynxImageEffectProcessor::EffectParams& params) {
   LynxImageHelper::DecodeImageAsync(
-      context_->GetNapiEnv(), url, !local_resource,
+      context_->GetNapiEnv(), url, is_base64,
       [weak_self = weak_from_this()](LynxImageHelper::ImageResponse& response) {
         auto self = weak_self.lock();
         if (!self) {

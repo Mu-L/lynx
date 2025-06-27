@@ -27,7 +27,7 @@ class UIImage : public UIBase {
 
   const std::string& GetSrc() { return src_; };
 
-  const std::string& GetPlaceHolder() { return place_holder_; };
+  const std::string& GetPlaceholder() { return place_holder_; };
 
  protected:
   UIImage(LynxContext* context, int sign, const std::string& tag);
@@ -38,7 +38,7 @@ class UIImage : public UIBase {
   void OnNodeEvent(ArkUI_NodeEvent* event) override;
   void SetEvents(const std::vector<lepus::Value>& events) override;
   void UpdateImageSource(const lepus::Value& value);
-  virtual void SetImageSrcAttribute(const std::string& value, bool local_resource);
+  virtual void SetImageSrcAttribute(const std::string& value, bool is_base64);
   void SetImageRendering(const lepus::Value& value) override;
   void OnNodeReady() override;
 
@@ -49,6 +49,7 @@ class UIImage : public UIBase {
   bool auto_size_{false};
   bool has_load_event_;
   bool has_error_event_;
+  bool skip_redirection_{false};
   float image_width_{0.f};
   float image_height_{0.f};
   float cap_inset_scale_{1.f};
@@ -81,6 +82,7 @@ class UIImage : public UIBase {
   void UpdateDeferSrcInvalidation(const lepus::Value& value);
   void UpdateTintColor(const lepus::Value& value);
   void UpdateDropShadow(const lepus::Value& value);
+  void UpdateSkipRedirection(const lepus::Value& value);
   void SetImageModeAttribute(const std::string& value);
   void HandleImageSuccessCallback(float image_width, float image_height);
   void HandleImageFailCallback(float error_code, const std::string& error_msg);
@@ -88,11 +90,13 @@ class UIImage : public UIBase {
   using ImageResourceHandler = void (UIImage::*)(pub::LynxPathResponse& response);
   void LoadImageResource(const std::string& url, ImageResourceHandler handler);
   void HandleImageSrcResponse(pub::LynxPathResponse& response);
-  void HandleImagePlaceHolderResponse(pub::LynxPathResponse& response);
+  void HandleImagePlaceholderResponse(pub::LynxPathResponse& response);
   LynxImageEffectProcessor::CommonViewParams GenerateCommonViewParams();
-  void HandleImageWithProcessor(const std::string& url, bool local_resource,
+  void HandleImageWithProcessor(const std::string& url, bool is_base64,
                                 LynxImageEffectProcessor::ImageEffect effect_type,
                                 const LynxImageEffectProcessor::EffectParams& params);
+  void LoadImageFromURL(bool placeholder = false);
+  void SetImageSrcFromPath(const std::string& url, bool placeholder = false);
 };
 
 }  // namespace harmony

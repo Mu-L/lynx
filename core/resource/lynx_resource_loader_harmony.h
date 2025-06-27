@@ -87,6 +87,10 @@ class LynxResourceLoaderHarmony : public pub::LynxResourceLoader {
       const pub::LynxResourceRequest& request,
       const std::shared_ptr<pub::LynxStreamDelegate>& stream_delegate) override;
 
+  bool IsLocalResource(const std::string& url) override;
+  std::string ShouldRedirectUrl(
+      const pub::LynxResourceRequest& request) override;
+
   void DeleteRef();
 
   static NativeResourceManager* resource_manager;
