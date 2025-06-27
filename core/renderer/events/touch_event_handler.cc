@@ -1358,6 +1358,9 @@ EventResult TouchEventHandler::FireElementWorklet(
     EventContext &context, const std::string &component_id,
     const std::string &entry_name, tasm::TemplateAssembler *tasm,
     EventHandler *handler, const lepus::Value &value, int element_id) const {
+  std::shared_ptr<PipelineOptions> current_option =
+      std::make_shared<PipelineOptions>();
+  tasm->CreateAndUpdateCurrentPipelineContext(current_option);
   EventResult result = EventResult::kDefault;
   if (tasm && tasm->EnableFiberArch()) {
     // trigger worklet in fiber
@@ -1375,9 +1378,15 @@ EventResult TouchEventHandler::FireElementWorklet(
         context.event_type);
     // trigger patch finish when a worklet operation is completed
     auto options = std::make_shared<PipelineOptions>();
-    // TODO(kechenglong): SetNeedsLayout if and only if needed.
-    tasm->page_proxy()->element_manager()->SetNeedsLayout();
-    tasm->page_proxy()->element_manager()->OnPatchFinish(options);
+    auto current_option = tasm->GetCurrentPipelineContext()
+                              ? tasm->GetCurrentPipelineContext()->GetOptions()
+                              : nullptr;
+    if (current_option == nullptr ||
+        !current_option->enable_unified_pixel_pipeline) {
+      // TODO(kechenglong): SetNeedsLayout if and only if needed.
+      tasm->page_proxy()->element_manager()->SetNeedsLayout();
+      tasm->page_proxy()->element_manager()->OnPatchFinish(options);
+    }
 #endif  // ENABLE_LEPUSNG_WORKLET
   }
   if (context.event_type != EventType::kComponent) {
@@ -1386,6 +1395,7 @@ EventResult TouchEventHandler::FireElementWorklet(
         kPrefix + GetEventType(context.event_type),
         tasm::replay::ReplayController::ConvertEventInfo(value));
   }
+  tasm->RunPixelPipeline();
   return result;
 }
 

@@ -3128,8 +3128,16 @@ void TemplateAssembler::CallLepusMethod(const std::string& method_name,
   LOGI("TemplateAssembler::CallLepusMethod. this:"
        << this << " url:" << url_ << " method name: " << method_name);
 
+  std::shared_ptr<PipelineOptions> current_option =
+      std::make_shared<PipelineOptions>();
+  pipeline_context_manager_->CreateAndUpdateCurrentPipelineContext(
+      current_option);
+
   const auto ret_value =
       GetLepusContext(tasm::DEFAULT_ENTRY_NAME)->Call(method_name, args);
+
+  RunPixelPipeline();
+
   if (callback.IsValid()) {
     delegate_.CallJSApiCallbackWithValue(callback, ret_value);
   }

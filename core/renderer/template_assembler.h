@@ -571,6 +571,13 @@ class TemplateAssembler final
     return pipeline_context_manager_->GetCurrentPipelineContext();
   }
 
+  PipelineContext* CreateAndUpdateCurrentPipelineContext(
+      const std::shared_ptr<PipelineOptions>& pipeline_options,
+      bool is_major_updated = false) {
+    return pipeline_context_manager_->CreateAndUpdateCurrentPipelineContext(
+        pipeline_options, is_major_updated);
+  }
+
   std::string TranslateResourceForTheme(const std::string& res_id,
                                         const std::string& theme_key) {
     std::string result;
