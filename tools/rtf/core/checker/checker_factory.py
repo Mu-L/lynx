@@ -20,3 +20,4 @@ def CheckerFactory(check_type: str):
         return Err(
             Constants.COVERAGE_CHECKER_BUILD_ERR, f"Unsupport check_type {check_type}"
         )
+    return Ok(checker)

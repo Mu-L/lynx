@@ -72,6 +72,7 @@ class NativeCoverageChecker(CoverageChecker):
             )
         content = LCovReader(args.inputs[0])
         file_2_change_lines = self.__get_file_to_changed_map(args.count)
+        Log.info(f"Files to be checked :{file_2_change_lines}")
         # ignore some files which not in content
         need_check_files = {}
         for file in file_2_change_lines.keys():

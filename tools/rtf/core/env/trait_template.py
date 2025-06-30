@@ -11,6 +11,10 @@ class Merge:
 
     @staticmethod
     def merge_builder(old_builder, cur_builder):
+        if cur_builder is None:
+            return {} if old_builder is None else old_builder
+        if old_builder is None:
+            return cur_builder
         new_builder = {}
         for name in old_builder.keys():
             if name in cur_builder.keys():
@@ -21,6 +25,10 @@ class Merge:
 
     @staticmethod
     def merge_coverage(old_coverage, cur_coverage):
+        if cur_coverage is None:
+            return {} if old_coverage is None else old_coverage
+        if old_coverage is None:
+            return cur_coverage
         if old_coverage["type"] != cur_coverage["type"]:
             Log.fatal(
                 f"Different types of coverage objects ({old_coverage['type']} -> {cur_coverage['type']}) "
@@ -32,6 +40,10 @@ class Merge:
 
     @staticmethod
     def merge_targets(old_targets, cur_targets):
+        if cur_targets is None:
+            return {} if old_targets is None else old_targets
+        if old_targets is None:
+            return cur_targets
         new_targets = {}
         for name in old_targets.keys():
             if name in cur_targets.keys():
