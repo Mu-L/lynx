@@ -46,7 +46,7 @@ class ListEventManager {
   void OnScroll(float distance, list::EventSource event_source);
   void DetectScrollToThresholdAndSend(float distance, float original_offset,
                                       list::EventSource event_source);
-  void SendLayoutCompleteInfo();
+  void SendLayoutCompleteEvent();
   void OnViewAttach(const ItemHolder* item_holder);
   void OnViewDetach(const ItemHolder* item_holder);
   bool IsDebugEventBound();

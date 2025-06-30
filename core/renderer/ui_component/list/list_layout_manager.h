@@ -149,7 +149,7 @@ class ListLayoutManager {
   void FlushContentSizeAndOffsetToPlatform(
       float content_offset_before_adjustment, bool from_layout);
   void OnLayoutCompleted();
-  void SendLayoutCompleteEvent(float scroll_delta);
+  void SendLayoutCompleteEvent();
   void SendScrollEvents(float scroll_delta, float original_offset,
                         list::EventSource event_source);
   // Sticky methods

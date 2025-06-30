@@ -1131,7 +1131,7 @@ LYNX_UI_METHOD(getVisibleCells) {
 - (CGFloat)orientationMaxScrollableDistance {
   // The `contentInset` is not took into account, for ListElement only
   return MAX(0, self.verticalOrientation ? self.view.contentSize.height - self.frame.size.height
-                                         : self.view.contentSize.width - self.frame.size.height);
+                                         : self.view.contentSize.width - self.frame.size.width);
 }
 
 - (CGFloat)orientationSize {

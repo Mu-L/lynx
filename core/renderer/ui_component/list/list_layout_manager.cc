@@ -331,7 +331,7 @@ void ListLayoutManager::OnPrepareForLayoutChildren() {
   list_container_->RecordVisibleItemIfNeeded(true);
 }
 
-void ListLayoutManager::SendLayoutCompleteEvent(float scroll_delta) {
+void ListLayoutManager::SendLayoutCompleteEvent() {
   // The bindlayoutcomplete event always works with a worklet to ensure
   // immediate operation. Since a worklet may change a component's size and
   // trigger another layout process, this event should be sent after the
@@ -339,7 +339,7 @@ void ListLayoutManager::SendLayoutCompleteEvent(float scroll_delta) {
   // without blocking.
   ListEventManager* event_manager = list_container_->list_event_manager();
   if (event_manager && !is_non_smooth_scroll_) {
-    event_manager->SendLayoutCompleteInfo();
+    event_manager->SendLayoutCompleteEvent();
   }
 }
 
@@ -348,7 +348,7 @@ void ListLayoutManager::SendScrollEvents(float scroll_delta,
                                          list::EventSource event_source) {
   list_container_->list_event_manager()->OnScroll(scroll_delta, event_source);
   list_container_->list_event_manager()->DetectScrollToThresholdAndSend(
-      scroll_delta, content_offset_, event_source);
+      scroll_delta, original_offset, event_source);
 }
 
 // Callback if layout finished.

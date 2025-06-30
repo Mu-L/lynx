@@ -181,7 +181,7 @@ void LinearLayoutManager::OnLayoutAfter(LayoutState& layout_state) {
   list::EventSource event_source = list_container_->has_valid_diff()
                                        ? list::EventSource::kDiff
                                        : list::EventSource::kLayout;
-  SendLayoutCompleteEvent(scroll_delta);
+  SendLayoutCompleteEvent();
   SendScrollEvents(scroll_delta, content_offset_, event_source);
   list_container_->ClearValidDiff();
 }

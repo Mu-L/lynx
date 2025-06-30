@@ -159,20 +159,20 @@ void ListEventManager::DetectScrollToThresholdAndSend(
   }
 }
 
-bool ListEventManager::NotAtBouncesArea(float content_offset,
+bool ListEventManager::NotAtBouncesArea(float original_offset,
                                         float content_size, float list_size) {
-  // content_offset is smaller than 0
-  if (base::FloatsLarger(0, content_offset)) {
+  // original_offset is smaller than 0
+  if (base::FloatsLarger(0, original_offset)) {
     return false;
   }
   // list can not be scrolled and content_offset is not zero
   if (base::FloatsLargerOrEqual(list_size, content_size) &&
-      base::FloatsLarger(content_offset, 0)) {
+      base::FloatsLarger(original_offset, 0)) {
     return false;
   }
-  // list is scrollable and content_offset is beyond end edge
+  // list is scrollable and original_offset is beyond end edge
   if (base::FloatsLarger(content_size, list_size) &&
-      base::FloatsLarger(content_offset + list_size, content_size)) {
+      base::FloatsLarger(original_offset + list_size, content_size)) {
     return false;
   }
   return true;
@@ -295,7 +295,7 @@ void ListEventManager::SendCustomScrollEvent(const std::string &event_name,
   }
 }
 
-void ListEventManager::SendLayoutCompleteInfo() {
+void ListEventManager::SendLayoutCompleteEvent() {
   // the switch of this event is not opened!
   if (!list_container_ ||
       events_.find(list::kLayoutComplete) == events_.end()) {
