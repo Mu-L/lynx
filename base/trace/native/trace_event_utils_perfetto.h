@@ -57,7 +57,8 @@ TRACE_EXPORT void TraceEventImplementation(
 TRACE_EXPORT void TraceEventImplementation(
     const char* category_name,
     const lynx::perfetto::CounterTrack& counter_track, TraceEventType phase,
-    const uint64_t& timestamp, const uint64_t& counter);
+    const uint64_t& timestamp, const uint64_t& counter,
+    const FuncType& callback);
 TRACE_EXPORT bool TraceEventCategoryEnabled(const char* category);
 TRACE_EXPORT void TraceRuntimeProfile(const std::string& runtime_profile,
                                       const uint64_t track_id,
@@ -341,13 +342,33 @@ inline void TraceCounter(const char* category,
                          const lynx::perfetto::CounterTrack& track,
                          uint64_t timestamp, uint64_t counter) {
   TraceEventImplementation(category, track, TraceEventType::TYPE_COUNTER,
-                           timestamp, counter);
+                           timestamp, counter, nullptr);
 }
 inline void TraceCounter(const char* category,
                          const lynx::perfetto::CounterTrack& track,
                          uint64_t counter) {
   TraceEventImplementation(category, track, TraceEventType::TYPE_COUNTER, 0,
-                           counter);
+                           counter, nullptr);
+}
+
+inline void TraceCounter(const char* category,
+                         const lynx::perfetto::CounterTrack& track,
+                         uint64_t timestamp, uint64_t counter,
+                         FuncType callback) {
+  TraceEventImplementation(category, track, TraceEventType::TYPE_COUNTER,
+                           timestamp, counter,
+                           [&](lynx::perfetto::EventContext ctx) {
+                             WriteTraceEventArgs(std::move(ctx), callback);
+                           });
+}
+
+inline void TraceCounter(const char* category,
+                         const lynx::perfetto::CounterTrack& track,
+                         uint64_t counter, FuncType callback) {
+  TraceEventImplementation(category, track, TraceEventType::TYPE_COUNTER, 0,
+                           counter, [&](lynx::perfetto::EventContext ctx) {
+                             WriteTraceEventArgs(std::move(ctx), callback);
+                           });
 }
 
 }  // namespace trace

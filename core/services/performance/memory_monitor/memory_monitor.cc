@@ -8,7 +8,9 @@
 #include <memory>
 #include <utility>
 
+#include "base/trace/native/trace_event.h"
 #include "core/renderer/utils/lynx_env.h"
+#include "core/services/trace/service_trace_event_def.h"
 #include "third_party/rapidjson/document.h"
 
 namespace lynx {
@@ -20,6 +22,52 @@ constexpr uint32_t kMemThresholdShift = 24;
 
 // Maximum allowed value for memory threshold (8-bit unsigned max)
 constexpr uint32_t kMaxMemThreshold = std::numeric_limits<uint8_t>::max();
+
+#if ENABLE_TRACE_PERFETTO
+inline std::string ValueToJsonString(const pub::Value& value) {
+  if (value.IsUndefined() || value.IsNil()) {
+    return "null";
+  }
+  if (value.IsBool()) {
+    return value.Bool() ? "true" : "false";
+  } else if (value.IsNumber()) {
+    std::ostringstream oss;
+    oss.precision(15);
+    oss << value.Double();
+    return oss.str();
+  } else if (value.IsString()) {
+    std::ostringstream oss;
+    oss.precision(15);
+    oss << "\"" << value.str() << "\"";
+    return oss.str();
+  } else if (value.IsArray()) {
+    std::string result = "[";
+    bool first = true;
+    value.ForeachArray([&](int64_t, const pub::Value& item) {
+      if (!first) {
+        result += ",";
+      }
+      result += ValueToJsonString(item);
+      first = false;
+    });
+    result += "]";
+    return result;
+  } else if (value.IsMap()) {
+    std::string result = "{";
+    bool first = true;
+    value.ForeachMap([&](const pub::Value& key, const pub::Value& val) {
+      if (!first) {
+        result += ",";
+      }
+      result += ValueToJsonString(key) + ":" + ValueToJsonString(val);
+      first = false;
+    });
+    result += "}";
+    return result;
+  }
+  return "\"<unknown>\"";
+}
+#endif
 
 inline MemoryRecord BuildMemoryRecord(
     const rapidjson::Value& obj,
@@ -137,7 +185,16 @@ void MemoryMonitor::UpdateMemoryUsage(MemoryRecord&& record) {
   if (!Enable()) {
     return;
   }
-  memory_records_[record.category_] = std::move(record);
+  auto it = memory_records_.find(record.category_);
+  if (it != memory_records_.end()) {
+    if (it->second.size_kb_ == record.size_kb_) {
+      // No change in memory usage, no need to report.
+      return;
+    }
+    it->second = std::move(record);
+  } else {
+    memory_records_.emplace(record.category_, std::move(record));
+  }
   ReportMemory();
 }
 
@@ -181,31 +238,56 @@ void MemoryMonitor::ReportMemory() {
     return;
   }
   auto entry_map = factory->CreateMap();
-  entry_map->PushStringToMap("entryType", "memory");
-  entry_map->PushStringToMap("name", "memory");
+  entry_map->PushStringToMap(kPerformanceEventType, kMemoryEntryType);
+  entry_map->PushStringToMap(kPerformanceEventName, kMemoryEntryType);
   float sizeKb = 0.f;
-  if (memory_records_.empty()) {
-    entry_map->PushDoubleToMap("sizeKb", sizeKb);
-    sender_->OnPerformanceEvent(std::move(entry_map), kEventTypePlatform);
-    return;
-  }
-  auto detail = sender_->GetValueFactory()->CreateMap();
-  for (const auto& [category, record] : memory_records_) {
-    auto record_map = sender_->GetValueFactory()->CreateMap();
-    record_map->PushStringToMap("category", record.category_);
-    record_map->PushDoubleToMap("sizeKb", record.size_kb_);
-    sizeKb += record.size_kb_;
-    if (record.detail_) {
-      auto map = sender_->GetValueFactory()->CreateMap();
-      for (const auto& [key, value] : *(record.detail_)) {
-        map->PushStringToMap(key, value);
+  if (!memory_records_.empty()) {
+    auto detail = sender_->GetValueFactory()->CreateMap();
+    for (const auto& [category, record] : memory_records_) {
+      auto record_map = sender_->GetValueFactory()->CreateMap();
+      record_map->PushStringToMap(kCategory, record.category_);
+      record_map->PushDoubleToMap(kSizeKb, record.size_kb_);
+      sizeKb += record.size_kb_;
+      if (record.detail_) {
+        auto map = sender_->GetValueFactory()->CreateMap();
+        for (const auto& [key, value] : *(record.detail_)) {
+          map->PushStringToMap(key, value);
+        }
+        record_map->PushValueToMap(kDetail, std::move(map));
       }
-      record_map->PushValueToMap("detail", std::move(map));
+      detail->PushValueToMap(category, std::move(record_map));
     }
-    detail->PushValueToMap(category, std::move(record_map));
+    entry_map->PushValueToMap(kDetail, std::move(detail));
   }
-  entry_map->PushDoubleToMap("sizeKb", sizeKb);
-  entry_map->PushValueToMap("detail", std::move(detail));
+  TRACE_COUNTER(
+      LYNX_TRACE_CATEGORY,
+      (std::string("memory_") + std::to_string(instance_id_)).c_str(), sizeKb,
+      [&entry_map, instance_id = instance_id_,
+       sizeKb](perfetto::EventContext ctx) {
+        ctx.event()->add_debug_annotations(kSizeKb, std::to_string(sizeKb));
+        auto detail = entry_map->GetValueForKey(kDetail);
+        detail->ForeachMap([debug = ctx.event()](const pub::Value& key,
+                                                 const pub::Value& val) {
+          if (key.IsString()) {
+            if (val.IsString()) {
+              debug->add_debug_annotations(key.str(), val.str());
+            } else if (val.IsBool()) {
+              debug->add_debug_annotations(key.str(),
+                                           std::to_string(val.Bool()));
+            } else if (val.IsNumber()) {
+              debug->add_debug_annotations(key.str(),
+                                           std::to_string(val.Number()));
+            } else if (val.IsMap()) {
+              auto v = ValueToJsonString(val);
+              debug->add_debug_annotations(key.str(), v);
+            }
+          }
+        });
+        ctx.event()->add_debug_annotations(INSTANCE_ID,
+                                           std::to_string(instance_id));
+      });
+
+  entry_map->PushDoubleToMap(kSizeKb, sizeKb);
   sender_->OnPerformanceEvent(std::move(entry_map), kEventTypePlatform);
 }
 

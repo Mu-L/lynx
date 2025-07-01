@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "core/services/event_report/event_tracker.h"
 #include "core/services/performance/memory_monitor/memory_record.h"
 #include "core/services/performance/performance_event_sender.h"
 
@@ -72,8 +73,9 @@ class MemoryMonitor {
   /// @return uint32_t Combined configuration bitmask
   static uint32_t ScriptingEngineMode();
 
-  explicit MemoryMonitor(PerformanceEventSender* observer)
-      : sender_(observer){};
+  explicit MemoryMonitor(PerformanceEventSender* observer,
+                         int32_t instance_id = report::kUninitializedInstanceId)
+      : instance_id_(instance_id), sender_(observer){};
   ~MemoryMonitor();
   MemoryMonitor(const MemoryMonitor& timing) = delete;
   MemoryMonitor& operator=(const MemoryMonitor&) = delete;
@@ -82,7 +84,7 @@ class MemoryMonitor {
 
  private:
   void ReportMemory();
-
+  int32_t instance_id_ = report::kUninitializedInstanceId;
   PerformanceEventSender* sender_;
   std::unordered_map<MemoryCategory, MemoryRecord> memory_records_;
 };

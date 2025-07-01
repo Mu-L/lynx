@@ -147,7 +147,8 @@ void TraceEventImplementation(const char* category_name, const char* name,
 void TraceEventImplementation(const char* category_name,
                               const lynx::perfetto::CounterTrack& counter_track,
                               TraceEventType phase, const uint64_t& timestamp,
-                              const uint64_t& counter) {
+                              const uint64_t& counter,
+                              const FuncType& callback) {
   auto track = ConvertToPerfCounterTrack(counter_track);
 
   TrackEvent::Trace([&](TrackEvent::TraceContext ctx) {
@@ -187,6 +188,11 @@ void TraceEventImplementation(const char* category_name,
 
       event_ctx.event()->set_track_uuid(track.uuid);
       event_ctx.event()->set_double_counter_value(counter);
+      if (callback) {
+        lynx::perfetto::TrackEvent event(&event_ctx);
+        lynx::perfetto::EventContext out_ctx(&event);
+        callback(std::move(out_ctx));
+      }
     }  // event_ctx
   });
 }

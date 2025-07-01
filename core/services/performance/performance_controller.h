@@ -35,7 +35,7 @@ class PerformanceController : public PerformanceEventSender {
       : PerformanceEventSender(std::make_shared<pub::PubValueFactoryDefault>()),
         instance_id_(instance_id),
         delegate_(std::move(delegate)),
-        memory_monitor_(this),
+        memory_monitor_(this, instance_id),
         timing_handler_(
             timing::TimingHandler(std::move(timing_delegate), this)) {}
   ~PerformanceController() override;

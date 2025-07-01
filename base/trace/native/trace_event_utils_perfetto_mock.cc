@@ -20,7 +20,8 @@ void TraceEventImplementation(const char* category_name,
 void TraceEventImplementation(const char* category_name,
                               const lynx::perfetto::CounterTrack& counter_track,
                               TraceEventType phase, const uint64_t& timestamp,
-                              const uint64_t& counter) {}
+                              const uint64_t& counter,
+                              const FuncType& callback) {}
 bool TraceEventCategoryEnabled(const char* category) { return false; }
 void TraceRuntimeProfile(const std::string& runtime_profile,
                          const uint64_t track_id, const int32_t profile_id) {}

@@ -18,7 +18,11 @@ using MemoryCategory = std::string;
 
 inline constexpr float KB = 1024.f;
 
+inline constexpr char kMemoryEntryType[] = "memory";
 inline constexpr char kCategory[] = "category";
+inline constexpr char kSizeKb[] = "sizeKb";
+inline constexpr char kDetail[] = "detail";
+
 // Memory types
 // Main thread scripting engine. Currently covers only LepusNG.
 inline constexpr char kCategoryMTSEngine[] = "mainThreadScriptingEngine";

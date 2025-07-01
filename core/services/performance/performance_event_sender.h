@@ -22,6 +22,9 @@ inline constexpr EventType kEventTypeMTSEngine = 1 << 2;
 inline constexpr EventType kEventTypeAll =
     kEventTypePlatform | kEventTypeBTSEngine | kEventTypeMTSEngine;
 
+inline constexpr char kPerformanceEventType[] = "entryType";
+inline constexpr char kPerformanceEventName[] = "name";
+
 class PerformanceEventSender {
  public:
   explicit PerformanceEventSender(
