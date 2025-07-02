@@ -131,6 +131,9 @@ void StyleResolver::ResolveStyleObjects(style::StyleObject** old_ptr,
         HandleRemovedStyleObject(old_ptr, target);
         // Otherwise, the current new style object is a new addition.
       } else {
+        while ((*old_ptr) != nullptr) {
+          HandleRemovedStyleObject(old_ptr, target);
+        }
         HandleAddedStyleObject(new_ptr, target);
       }
     }
