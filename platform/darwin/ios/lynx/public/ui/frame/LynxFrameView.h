@@ -6,10 +6,13 @@
 #import <UIKit/UIKit.h>
 
 #import <Lynx/LUIBodyView.h>
+#import <Lynx/LynxTemplateBundle.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface LynxFrameView : UIView <LUIBodyView>
+
+- (void)setAppBundle:(LynxTemplateBundle*)bundle;
 
 @end
 

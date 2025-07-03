@@ -91,9 +91,16 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
   return enable == LynxBooleanOptionTrue;
 }
 
+- (instancetype)initWithBuilderBlock:(void (^_Nullable)(NS_NOESCAPE LynxViewBuilder* _Nonnull))block
+                            lynxView:(LynxView* _Nullable)lynxView {
+  if (self = [self initWithBuilderBlock:block containerView:lynxView]) {
+  }
+  return self;
+}
+
 - (instancetype)initWithBuilderBlock:(void (^)(__attribute__((noescape))
                                                LynxViewBuilder* _Nonnull))block
-                            lynxView:(LynxView*)lynxView {
+                       containerView:(UIView<LUIBodyView>*)containerView {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, TEMPLATE_RENDER_INIT_WITH_BUILDER_BLOCK);
   if (self = [super init]) {
     _initStartTiming = [[NSDate date] timeIntervalSince1970] * 1000 * 1000;
@@ -123,7 +130,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
       [_runtimeOptions merge:_runtime.options];
     }
 
-    [builder.lynxUIRenderer attachContainerView:lynxView];
+    [builder.lynxUIRenderer attachContainerView:containerView];
 
     /// Member Variable
     CGSize screenSize;
@@ -132,7 +139,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
     } else {
       screenSize = [UIScreen mainScreen].bounds.size;
     }
-    [self setUpVariableWithBuilder:builder lynxView:lynxView screenSize:screenSize];
+    [self setUpVariableWithBuilder:builder containerView:containerView screenSize:screenSize];
 
     /// DevTool
     [self setUpDevTool:builder.debuggable];
@@ -170,7 +177,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
 }
 
 - (void)setUpVariableWithBuilder:(LynxViewBuilder*)builder
-                        lynxView:(LynxView*)lynxView
+                   containerView:(UIView<LUIBodyView>*)containerView
                       screenSize:(CGSize)screenSize {
   _enableGenericResourceFetcher =
       [self checkEnableGenericResourceFetcher:builder.enableGenericResourceFetcher];
@@ -211,17 +218,21 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
   _lynxModuleExtraData = builder.lynxModuleExtraData;
   _lynxUIRenderer = builder.lynxUIRenderer;
 
-  [self setUpLynxView:lynxView builder:builder];
+  [self setUpContainerView:containerView builder:builder];
 }
 
-- (void)setUpLynxView:(LynxView*)lynxView builder:(LynxViewBuilder*)builder {
-  if (lynxView != nil) {
-    _lynxView = lynxView;
-    lynxView.clipsToBounds = YES;
-    _delegate = (id<LynxTemplateRenderDelegate>)lynxView;
-    [lynxView setEnableTextNonContiguousLayout:[builder enableTextNonContiguousLayout]];
-    [lynxView setEnableLayoutOnly:[LynxEnv.sharedInstance getEnableLayoutOnly]];
-    [lynxView setEnableSyncFlush:[builder enableSyncFlush]];
+- (void)setUpContainerView:(UIView<LUIBodyView>*)containerView builder:(LynxViewBuilder*)builder {
+  if (containerView != nil) {
+    _containerView = containerView;
+    containerView.clipsToBounds = YES;
+    if ([containerView isKindOfClass:[LynxView class]]) {
+      LynxView* lynxView = (LynxView*)containerView;
+      // TODO(zhoupeng.z): support for UIBodyView
+      _delegate = (id<LynxTemplateRenderDelegate>)lynxView;
+      [lynxView setEnableTextNonContiguousLayout:[builder enableTextNonContiguousLayout]];
+      [lynxView setEnableLayoutOnly:[LynxEnv.sharedInstance getEnableLayoutOnly]];
+      [lynxView setEnableSyncFlush:[builder enableSyncFlush]];
+    }
   }
 }
 
@@ -230,13 +241,22 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
   [[LynxEnv sharedInstance] initLayoutConfig:screenSize];
 }
 
+- (LynxView*)getLynxView {
+  return [_containerView isKindOfClass:[LynxView class]] ? (LynxView*)_containerView : nil;
+}
+
 - (void)setUpDevTool:(BOOL)debuggable {
+  LynxView* lynxView = [self getLynxView];
+  if (!lynxView) {
+    return;
+  }
+  // TODO(zhoupeng.z): devtool should accept UIBodyView
   if (LynxEnv.sharedInstance.lynxDebugEnabled) {
     if (_runtime) {
       _devTool = _runtime.devtool;
-      [_devTool attachLynxView:_lynxView];
+      [_devTool attachLynxView:lynxView];
     } else {
-      _devTool = [[LynxDevtool alloc] initWithLynxView:_lynxView debuggable:debuggable];
+      _devTool = [[LynxDevtool alloc] initWithLynxView:lynxView debuggable:debuggable];
     }
     __weak LynxTemplateRender* weakSelf = self;
     [_devTool setDispatchMessageEventBlock:^(NSDictionary* _Nonnull event) {
@@ -262,17 +282,21 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
 
 - (void)setUpFrame:(CGRect)frame {
   // update viewport when preset width and height
+  [self updateFrame:frame];
+  _frameOfLynxView = frame;
+  if (_containerView && !CGRectEqualToRect(_containerView.frame, _frameOfLynxView) &&
+      !CGRectEqualToRect(CGRectZero, _frameOfLynxView)) {
+    _containerView.frame = _frameOfLynxView;
+  }
+}
+
+- (void)updateFrame:(CGRect)frame {
   if ((!CGRectEqualToRect(frame, CGRectZero) && !CGSizeEqualToSize(frame.size, CGSizeZero))) {
     _layoutWidthMode = LynxViewSizeModeExact;
     _layoutHeightMode = LynxViewSizeModeExact;
     _preferredLayoutWidth = frame.size.width;
     _preferredLayoutHeight = frame.size.height;
     [self updateViewport];
-  }
-  _frameOfLynxView = frame;
-  if (_lynxView && !CGRectEqualToRect(_lynxView.frame, _frameOfLynxView) &&
-      !CGRectEqualToRect(CGRectZero, _frameOfLynxView)) {
-    _lynxView.frame = _frameOfLynxView;
   }
 }
 
@@ -573,7 +597,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
           [self markTiming:lynx::tasm::timing::kVerifyTasmStart
                 pipelineID:pipeline_options->pipeline_id.c_str()];
           LynxVerificationResult* verification = [securityService verifyTASM:tem
-                                                                        view:_lynxView
+                                                                        view:[self getLynxView]
                                                                          url:url
                                                                         type:LynxTASMTypeTemplate];
           [self markTiming:lynx::tasm::timing::kVerifyTasmEnd
@@ -1264,8 +1288,8 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
 
 - (void)detachLynxView {
   [_delegate templateRenderOnDetach:self];
-  if (_lynxView) {
-    _lynxView = nil;
+  if (_containerView) {
+    _containerView = nil;
     _delegate = nil;
   }
 }
@@ -1322,6 +1346,10 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
 }
 
 #pragma mark - Setter & Getter
+
+- (LynxLifecycleDispatcher*)getLifecycleDispatcher {
+  return [[self getLynxView] getLifecycleDispatcher];
+};
 
 - (void)setEnableAsyncDisplay:(BOOL)enableAsyncDisplay {
   _enableAsyncDisplayFromNative = enableAsyncDisplay;
@@ -1393,7 +1421,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
 }
 
 - (void)setTemplateRenderDelegate:(LynxTemplateRenderDelegateExternal*)delegate {
-  if (_lynxView != nil) {
+  if (_containerView != nil) {
     _LogE(@"LynxTemplateRender can not setTemplateRenderDelegate, _lynxView has been attached.");
     return;
   }
@@ -1873,7 +1901,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
 
 - (void)attachLynxView:(LynxView* _Nonnull)lynxView {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, TEMPLATE_RENDER_ATTACH_LYNX_VIEW);
-  _lynxView = lynxView;
+  _containerView = lynxView;
   _delegate = (id<LynxTemplateRenderDelegate>)lynxView;
 
   if ([_delegate respondsToSelector:@selector(templateRenderSetLayoutOption:)]) {
@@ -1903,7 +1931,7 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
     return NO;
   }
 
-  if (_lynxView == nil) {
+  if (_containerView == nil) {
     [self attachLynxView:lynxView];
   }
 
@@ -1971,15 +1999,17 @@ LYNX_NOT_IMPLEMENTED(-(instancetype)initWithCoder : (NSCoder*)aDecoder)
 }
 
 - (void)onTimingSetup:(NSDictionary*)timingInfo {
-  [[_lynxView getLifecycleDispatcher] lynxView:_lynxView onSetup:timingInfo];
+  [[self getLifecycleDispatcher] lynxView:[self getLynxView] onSetup:timingInfo];
 }
 
 - (void)onTimingUpdate:(NSDictionary*)timingInfo updateTiming:(NSDictionary*)updateTiming {
-  [[_lynxView getLifecycleDispatcher] lynxView:_lynxView onUpdate:timingInfo timing:updateTiming];
+  [[self getLifecycleDispatcher] lynxView:[self getLynxView]
+                                 onUpdate:timingInfo
+                                   timing:updateTiming];
 }
 
 - (void)onPerformanceEvent:(NSDictionary*)originDict {
-  [[_lynxView getLifecycleDispatcher]
+  [[self getLifecycleDispatcher]
       onPerformanceEvent:[LynxPerformanceEntryConverter makePerformanceEntry:originDict]];
 }
 

@@ -33,6 +33,7 @@
 @class LynxSSRHelper;
 @class LynxView;
 @class LynxViewBuilder;
+@class LynxLifecycleDispatcher;
 typedef NS_ENUM(NSInteger, LynxBooleanOption);
 
 @protocol LynxDynamicComponentFetcher;
@@ -88,7 +89,7 @@ NS_ASSUME_NONNULL_BEGIN
   long _initStartTiming;
   long _initEndTiming;
   id _lynxModuleExtraData;
-  __weak LynxView* _lynxView;
+  __weak UIView<LUIBodyView>* _containerView;
 
   __weak id<LynxTemplateRenderDelegate> _delegate;
 
@@ -113,6 +114,8 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (lynx::piper::ModuleFactoryDarwin*)getModuleFactory;
+
+- (LynxLifecycleDispatcher*)getLifecycleDispatcher;
 
 @end
 

@@ -18,6 +18,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface LynxTemplateRender ()
 
+/**
+ * used by FrameView
+ */
+- (instancetype)initWithBuilderBlock:(void (^_Nullable)(NS_NOESCAPE LynxViewBuilder *_Nonnull))block
+                       containerView:(UIView<LUIBodyView> *_Nullable)containerView;
+
 - (NSInteger)logBoxImageSizeWarningThreshold;
 
 - (void)didMoveToWindow:(BOOL)windowIsNil;
@@ -46,6 +52,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (LynxPerformanceController *)performanceController;
 
 - (void)setAttachLynxPageUICallback:(attachLynxPageUI)callback;
+
+/**
+ * updateFrame for setUp and FrameView
+ */
+- (void)updateFrame:(CGRect)frame;
 
 @end
 

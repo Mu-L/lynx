@@ -20,7 +20,20 @@ LYNX_REGISTER_UI("frame")
 }
 
 - (void)onReceiveAppBundle:(LynxTemplateBundle*)bundle {
-  // TODO(zhoupeng.z): post bundle to frame view
+  [[self view] setAppBundle:bundle];
+}
+
+- (void)updateFrame:(CGRect)frame
+            withPadding:(UIEdgeInsets)padding
+                 border:(UIEdgeInsets)border
+                 margin:(UIEdgeInsets)margin
+    withLayoutAnimation:(BOOL)with {
+  [super updateFrame:frame
+              withPadding:padding
+                   border:border
+                   margin:margin
+      withLayoutAnimation:with];
+  [[self view] setFrame:frame];
 }
 
 @end

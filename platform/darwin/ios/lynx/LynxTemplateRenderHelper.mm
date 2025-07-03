@@ -16,7 +16,6 @@
 #import <Lynx/LynxEventReporterUtils.h>
 #import <Lynx/LynxExposureModule.h>
 #import <Lynx/LynxFetchModule.h>
-#import <Lynx/LynxFrameRender.h>
 #import <Lynx/LynxGroup+Internal.h>
 #import <Lynx/LynxIntersectionObserverModule.h>
 #import <Lynx/LynxLog.h>
@@ -54,7 +53,7 @@
 - (void)setUpShadowNodeOwner {
   if (!_uilayoutTick) {
     __weak typeof(self) weakSelf = self;
-    _uilayoutTick = [[LynxUILayoutTick alloc] initWithRoot:_lynxView
+    _uilayoutTick = [[LynxUILayoutTick alloc] initWithRoot:_containerView
                                                      block:^() {
                                                        __strong LynxTemplateRender* strongSelf =
                                                            weakSelf;
@@ -102,7 +101,7 @@
   }
 
   _performanceController =
-      [[LynxPerformanceController alloc] initWithObserver:[_lynxView getLifecycleDispatcher]];
+      [[LynxPerformanceController alloc] initWithObserver:[self getLifecycleDispatcher]];
   auto* a = reinterpret_cast<lynx::tasm::PaintingContextDarwinRef*>(
       painting_context->GetPlatformRef().get());
   a->SetPerformanceController(_performanceController);
@@ -162,7 +161,7 @@
   TRACE_EVENT(LYNX_TRACE_CATEGORY, TEMPLATE_RENDER_SETUP_EVENT_HANDLER);
   [_lynxUIRenderer setupEventHandler:self
                          engineProxy:_lynxEngineProxy
-                       containerView:_lynxView
+                       containerView:_containerView
                              context:_context
                             shellPtr:reinterpret_cast<int64_t>(shell_.get())];
 }
@@ -236,7 +235,7 @@
 }
 
 - (void)setUpLynxContextWithLastInstanceId:(int32_t)lastInstanceId {
-  _context = [[LynxContext alloc] initWithContainerView:_lynxView];
+  _context = [[LynxContext alloc] initWithContainerView:_containerView];
   _context.instanceId = shell_->GetInstanceId();
   auto layout_proxy =
       std::make_shared<lynx::shell::LynxLayoutProxyDarwin>(shell_->GetLayoutActor());
@@ -366,7 +365,9 @@
 }
 
 - (void)setUpUIRendererWithBuilder:(LynxViewBuilder*)builder screenSize:(CGSize)screenSize {
-  [builder.lynxUIRenderer setupWithContainerView:_lynxView builder:builder screenSize:screenSize];
+  [builder.lynxUIRenderer setupWithContainerView:_containerView
+                                         builder:builder
+                                      screenSize:screenSize];
   [_devTool attachLynxUIOwner:[builder.lynxUIRenderer uiOwner]];
 
   [self setUpResourceProviderWithBuilder:builder];

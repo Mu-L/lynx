@@ -1620,10 +1620,8 @@ public class LynxFPSRecord : NSObject, <NSCopying> {
   public void LynxFPSRecord::reset();
 }
 
-public class LynxFrameRender : NSObject {
-}
-
 public class LynxFrameView : UIView, <LUIBodyView> {
+  public void LynxFrameView::setAppBundle:(LynxTemplateBundle *bundle);
 }
 
 public protocol LynxGenericResourceFetcher-p : <NSObject> {
@@ -3209,6 +3207,7 @@ public class LynxTemplateRender : NSObject, <LynxTemplateRenderProtocol>, <Templ
   public void LynxTemplateRender::processLayoutWithTemplateBundle:withURL:initData:(nonnull LynxTemplateBundle *bundle,[withURL] nonnull NSString *url,[initData] nullable LynxTemplateData *data);
   public void LynxTemplateRender::processLayoutWithSSRData:withURL:initData:(nonnull NSData *tem,[withURL] nonnull NSString *url,[initData] nullable LynxTemplateData *data);
   public void LynxTemplateRender::setTemplateRenderDelegate:(LynxTemplateRenderDelegateExternal *_Nonnull delegate);
+  public instancetype LynxTemplateRender()::initWithBuilderBlock:containerView:(void(^_Nullable block)(NS_NOESCAPE LynxViewBuilder *_Nonnull), [containerView] UIView< LUIBodyView > *_Nullable containerView);
   public NSInteger LynxTemplateRender()::logBoxImageSizeWarningThreshold();
   public void LynxTemplateRender()::didMoveToWindow:(BOOL windowIsNil);
   public BOOL LynxTemplateRender()::enableNewListContainer();
@@ -3223,7 +3222,9 @@ public class LynxTemplateRender : NSObject, <LynxTemplateRenderProtocol>, <Templ
   public LynxUIOwner * LynxTemplateRender()::uiOwner();
   public LynxPerformanceController * LynxTemplateRender()::performanceController();
   public void LynxTemplateRender()::setAttachLynxPageUICallback:(attachLynxPageUI callback);
+  public void LynxTemplateRender()::updateFrame:(CGRect frame);
   public lynx::piper::ModuleFactoryDarwin * LynxTemplateRender()::getModuleFactory();
+  public LynxLifecycleDispatcher * LynxTemplateRender()::getLifecycleDispatcher();
   public void LynxTemplateRender(Helper)::setUpWithBuilder:screenSize:(LynxViewBuilder *builder, [screenSize] CGSize screenSize);
   public void LynxTemplateRender(Helper)::reset:(int32_t lastInstanceId);
 }

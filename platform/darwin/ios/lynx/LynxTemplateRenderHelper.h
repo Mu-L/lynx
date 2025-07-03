@@ -6,7 +6,6 @@
 
 /**
  * internal class helping to setup UIRender, LynxShell and Event
- * TODO(zhoupeng.z): reuse on LynxFrameRender
  */
 @interface LynxTemplateRender (Helper)
 

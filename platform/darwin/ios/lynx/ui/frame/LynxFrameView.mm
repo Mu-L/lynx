@@ -4,12 +4,32 @@
 
 #import <Lynx/LynxFrameView.h>
 
-#import <Lynx/LynxFrameRender.h>
+#import <Lynx/LynxTemplateRender+Internal.h>
+#import <Lynx/LynxTemplateRender.h>
 
 #pragma mark - LynxFrameView
 
 @implementation LynxFrameView {
-  LynxFrameRender *_render;
+  LynxTemplateRender *_render;
+}
+
+- (instancetype)init {
+  if (self = [super init]) {
+    // TODO(zhoupeng.z): get build params for root view
+    _render = [[LynxTemplateRender alloc] initWithBuilderBlock:nil containerView:self];
+  }
+  return self;
+}
+
+- (void)setAppBundle:(LynxTemplateBundle *)bundle {
+  LynxLoadMeta *loadMeta = [[LynxLoadMeta alloc] init];
+  loadMeta.templateBundle = bundle;
+  [_render loadTemplate:loadMeta];
+}
+
+- (void)setFrame:(CGRect)frame {
+  [super setFrame:frame];
+  [_render updateFrame:frame];
 }
 
 // TODO(zhoupeng.z): implement following methods, some of them are useless for LynxFrameView.
