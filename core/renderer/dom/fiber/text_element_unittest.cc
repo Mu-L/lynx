@@ -286,7 +286,8 @@ TEST_F(TextElementTest, TestResolveStyleValue) {
   EXPECT_EQ(mock_text_painting_node_->props_.size(), 0);
   std::string key("text-overflow");
   EXPECT_EQ(text->text_props_->text_max_line, 1);
-  EXPECT_EQ(*(text->text_props_->color), 4294901760);
+  EXPECT_TRUE(text->property_bits_.Has(kPropertyIDColor));
+  EXPECT_EQ(text->computed_css_style()->GetTextAttributes()->color, 4294901760);
 
   text->SetAttribute("text-maxline", lepus::Value(2));
   text->SetAttribute("layout-only", lepus::Value("false"));
@@ -296,7 +297,8 @@ TEST_F(TextElementTest, TestResolveStyleValue) {
   text->FlushActionsAsRoot();
 
   EXPECT_EQ(text->text_props_->text_max_line, 2);
-  EXPECT_FALSE(text->text_props_->color.has_value());
+  EXPECT_TRUE(text->property_bits_.Has(kPropertyIDColor));
+  EXPECT_EQ(text->computed_css_style()->GetTextAttributes()->color, 4278190080);
 }
 
 }  // namespace testing

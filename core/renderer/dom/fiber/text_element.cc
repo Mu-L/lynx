@@ -145,112 +145,35 @@ bool TextElement::ResolveStyleValue(CSSPropertyID id,
                                     const tasm::CSSValue& value,
                                     bool force_update) {
   bool has_processed = false;
-  if (EnableLayoutInElementMode()) {
-    has_processed = ProcessTextStyles(id, value);
-  }
 
-  if (!has_processed) {
+  if (EnableLayoutInElementMode()) {
+    if (computed_css_style()->SetValue(id, value)) {
+      property_bits_.Set(id);
+      has_processed = true;
+    }
+  } else {
     has_processed = FiberElement::ResolveStyleValue(id, value, force_update);
   }
 
   return has_processed;
 }
 
-void TextElement::ResetCSSValue(CSSPropertyID id) {
+bool TextElement::ResetCSSValue(CSSPropertyID id) {
   bool has_processed = false;
   if (EnableLayoutInElementMode()) {
-    has_processed = ResetTextStyles(id);
+    if (id == kPropertyIDFontSize) {
+      // font-size has been reset to default value in WillResetCSSValue
+      return false;
+    }
+    if (computed_css_style()->ResetValue(id)) {
+      property_bits_.Set(id);
+      has_processed = true;
+    }
+  } else {
+    has_processed = FiberElement::ResetCSSValue(id);
   }
 
-  if (!has_processed) {
-    FiberElement::ResetCSSValue(id);
-  }
-}
-
-bool TextElement::ProcessTextStyles(CSSPropertyID id,
-                                    const tasm::CSSValue& value) {
-  bool processed = true;
-  EnsureTextProps();
-  switch (id) {
-    case kPropertyIDFontSize:
-      text_props_->font_size = value.AsNumber();
-      break;
-    case kPropertyIDColor:
-      text_props_->color = value.AsNumber();
-      break;
-    case kPropertyIDLineHeight:
-      text_props_->line_height = value.AsNumber();
-      break;
-    case kPropertyIDFontWeight:
-      text_props_->font_weight = value.AsNumber();
-      break;
-    case kPropertyIDFontStyle:
-      text_props_->font_style = value.AsNumber();
-      break;
-    case kPropertyIDTextOverflow:
-      text_props_->text_overflow = static_cast<TextProps::TextOverflow>(
-          static_cast<int>(value.AsNumber()));
-      break;
-
-    case kPropertyIDVerticalAlign: {
-      auto arr = value.GetValue().Array();
-      text_props_->vertical_align_type =
-          static_cast<starlight::VerticalAlignType>(arr->get(0).Number());
-
-      if (text_props_->vertical_align_type == VerticalAlignType::kLength) {
-        auto pattern = static_cast<tasm::CSSValuePattern>(arr->get(3).Number());
-        std::pair<starlight::NLength, bool> result =
-            starlight::CSSStyleUtils::ToLength(
-                tasm::CSSValue(arr->get(2), pattern),
-                computed_css_style()->GetMeasureContext(),
-                element_manager_->GetCSSParserConfigs());
-
-        text_props_->vertical_align_length = result.first.GetRawValue();
-      } else if (text_props_->vertical_align_type ==
-                 VerticalAlignType::kPercent) {
-        text_props_->vertical_align_length = arr->get(2).Number();
-      } else {
-        text_props_->vertical_align_length = 0.0f;
-      }
-    } break;
-      //...
-    default:
-      processed = false;
-      break;
-  }
-  return processed;
-}
-
-bool TextElement::ResetTextStyles(CSSPropertyID id) {
-  bool processed = true;
-  EnsureTextProps();
-  switch (id) {
-    case kPropertyIDFontSize:
-      text_props_->font_size.reset();
-      break;
-    case kPropertyIDColor:
-      text_props_->color.reset();
-      break;
-    case kPropertyIDLineHeight:
-      text_props_->line_height.reset();
-      break;
-    case kPropertyIDFontWeight:
-      text_props_->font_weight.reset();
-      break;
-    case kPropertyIDFontStyle:
-      text_props_->font_style.reset();
-      break;
-    case kPropertyIDTextOverflow:
-      text_props_->text_overflow.reset();
-      break;
-    case kPropertyIDVerticalAlign:
-      text_props_->vertical_align_type.reset();
-      break;
-    default:
-      processed = false;
-      break;
-  }
-  return processed;
+  return has_processed;
 }
 
 void TextElement::BuildTextPropsBuffer(std::string& output, PropArray* props) {
@@ -326,8 +249,7 @@ void TextElement::OnLayoutObjectCreated() {
 void TextElement::UpdateLayoutNodeFontSize(double cur_node_font_size,
                                            double root_node_font_size) {
   if (EnableLayoutInElementMode()) {
-    EnsureTextProps();
-    text_props_->font_size = cur_node_font_size;
+    property_bits_.Set(kPropertyIDFontSize);
   } else {
     FiberElement::UpdateLayoutNodeFontSize(cur_node_font_size,
                                            root_node_font_size);
@@ -337,106 +259,98 @@ void TextElement::UpdateLayoutNodeFontSize(double cur_node_font_size,
 // static
 void TextElement::BuildAttributedStringProps(size_t pos_start, size_t pos_end,
                                              PropArray* props) {
+  if (!text_props_ && !property_bits_.HasAny()) {
+    return;
+  }
+  // only inline text need the pass the range，   kPropRangeStart should be
+  // the first key
+  if (is_inline_element()) {
+    props->AddProp(kPropInlineStart);
+    props->AddProp(static_cast<int>(pos_start));
+  }
+
+  // styles
+  const auto& text_attributes = computed_css_style()->GetTextAttributes();
+  if (text_attributes.has_value()) {
+    for (CSSPropertyID id : property_bits_) {
+      switch (id) {
+        case kPropertyIDFontSize:
+          props->AddProp(kTextPropFontSize);
+          props->AddProp(
+              static_cast<float>(computed_css_style()->GetFontSize()));
+          break;
+
+        case kPropertyIDColor:
+          props->AddProp(kTextPropColor);
+          props->AddProp(static_cast<int>(text_attributes->color));
+          // FIXME(linxs): use another key to indicate color gradient
+          break;
+
+        case kPropertyIDWhiteSpace:
+          props->AddProp(kTextPropWhiteSpace);
+          props->AddProp(static_cast<int>(text_attributes->white_space));
+          break;
+
+        case kPropertyIDTextOverflow:
+          props->AddProp(kTextPropTextOverflow);
+          props->AddProp(static_cast<int>(text_attributes->text_overflow));
+          break;
+
+        case kPropertyIDFontWeight:
+          props->AddProp(kTextPropFontWeight);
+          props->AddProp(static_cast<int>(text_attributes->font_weight));
+          break;
+        case kPropertyIDFontStyle:
+          props->AddProp(kTextPropFontStyle);
+          props->AddProp(static_cast<int>(text_attributes->font_style));
+          break;
+
+        case kPropertyIDFontFamily:
+          props->AddProp(kTextPropFontFamily);
+          props->AddProp(text_attributes->font_family.c_str());
+          break;
+
+        case kPropertyIDLineHeight:
+          props->AddProp(kTextPropLineHeight);
+          props->AddProp(text_attributes->computed_line_height);
+          break;
+
+        case kPropertyIDLetterSpacing:
+          props->AddProp(kTextPropLetterSpacing);
+          props->AddProp(text_attributes->letter_spacing);
+          break;
+
+        case kPropertyIDTextAlign:
+          props->AddProp(kTextPropTextAlign);
+          props->AddProp(static_cast<int>(text_attributes->text_align));
+          break;
+
+        case kPropertyIDVerticalAlign:
+          props->AddProp(kTextPropVerticalAlign);
+          props->AddProp(static_cast<int>(text_attributes->vertical_align));
+          props->AddProp(text_attributes->vertical_align_length);
+          break;
+
+        default:
+          break;
+      }
+    }
+  }
+
+  // attributes
+  // text_maxline
   if (text_props_) {
-    // only inline text need the pass the range，   kPropRangeStart should be
-    // the first key
-    if (is_inline_element()) {
-      props->AddProp(kPropInlineStart);
-      props->AddProp(static_cast<int>(pos_start));
-    }
-
-    // FontSize
-    if (text_props_->font_size) {
-      props->AddProp(kTextPropFontSize);
-      props->AddProp(*(text_props_->font_size));
-    }
-    // Color
-    if (text_props_->color) {
-      props->AddProp(kTextPropColor);
-      props->AddProp(*text_props_->color);
-    }
-    // WhiteSpace
-    if (text_props_->white_space) {
-      props->AddProp(kTextPropWhiteSpace);
-      props->AddProp(static_cast<int>(*text_props_->white_space));
-    }
-    // TextOverflow
-    if (text_props_->text_overflow) {
-      props->AddProp(kTextPropTextOverflow);
-      props->AddProp(static_cast<int>(*text_props_->text_overflow));
-    }
-    // FontWeight
-    if (text_props_->font_weight) {
-      props->AddProp(kTextPropFontWeight);
-      props->AddProp(static_cast<int>(*text_props_->font_weight));
-    }
-    // FontStyle
-    if (text_props_->font_style) {
-      props->AddProp(kTextPropFontStyle);
-      props->AddProp(static_cast<int>(*text_props_->font_style));
-    }
-    // FontFamily
-    if (text_props_->font_family) {
-      props->AddProp(kTextPropFontFamily);
-      props->AddProp(text_props_->font_family->c_str());
-    }
-    // LineHeight
-    if (text_props_->line_height) {
-      props->AddProp(kTextPropLineHeight);
-      props->AddProp(*text_props_->line_height);
-    }
-    // letterSpacing
-    if (text_props_->letter_spacing) {
-      props->AddProp(kTextPropLetterSpacing);
-      props->AddProp(*text_props_->letter_spacing);
-    }
-    // lineSpacing
-    if (text_props_->line_spacing) {
-      props->AddProp(kTextPropLineSpacing);
-      props->AddProp(*text_props_->line_spacing);
-    }
-    // text_shadow
-    if (text_props_->text_shadow) {
-      props->AddProp(kTextPropTextShadow);
-      props->AddProp(text_props_->text_shadow->c_str());
-    }
-    // text_decoration
-    if (text_props_->text_decoration) {
-      props->AddProp(kTextPropTextDecoration);
-      props->AddProp(text_props_->text_decoration->c_str());
-    }
-    // text_align
-    if (text_props_->text_align) {
-      props->AddProp(kTextPropTextAlign);
-      props->AddProp(static_cast<int>(*text_props_->text_align));
-    }
-
-    // vertical-align
-    if (text_props_->vertical_align_type &&
-        text_props_->vertical_align_length) {
-      props->AddProp(kTextPropVerticalAlign);
-      props->AddProp(static_cast<int>(*text_props_->vertical_align_type));
-      props->AddProp(*text_props_->vertical_align_length);
-    }
-
-    // attributes
-    // background_color
-    if (text_props_->background_color) {
-      props->AddProp(kTextPropBackGroundColor);
-      props->AddProp(*text_props_->background_color);
-    }
-    // text_maxline
     if (text_props_->text_max_line) {
       props->AddProp(kTextPropTextMaxLine);
       props->AddProp(*text_props_->text_max_line);
     }
+  }
 
-    // only inline text need the pass the range, kPropRangeEnd should be the
-    // first key
-    if (is_inline_element()) {
-      props->AddProp(kPropInlineEnd);
-      props->AddProp(static_cast<int>(pos_end));
-    }
+  // only inline text need the pass the range, kPropRangeEnd should be the
+  // first key
+  if (is_inline_element()) {
+    props->AddProp(kPropInlineEnd);
+    props->AddProp(static_cast<int>(pos_end));
   }
 }
 

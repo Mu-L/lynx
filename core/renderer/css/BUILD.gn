@@ -63,6 +63,7 @@ unittest_set("css_test_testset") {
     "css_keywords_unittest.cc",
     "css_parser_token_unittest.cc",
     "css_property_auto_gen_unittest.cc",
+    "css_property_bitset_unittest.cc",
     "css_property_unittest.cc",
     "css_style_sheet_manager_unittest.cc",
     "css_style_utils_unittest.cc",

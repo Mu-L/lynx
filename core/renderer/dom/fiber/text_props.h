@@ -52,27 +52,9 @@ struct TextProps {
 
   enum class TextAlign { LEFT = 0, CENTER = 1, RIGHT = 2 };
 
-  std::optional<float> font_size;               // = UNDEFINED;
-  std::optional<unsigned int> color;            // = CSSColor::Black;
-  std::optional<WhiteSpace> white_space;        // = WhiteSpace::NORMAL;
-  std::optional<TextOverflow> text_overflow;    // = TextOverflow::CLIP;
-  std::optional<int> font_weight;               //= Typeface::NORMAL;
-  std::optional<int> font_style;                //= Typeface::NORMAL;
-  std::optional<base::String> font_family;      //= "";
-  std::optional<float> line_height;             // = UNDEFINED;
-  std::optional<float> letter_spacing;          //= UNDEFINED;
-  std::optional<float> line_spacing;            //= UNDEFINED;
-  std::optional<base::String> text_shadow;      //=""
-  std::optional<base::String> text_decoration;  //=""
-  std::optional<TextAlign> text_align;          //=TextAlign::LEFT
-  std::optional<VerticalAlignType>
-      vertical_align_type;  // =  DefaultComputedStyle::DEFAULT_VERTICAL_ALIGN
-  std::optional<double> vertical_align_length;
-
   // attributes
-  std::optional<unsigned int> background_color;  // CSSColor::White;
-  std::optional<int> text_max_line;              //=-1
-  std::optional<base::String> image_mode;        //""
+  std::optional<int> text_max_line;        //=-1
+  std::optional<base::String> image_mode;  //""
 };
 
 }  // namespace tasm

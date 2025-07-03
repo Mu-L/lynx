@@ -513,7 +513,7 @@ class Element : public lepus::RefCounted {
 
   virtual void WillResetCSSValue(CSSPropertyID& id) {}
 
-  virtual void ResetCSSValue(CSSPropertyID id);
+  virtual bool ResetCSSValue(CSSPropertyID id);
   virtual void ConsumeTransitionStylesInAdvanceInternal(
       CSSPropertyID css_id, const tasm::CSSValue& value) = 0;
   bool ResetTransitionStylesInAdvance(

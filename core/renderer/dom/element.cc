@@ -413,16 +413,17 @@ void Element::ResetStyleInternal(CSSPropertyID css_id) {
   ResetCSSValue(css_id);
 }
 
-void Element::ResetCSSValue(CSSPropertyID css_id) {
+bool Element::ResetCSSValue(CSSPropertyID css_id) {
   CheckDynamicUnit(css_id, CSSValue::Empty(), true);
 
   if (css_id == kPropertyIDFontSize) {
     // font-size has been reset to default value in WillResetCSSValue
-    return;
+    return false;
   }
 
   bool is_layout_only = LayoutProperty::IsLayoutOnly(css_id);
   bool need_layout = is_layout_only || LayoutProperty::IsLayoutWanted(css_id);
+  bool processed = false;
   if (need_layout) {
     ResetLayoutNodeStyle(css_id);
     if (element_manager_->GetEnableDumpElementTree()) {
@@ -433,6 +434,7 @@ void Element::ResetCSSValue(CSSPropertyID css_id) {
     if (is_layout_only && EnableLayoutInElementMode() &&
         computed_css_style()->ResetValue(css_id)) {
       RequestLayout();
+      processed = true;
     }
   }
   if (css_id == kPropertyIDPosition) {
@@ -442,10 +444,10 @@ void Element::ResetCSSValue(CSSPropertyID css_id) {
     is_sticky_ = is_fixed_ = false;
   }
   if (is_layout_only) {
-    return;
+    return processed;
   }
   has_layout_only_props_ = false;
-  computed_css_style()->ResetValue(css_id);
+  processed = computed_css_style()->ResetValue(css_id);
 
   CheckZIndexProps(css_id, true);
 
@@ -455,6 +457,8 @@ void Element::ResetCSSValue(CSSPropertyID css_id) {
   if (!(CheckTransitionProps(css_id) || CheckKeyframeProps(css_id))) {
     ResetProp(CSSProperty::GetPropertyName(css_id).c_str());
   }
+
+  return processed;
 }
 
 // If the new animator is activated and this element has been created before,

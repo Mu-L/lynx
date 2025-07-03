@@ -9,6 +9,7 @@
 #include <string>
 
 #include "core/public/prop_bundle.h"
+#include "core/renderer/css/css_property_bitset.h"
 #include "core/renderer/dom/fiber/fiber_element.h"
 #include "core/renderer/dom/fiber/text_props.h"
 
@@ -38,7 +39,7 @@ class TextElement : public FiberElement {
   bool ResolveStyleValue(CSSPropertyID id, const tasm::CSSValue& value,
                          bool force_update) override;
 
-  void ResetCSSValue(CSSPropertyID id) override;
+  bool ResetCSSValue(CSSPropertyID id) override;
 
   LayoutResult Measure(float width, int32_t width_mode, float height,
                        int32_t height_mode, bool final_measure);
@@ -68,16 +69,15 @@ class TextElement : public FiberElement {
  private:
   void ResolveAndFlushFontFaces(const base::String& font_family);
 
-  bool ProcessTextStyles(CSSPropertyID id, const tasm::CSSValue& value);
-  bool ResetTextStyles(CSSPropertyID id);
-
   void EnsureTextProps() {
     if (!text_props_) {
       text_props_ = std::make_unique<TextProps>();
     }
   }
+
   base::String content_;
   std::unique_ptr<TextProps> text_props_;
+  CSSIDBitset property_bits_;
 };
 
 }  // namespace tasm

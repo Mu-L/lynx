@@ -160,6 +160,10 @@ public class TextMeasurer {
           textAttributes = ensureTextAttributes(textAttributes);
           textAttributes.setFontSize((float) iterator.next().getDouble());
           break;
+        case kTextPropFontFamily:
+          textAttributes = ensureTextAttributes(textAttributes);
+          textAttributes.setFontFamily(iterator.next().getString());
+          break;
         case kTextPropColor:
           textAttributes = ensureTextAttributes(textAttributes);
           textAttributes.setFontColor(iterator.next().getInt());
