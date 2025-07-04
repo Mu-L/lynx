@@ -126,8 +126,8 @@ static NSString* _Nonnull const KEY_LYNX_PLATFORM_CONFIG = @"platform_config";
  * Please DO NOT enable this switch on your own for now.
  * Contact the Lynx team for more information.
  */
-- (void)setEmbeddedMode:(EmbeddedMode)embeddedMode;
-- (EmbeddedMode)getEmbeddedMode;
+- (void)setEmbeddedMode:(LynxEmbeddedMode)embeddedMode;
+- (LynxEmbeddedMode)getEmbeddedMode;
 
 - (void)addLynxResourceProvider:(NSString* _Nonnull)resType
                        provider:(id<LynxResourceProvider> _Nonnull)provider;

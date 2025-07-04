@@ -13,7 +13,7 @@
 
 @implementation LynxViewBuilder {
   LynxThreadStrategyForRender _threadStrategy;
-  EmbeddedMode _embeddedMode;
+  LynxEmbeddedMode _embeddedMode;
   NSMutableDictionary<NSString*, LynxAliasFontInfo*>* _builderRegisteredAliasFontMap;
 }
 
@@ -35,13 +35,13 @@
   return self;
 }
 
-- (EmbeddedMode)getEmbeddedMode {
+- (LynxEmbeddedMode)getEmbeddedMode {
   return _embeddedMode;
 }
 
-- (void)setEmbeddedMode:(EmbeddedMode)embeddedMode {
+- (void)setEmbeddedMode:(LynxEmbeddedMode)embeddedMode {
   _embeddedMode = embeddedMode;
-  if ((embeddedMode & UNSET) > 0) {
+  if ((embeddedMode & LynxEmbeddedModeUnset) > 0) {
     [LynxComponentScopeRegistry tryRegisterBuiltInClasses];
   }
 }

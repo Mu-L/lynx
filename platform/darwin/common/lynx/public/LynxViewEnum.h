@@ -24,7 +24,7 @@ typedef NS_ENUM(NSInteger, LynxThreadStrategyForRender) {
 };
 
 /**
- * Embedded mode is an experimental switch
+ * LynxEmbeddedMode mode is an experimental switch
  * When embeddedMode is set, we offer optimal performance for embedded scenarios.
  * But it will restrict business flexibility.
  * Please DO NOT enable this switch on your own for now.
@@ -33,43 +33,40 @@ typedef NS_ENUM(NSInteger, LynxThreadStrategyForRender) {
  *
  * Usage:
  * 1. Basic usage:
- *    - Use UNSET for no options selected
- *    - Use EMBEDDED_MODE_BASE for basic optimizations
- *    - Use EMBEDDED_MODE_ALL for all optimizations
+ *    - Use LynxEmbeddedModeUnset for no options selected
+ *    - Use LynxEmbeddedModeBase for basic optimizations
+ *    - Use LynxEmbeddedModeAll for all optimizations
  *
  * 2. Combine options:
  *    - Use bitwise OR (|) to combine options
- *    - Example: EMBEDDED_MODE_BASE | ENGINE_POOL
+ *    - Example: LynxEmbeddedModeBase | LynxEmbeddedModeEnginePool
  *
  * 3. Check options:
  *    - Use bitwise AND (&) to check if an option is enabled
- *    - Example: (mode & ENGINE_POOL) != 0
+ *    - Example: (mode & LynxEmbeddedModeEnginePool) != 0
  */
-typedef NS_OPTIONS(NSInteger, EmbeddedMode) {
+typedef NS_OPTIONS(NSInteger, LynxEmbeddedMode) {
   /**
    * No optimization options selected
    */
-  UNSET = 0,
-
+  LynxEmbeddedModeUnset = 0,
   /**
    * Basic embedded mode with minimal optimizations
    */
-  EMBEDDED_MODE_BASE = 1 << 0,
-
+  LynxEmbeddedModeBase = 1 << 0,
   /**
    * Engine pool optimization for better instance reuse
    */
-  ENGINE_POOL = 1 << 1,
-
+  LynxEmbeddedModeEnginePool = 1 << 1,
   /**
    * Integrate Layout with Element
    */
-  LAYOUT_IN_ELEMENT = 1 << 2,
-
+  LynxEmbeddedModeLayoutInElement = 1 << 2,
   /**
    * Combination of all optimization options
    *
    * Note: When adding new optimization options, update this value
    */
-  EMBEDDED_MODE_ALL = EMBEDDED_MODE_BASE | ENGINE_POOL | LAYOUT_IN_ELEMENT,
+  LynxEmbeddedModeAll = LynxEmbeddedModeBase | LynxEmbeddedModeEnginePool |
+                        LynxEmbeddedModeLayoutInElement
 };

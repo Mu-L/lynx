@@ -119,7 +119,7 @@ extern NSString* const kDefaultComponentID;
 
 @implementation LynxUIOwner {
   BOOL _enableDetailLog;
-  EmbeddedMode _embeddedMode;
+  LynxEmbeddedMode _embeddedMode;
 }
 
 - (void)attachContainerView:(UIView<LUIBodyView>* _Nonnull)containerView {
@@ -133,7 +133,7 @@ extern NSString* const kDefaultComponentID;
                         screenMetrics:(LynxScreenMetrics*)screenMetrics
                          errorHandler:(id<LUIErrorHandling> _Nullable)errorHandler
                              uiConfig:(id<LUIConfig> _Nullable)uiConfig
-                         embeddedMode:(EmbeddedMode)embeddedMode {
+                         embeddedMode:(LynxEmbeddedMode)embeddedMode {
   LYNX_TRACE_SECTION(LYNX_TRACE_CATEGORY_WRAPPER, UI_OWNER_INIT);
   self = [super init];
   if (self) {
@@ -157,7 +157,7 @@ extern NSString* const kDefaultComponentID;
     _uiContext.fontFaceContext = _fontFaceContext;
     _componentRegistry = registry;
     _embeddedMode = embeddedMode;
-    if (embeddedMode != UNSET) {
+    if (embeddedMode != LynxEmbeddedModeUnset) {
       [LynxComponentScopeRegistry registerBuiltInBehaviors:_componentRegistry];
     }
     _componentSet = [[NSMutableSet alloc] init];
@@ -192,7 +192,7 @@ extern NSString* const kDefaultComponentID;
                        screenMetrics:screenMetrics
                         errorHandler:containerView
                             uiConfig:uiConfig
-                        embeddedMode:UNSET];
+                        embeddedMode:LynxEmbeddedModeUnset];
 }
 
 - (instancetype)initWithContainerView:(UIView<LUIBodyView>*)containerView
@@ -203,7 +203,7 @@ extern NSString* const kDefaultComponentID;
                        screenMetrics:screenMetrics
                         errorHandler:containerView
                             uiConfig:nil
-                        embeddedMode:UNSET];
+                        embeddedMode:LynxEmbeddedModeUnset];
 }
 
 - (LynxThreadStrategyForRender)getThreadStrategyForRender {

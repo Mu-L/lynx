@@ -140,7 +140,7 @@
   [_devTool onTemplateAssemblerCreated:(intptr_t)shell_.get()];
 
   // Runtime
-  if (_embeddedMode == UNSET) {
+  if (_embeddedMode == LynxEmbeddedModeUnset) {
     [self setUpRuntimeWithLastInstanceId:lastInstanceId];
   }
 

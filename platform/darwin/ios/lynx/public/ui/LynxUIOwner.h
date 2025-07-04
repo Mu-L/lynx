@@ -57,7 +57,7 @@ NS_ASSUME_NONNULL_BEGIN
                         screenMetrics:(LynxScreenMetrics*)screenMetrics
                          errorHandler:(id<LUIErrorHandling> _Nullable)errorHandler
                              uiConfig:(id<LUIConfig> _Nullable)uiConfig
-                         embeddedMode:(EmbeddedMode)embeddedMode;
+                         embeddedMode:(LynxEmbeddedMode)embeddedMode;
 
 - (LynxUI*)findUIBySign:(NSInteger)sign;
 - (LynxUI*)findUIByComponentId:(NSString*)componentId;
