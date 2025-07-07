@@ -6,16 +6,20 @@ package com.lynx.tasm;
 import com.lynx.react.bridge.JavaOnlyArray;
 
 public class LynxSSRHelper {
-  private enum SSRHydrateStatus { UNDEFINED, PENDING, BEGINNING, FAILED, SUCCESSFUL }
+  private enum SSRHydrateStatus { UNDEFINED, PENDING, STARTED, EXECUTING, FAILED, SUCCESSFUL }
   private SSRHydrateStatus mHydrateStatus = SSRHydrateStatus.UNDEFINED;
   private static final String CACHE_IDENTIFY = "from_ssr_cache";
 
-  public void onLoadSSRDataBegan(String url) {
+  public void onLoadSSRDataStart() {
     mHydrateStatus = SSRHydrateStatus.PENDING;
   }
 
-  public void onHydrateBegan() {
-    mHydrateStatus = SSRHydrateStatus.PENDING;
+  public void onHydrateStart() {
+    mHydrateStatus = SSRHydrateStatus.STARTED;
+  }
+
+  public void onHydrateExecuting() {
+    mHydrateStatus = SSRHydrateStatus.EXECUTING;
   }
 
   public void onHydrateFinished() {
@@ -27,6 +31,10 @@ public class LynxSSRHelper {
     if (errorCode == LynxErrorBehavior.EB_APP_BUNDLE_LOAD) {
       mHydrateStatus = SSRHydrateStatus.FAILED;
     }
+  }
+
+  public boolean isHydrateStarted() {
+    return mHydrateStatus == SSRHydrateStatus.STARTED;
   }
 
   public boolean isHydratePending() {
@@ -45,7 +53,8 @@ public class LynxSSRHelper {
   }
 
   public boolean shouldSendEventToSSR() {
-    if (mHydrateStatus == SSRHydrateStatus.PENDING || mHydrateStatus == SSRHydrateStatus.BEGINNING
+    if (mHydrateStatus == SSRHydrateStatus.PENDING || mHydrateStatus == SSRHydrateStatus.STARTED
+        || mHydrateStatus == SSRHydrateStatus.EXECUTING
         || mHydrateStatus == SSRHydrateStatus.FAILED) {
       return true;
     }

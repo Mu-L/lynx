@@ -25,6 +25,7 @@ import com.lynx.tasm.LynxEnv;
 import com.lynx.tasm.LynxGroup;
 import com.lynx.tasm.LynxGroup.LynxGroupBuilder;
 import com.lynx.tasm.LynxLoadMeta;
+import com.lynx.tasm.LynxLoadMode;
 import com.lynx.tasm.LynxUpdateMeta;
 import com.lynx.tasm.LynxView;
 import com.lynx.tasm.LynxViewBuilder;
@@ -1121,11 +1122,21 @@ public class LynxRecorderActionManager {
 
           mLynxView.loadTemplate(builder.build());
         } else {
-          mLynxView.ssrHydrate(templateSource, url, mLoadTemplateData);
+          LynxLoadMeta.Builder builder = new LynxLoadMeta.Builder();
+          builder.setLoadMode(LynxLoadMode.HYDRATE_SSR);
+          builder.setUrl(url);
+          builder.setBinaryData(templateSource);
+          builder.setInitialData(mLoadTemplateData);
+          mLynxView.loadTemplate(builder.build());
         }
       } else {
         Map<String, Object> dataMap = (Map) (templateInitData.toMap());
-        mLynxView.renderSSR(templateSource, url, dataMap);
+        LynxLoadMeta.Builder builder = new LynxLoadMeta.Builder();
+        builder.setLoadMode(LynxLoadMode.RENDER_SSR);
+        builder.setUrl(url);
+        builder.setBinaryData(templateSource);
+        builder.setInitialData(TemplateData.fromMap(dataMap));
+        mLynxView.loadTemplate(builder.build());
         mSSRLoaded = true;
       }
     } catch (JSONException e) {

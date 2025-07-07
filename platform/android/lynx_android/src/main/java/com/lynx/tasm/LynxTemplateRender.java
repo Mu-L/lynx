@@ -951,20 +951,24 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
   }
 
   // only for ssr hydrate.
-  private void TryHydrateSSRPage() {
-    if (mSSRHelper != null && mSSRHelper.isHydratePending()) {
+  private void onLoadTemplateFromSSRPage() {
+    if (mSSRHelper != null && mSSRHelper.isHydrateStarted()) {
       reload = false;
-      mSSRHelper.onHydrateBegan();
+      mSSRHelper.onHydrateExecuting();
     }
   }
 
   public void ssrHydrateUrl(@NonNull String hydrateUrl, final Map<String, Object> data) {
-    TryHydrateSSRPage();
+    if (mSSRHelper != null) {
+      mSSRHelper.onHydrateStart();
+    }
     renderTemplateUrl(hydrateUrl, data);
   }
 
   public void ssrHydrateUrl(@NonNull String hydrateUrl, final TemplateData data) {
-    TryHydrateSSRPage();
+    if (mSSRHelper != null) {
+      mSSRHelper.onHydrateStart();
+    }
     renderTemplateUrl(hydrateUrl, data);
   }
 
@@ -1181,13 +1185,17 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
 
   public void ssrHydrateWithBaseUrl(
       @NonNull byte[] template, final Map<String, Object> data, @NonNull String hydrateUrl) {
-    TryHydrateSSRPage();
+    if (mSSRHelper != null) {
+      mSSRHelper.onHydrateStart();
+    }
     renderTemplateWithBaseUrl(template, data, hydrateUrl);
   }
 
   public void ssrHydrateWithBaseUrl(
       @NonNull byte[] template, final TemplateData data, @NonNull String hydrateUrl) {
-    TryHydrateSSRPage();
+    if (mSSRHelper != null) {
+      mSSRHelper.onHydrateStart();
+    }
     renderTemplateWithBaseUrl(template, data, hydrateUrl);
   }
 
@@ -1204,6 +1212,10 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
       onErrorOccurred(LynxSubErrorCode.E_APP_BUNDLE_LOAD_ENV_NOT_READY,
           "LynxEnv has not been prepared successfully!");
       return;
+    }
+
+    if (mSSRHelper != null) {
+      onLoadTemplateFromSSRPage();
     }
 
     mWillContentSizeChange = true;
@@ -1395,6 +1407,16 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
       mLynxContext.setInPreLoad(true);
     }
 
+    if (metaData.getLoadMode() == LynxLoadMode.RENDER_SSR) {
+      renderSSRWithMetaData(metaData);
+      onTraceEventEnd(eventName);
+      return;
+    }
+
+    if (mSSRHelper != null && metaData.getLoadMode() == LynxLoadMode.HYDRATE_SSR) {
+      mSSRHelper.onHydrateStart();
+    }
+
     TimingOption timingOption = new TimingOption(TimingConstants.LOAD_BUNDLE);
     long currentTimeMillis = System.currentTimeMillis();
     timingOption.setTiming(TimingConstants.PIPELINE_START, currentTimeMillis);
@@ -1475,6 +1497,17 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
     }
   }
 
+  private void renderSSRWithMetaData(final LynxLoadMeta metaData) {
+    if (metaData.isBinaryValid()) {
+      renderSSR(metaData.binaryData, metaData.url, metaData.initialData);
+    } else if (!metaData.url.isEmpty()) {
+      renderSSRUrlInternal(
+          metaData.url, new InnerSSRLoadedCallback(metaData.url, metaData.initialData));
+    } else {
+      LLog.e(TAG, "SSR rendering failed: Binary data is invalid or URL is empty.");
+    }
+  }
+
   public void renderSSR(final byte[] ssr, final String url, final TemplateData templateData) {
     if (mHasDestroy) {
       return;
@@ -1523,7 +1556,7 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
     // waiting for hydrate
 
     mSSRHelper = new LynxSSRHelper();
-    mSSRHelper.onLoadSSRDataBegan(url);
+    mSSRHelper.onLoadSSRDataStart();
     if (mLynxContext != null && mLynxContext.enableEventReporter()) {
       LynxEventReporter.updateGenericInfo(
           LynxEventReporter.PROP_NAME_ENABLE_SSR, true, mLynxContext.getInstanceId());

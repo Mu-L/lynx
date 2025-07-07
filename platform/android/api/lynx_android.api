@@ -5040,6 +5040,8 @@ public enum com::lynx::tasm::LynxLoadMode {
   public com.lynx.tasm.LynxLoadMode.NORMAL NORMAL;
   public com.lynx.tasm.LynxLoadMode.PRE_PAINTING PRE_PAINTING;
   public com.lynx.tasm.LynxLoadMode.PRE_PAINTING_DRAW PRE_PAINTING_DRAW;
+  public com.lynx.tasm.LynxLoadMode.RENDER_SSR RENDER_SSR;
+  public com.lynx.tasm.LynxLoadMode.HYDRATE_SSR HYDRATE_SSR;
   public com.lynx.tasm.LynxLoadMode.LynxLoadMode(int id);
   public int com.lynx.tasm.LynxLoadMode.id();
 }
@@ -5568,10 +5570,12 @@ public interface com::lynx::tasm::behavior::ui::list::LynxSnapHelper::LynxSnapHo
 }
 
 public class com::lynx::tasm::LynxSSRHelper :  {
-  public void com.lynx.tasm.LynxSSRHelper.onLoadSSRDataBegan(String url);
-  public void com.lynx.tasm.LynxSSRHelper.onHydrateBegan();
+  public void com.lynx.tasm.LynxSSRHelper.onLoadSSRDataStart();
+  public void com.lynx.tasm.LynxSSRHelper.onHydrateStart();
+  public void com.lynx.tasm.LynxSSRHelper.onHydrateExecuting();
   public void com.lynx.tasm.LynxSSRHelper.onHydrateFinished();
   public void com.lynx.tasm.LynxSSRHelper.onErrorOccurred(int type, LynxError lynxError);
+  public boolean com.lynx.tasm.LynxSSRHelper.isHydrateStarted();
   public boolean com.lynx.tasm.LynxSSRHelper.isHydratePending();
   public JavaOnlyArray com.lynx.tasm.LynxSSRHelper.processEventParams(JavaOnlyArray params);
   public boolean com.lynx.tasm.LynxSSRHelper.shouldSendEventToSSR();
@@ -8212,7 +8216,8 @@ public class com::lynx::tasm::behavior::ui::utils::Spacing :  {
 public enum com::lynx::tasm::LynxSSRHelper::SSRHydrateStatus {
   public com.lynx.tasm.LynxSSRHelper.SSRHydrateStatus.UNDEFINED UNDEFINED;
   public com.lynx.tasm.LynxSSRHelper.SSRHydrateStatus.PENDING PENDING;
-  public com.lynx.tasm.LynxSSRHelper.SSRHydrateStatus.BEGINNING BEGINNING;
+  public com.lynx.tasm.LynxSSRHelper.SSRHydrateStatus.STARTED STARTED;
+  public com.lynx.tasm.LynxSSRHelper.SSRHydrateStatus.EXECUTING EXECUTING;
   public com.lynx.tasm.LynxSSRHelper.SSRHydrateStatus.FAILED FAILED;
   public com.lynx.tasm.LynxSSRHelper.SSRHydrateStatus.SUCCESSFUL SUCCESSFUL;
 }
