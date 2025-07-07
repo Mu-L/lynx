@@ -65,7 +65,6 @@ public class LynxView extends UIBodyView {
   private final static String TAG = "LynxView";
   private boolean mIsAccessibilityDisabled = false;
   private KeyboardEvent mKeyboardEvent;
-  ILynxUIRenderer mLynxUIRender;
 
   private String mUrl;
   private volatile boolean mHasReportedAccessFromNonUiThread = false;
@@ -1565,7 +1564,6 @@ public class LynxView extends UIBodyView {
     }
   }
 
-  @Override
   public ILynxUIRenderer lynxUIRenderer() {
     if (mLynxTemplateRender != null) {
       return mLynxTemplateRender.lynxUIRenderer();

@@ -9031,7 +9031,8 @@ public class com::lynx::tasm::behavior::ui::UIBody::UIBodyView : FrameLayout, co
   public void com.lynx.tasm.behavior.ui.UIBody.UIBodyView.setIsChildLynxPageUI(boolean isChildLynxPageUI);
   public void com.lynx.tasm.behavior.ui.UIBody.UIBodyView.setAttachLynxPageUICallback(attachLynxPageUICallback callback);
   public void com.lynx.tasm.behavior.ui.UIBody.UIBodyView.runOnTasmThread(Runnable runnable);
-  public ILynxUIRenderer com.lynx.tasm.behavior.ui.UIBody.UIBodyView.lynxUIRenderer();
+  public ILynxUIRenderer com.lynx.tasm.behavior.ui.UIBody.UIBodyView.getLynxUIRendererInternal();
+  public void com.lynx.tasm.behavior.ui.UIBody.UIBodyView.setLynxUIRendererInternal(ILynxUIRenderer uiRenderer);
 }
 
 public class com::lynx::tasm::behavior::ui::scroll::UIBounceView : com::lynx::tasm::behavior::ui::view::UISimpleView< AndroidView > {

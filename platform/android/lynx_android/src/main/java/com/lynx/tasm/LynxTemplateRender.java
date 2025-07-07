@@ -2547,7 +2547,7 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
     LLog.i(TAG, "LynxTemplateRender(" + this + ") is attached on lynxView:" + lynxView);
     ILynxUIRenderer lynxUIRenderer = lynxUIRenderer();
     mLynxView = lynxView;
-    mLynxView.mLynxUIRender = lynxUIRenderer;
+    mLynxView.setLynxUIRendererInternal(lynxUIRenderer);
     if (mDevTool != null) {
       mDevTool.attachContext(mContext);
     }
@@ -3445,13 +3445,13 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
 
   private void recreateLynxUIRenderer() {
     mLynxUIRender = mLynxViewBuilder.uiRenderCreator.createLynxUIRender();
-    mLynxView.mLynxUIRender = mLynxUIRender;
+    mLynxView.setLynxUIRendererInternal(mLynxUIRender);
   }
 
   public ILynxUIRenderer lynxUIRenderer() {
     if (mLynxUIRender == null) {
       if (mLynxView != null) {
-        mLynxUIRender = mLynxView.mLynxUIRender;
+        mLynxUIRender = mLynxView.getLynxUIRendererInternal();
       } else {
         // for context free.
         mLynxUIRender = mLynxViewBuilder.uiRenderCreator.createLynxUIRender();
