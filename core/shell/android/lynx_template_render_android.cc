@@ -319,9 +319,11 @@ jlong Create(JNIEnv* env, jclass jcaller, jlong runtime_wrapper_ptr,
                   ? runtime_wrapper->GetPerfControllerActor()
                   : nullptr)
           .SetPerformanceControllerPlatform(
-              std::make_unique<
-                  lynx::tasm::performance::PerformanceControllerAndroid>(
-                  env, j_performance_controller))
+              j_performance_controller != nullptr
+                  ? std::make_unique<
+                        lynx::tasm::performance::PerformanceControllerAndroid>(
+                        env, j_performance_controller)
+                  : nullptr)
           .SetShellOption(shell_option)
           .SetPropBundleCreator(ui_delegate->CreatePropBundleCreator())
           .SetTasmPlatformInvoker(

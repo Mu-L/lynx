@@ -196,33 +196,37 @@ LynxShell* LynxShellBuilder::build() {
     shell->perf_mediator_ = nullptr;
     shell->perf_controller_actor_ = perf_controller_actor_;
   } else {
-    // create timing mediator & actor
-    auto timing_mediator = std::make_unique<lynx::tasm::timing::TimingMediator>(
-        shell->instance_id_);
-    timing_mediator->SetFacadeActor(shell->facade_actor_);
-    timing_mediator->SetEnableJSRuntime(this->shell_option_.enable_js_);
-    shell->timing_mediator_ = timing_mediator.get();
-    // create PerformanceController mediator & actor
-    auto performance_mediator =
-        std::make_unique<lynx::tasm::performance::PerformanceMediator>();
-    shell->perf_mediator_ = performance_mediator.get();
+    const auto enable_perf = !shell_option_.page_options_.IsEmbeddedModeOn();
+    std::unique_ptr<tasm::performance::PerformanceController> perf_controller;
+    if (enable_perf) {
+      // create timing mediator & actor
+      auto timing_mediator =
+          std::make_unique<lynx::tasm::timing::TimingMediator>(
+              shell->instance_id_);
+      timing_mediator->SetFacadeActor(shell->facade_actor_);
+      timing_mediator->SetEnableJSRuntime(this->shell_option_.enable_js_);
+      shell->timing_mediator_ = timing_mediator.get();
+      // create PerformanceController mediator & actor
+      auto performance_mediator =
+          std::make_unique<lynx::tasm::performance::PerformanceMediator>();
+      shell->perf_mediator_ = performance_mediator.get();
 
-    // Temporarily disable TimingActor in Embedded mode
-    const auto enable_timing = !shell_option_.page_options_.IsEmbeddedModeOn();
-    auto perf_controller =
-        std::make_unique<tasm::performance::PerformanceController>(
-            std::move(performance_mediator), std::move(timing_mediator),
-            shell->instance_id_);
+      // Temporarily disable TimingActor in Embedded mode
 
-    perf_controller->GetTimingHandler().SetEnableJSRuntime(
-        this->shell_option_.enable_js_);
-    perf_controller->GetTimingHandler().SetThreadStrategy(this->strategy_);
+      perf_controller =
+          std::make_unique<tasm::performance::PerformanceController>(
+              std::move(performance_mediator), std::move(timing_mediator),
+              shell->instance_id_);
 
+      perf_controller->GetTimingHandler().SetEnableJSRuntime(
+          this->shell_option_.enable_js_);
+      perf_controller->GetTimingHandler().SetThreadStrategy(this->strategy_);
+    }
     shell->perf_controller_actor_ =
         std::make_shared<LynxActor<tasm::performance::PerformanceController>>(
             std::move(perf_controller),
             tasm::performance::PerformanceController::GetTaskRunner(),
-            shell->instance_id_, enable_timing);
+            shell->instance_id_, enable_perf);
   }
   // Pass the `perf_controller_actor_` to the `PerformanceController`
   // object of the platform layer to establish a mapping relationship.

@@ -1403,6 +1403,7 @@ public class com::lynx::tasm::EmbeddedMode :  {
   public final int com.lynx.tasm.EmbeddedMode.LAYOUT_IN_ELEMENT LAYOUT_IN_ELEMENT;
   public final int com.lynx.tasm.EmbeddedMode.EMBEDDED_MODE_ALL EMBEDDED_MODE_ALL;
   public static boolean com.lynx.tasm.EmbeddedMode.isEnginePoolEnable(@EmbeddedMode.Mode int mode);
+  public static boolean com.lynx.tasm.EmbeddedMode.isBaseModeEnable(@EmbeddedMode.Mode int mode);
 }
 
 public enum com::lynx::tasm::behavior::event::EventTarget::EnableStatus {
@@ -7064,6 +7065,8 @@ public interface com::lynx::tasm::behavior::PatchFinishListener {
 
 public class com::lynx::tasm::performance::PerformanceController : com.lynx.tasm.performance.memory.IMemoryMonitor, com.lynx.tasm.performance.timing.ITimingCollector {
   public void com.lynx.tasm.performance.PerformanceController.setPerformanceObserver(IPerformanceObserver observer);
+  public boolean com.lynx.tasm.performance.PerformanceController.isEnableController();
+  public void com.lynx.tasm.performance.PerformanceController.setEnableController(boolean enableController);
   public void com.lynx.tasm.performance.PerformanceController.allocateMemory(IMemoryRecordBuilder builder);
   public void com.lynx.tasm.performance.PerformanceController.deallocateMemory(IMemoryRecordBuilder builder);
   public void com.lynx.tasm.performance.PerformanceController.updateMemoryUsage(IMemoryRecordBuilder builder);

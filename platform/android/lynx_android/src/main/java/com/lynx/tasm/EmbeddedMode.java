@@ -62,4 +62,8 @@ public final class EmbeddedMode {
   public static boolean isEnginePoolEnable(@EmbeddedMode.Mode int mode) {
     return (mode & EmbeddedMode.ENGINE_POOL) > 0;
   }
+
+  public static boolean isBaseModeEnable(@EmbeddedMode.Mode int mode) {
+    return (mode & EmbeddedMode.EMBEDDED_MODE_BASE) > 0;
+  }
 }
