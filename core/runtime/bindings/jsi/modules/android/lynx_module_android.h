@@ -78,6 +78,11 @@ class LynxModuleAndroid
   // & OnMethodInvoked methods, and the delegate will be removed later.
   std::shared_ptr<ModuleDelegate> legacy_module_delegate_;
 
+  // Only cache the Native ModuleCallbackAndroid object. Do not cache the
+  // CallbackImpl jobject on the Module object!!!!! The user may not call the
+  // Callback object, resulting in the inability to destroy the cached
+  // CallbackImpl object. Too many CallbackImpl instances will cause OOM in the
+  // case of high-frequency calls.
   CallbackHolders callbackHolders_;
   std::unordered_set<std::shared_ptr<LynxPromiseImpl>> promises_;
 

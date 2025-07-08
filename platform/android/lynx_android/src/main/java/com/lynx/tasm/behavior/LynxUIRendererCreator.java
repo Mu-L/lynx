@@ -3,9 +3,9 @@
 // LICENSE file in the root directory of this source tree.
 package com.lynx.tasm.behavior;
 
-import com.lynx.tasm.IUIRenderCreator;
+import com.lynx.tasm.IUIRendererCreator;
 
-public class LynxUIRenderCreator implements IUIRenderCreator {
+public class LynxUIRendererCreator implements IUIRendererCreator {
   @Override
   public ILynxUIRenderer createLynxUIRender() {
     return new LynxUIRenderer();

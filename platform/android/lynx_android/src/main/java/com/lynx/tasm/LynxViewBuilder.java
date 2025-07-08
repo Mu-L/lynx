@@ -14,7 +14,7 @@ import com.lynx.tasm.base.trace.TraceEventDef;
 import com.lynx.tasm.behavior.Behavior;
 import com.lynx.tasm.behavior.BehaviorRegistry;
 import com.lynx.tasm.behavior.BuiltInUIRegistry;
-import com.lynx.tasm.behavior.LynxUIRenderCreator;
+import com.lynx.tasm.behavior.LynxUIRendererCreator;
 import com.lynx.tasm.component.DynamicComponentFetcher;
 import com.lynx.tasm.image.model.LynxImageFetcher;
 import com.lynx.tasm.loader.LynxFontFaceLoader;
@@ -96,7 +96,7 @@ public class LynxViewBuilder {
   LynxBackgroundRuntimeOptions lynxRuntimeOptions;
   LynxBackgroundRuntime lynxBackgroundRuntime;
 
-  IUIRenderCreator uiRenderCreator;
+  IUIRendererCreator uiRenderCreator;
 
   int embeddedMode = EmbeddedMode.UNSET;
 
@@ -111,7 +111,7 @@ public class LynxViewBuilder {
     if (defaultDensity != null) {
       densityOverride = defaultDensity;
     }
-    uiRenderCreator = new LynxUIRenderCreator();
+    uiRenderCreator = new LynxUIRendererCreator();
   }
 
   @Deprecated
@@ -168,12 +168,12 @@ public class LynxViewBuilder {
     return this;
   }
 
-  public LynxViewBuilder setUIRenderCreator(@NonNull IUIRenderCreator uiRenderCreator) {
-    this.uiRenderCreator = uiRenderCreator;
+  public LynxViewBuilder setUIRendererCreator(@NonNull IUIRendererCreator uiRendererCreator) {
+    this.uiRenderCreator = uiRendererCreator;
     return this;
   }
 
-  public IUIRenderCreator getUIRenderCreator() {
+  public IUIRendererCreator getUIRenderCreator() {
     return uiRenderCreator;
   }
 

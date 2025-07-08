@@ -404,10 +404,10 @@ class LynxShell {
       std::make_shared<LynxCardCacheDataManager>();
   std::shared_ptr<TASMOperationQueue> tasm_operation_queue_;
   std::shared_ptr<shell::DynamicUIOperationQueue> ui_operation_queue_;
-  tasm::timing::TimingMediator* timing_mediator_;          // NOT OWNED
-  TasmMediator* tasm_mediator_;                            // NOT OWNED
-  LayoutMediator* layout_mediator_;                        // NOT OWNED
-  tasm::performance::PerformanceMediator* perf_mediator_;  // NOT OWNED
+  tasm::timing::TimingMediator* timing_mediator_{nullptr};          // NOT OWNED
+  TasmMediator* tasm_mediator_{nullptr};                            // NOT OWNED
+  LayoutMediator* layout_mediator_{nullptr};                        // NOT OWNED
+  tasm::performance::PerformanceMediator* perf_mediator_{nullptr};  // NOT OWNED
 
   std::function<void(std::unique_ptr<runtime::LynxRuntime>&)>
       start_js_runtime_task_;

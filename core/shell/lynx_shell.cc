@@ -222,7 +222,9 @@ void LynxShell::InitRuntimeWithRuntimeDisabled(
       nullptr, nullptr, instance_id_, enable_runtime_);
   tasm_mediator_->SetRuntimeActor(runtime_actor_);
   layout_mediator_->SetRuntimeActor(runtime_actor_);
-  timing_mediator_->SetRuntimeActor(runtime_actor_);
+  if (timing_mediator_ != nullptr) {
+    timing_mediator_->SetRuntimeActor(runtime_actor_);
+  }
   if (perf_mediator_) {
     perf_mediator_->SetRuntimeActor(runtime_actor_);
   }
@@ -279,7 +281,10 @@ void LynxShell::InitRuntime(
   external_resource_loader_ptr->SetRuntimeActor(runtime_actor_);
   tasm_mediator_->SetRuntimeActor(runtime_actor_);
   layout_mediator_->SetRuntimeActor(runtime_actor_);
-  timing_mediator_->SetRuntimeActor(runtime_actor_);
+
+  if (timing_mediator_ != nullptr) {
+    timing_mediator_->SetRuntimeActor(runtime_actor_);
+  }
   if (perf_mediator_) {
     perf_mediator_->SetRuntimeActor(runtime_actor_);
   }

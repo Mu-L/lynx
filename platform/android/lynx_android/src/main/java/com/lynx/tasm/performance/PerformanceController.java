@@ -33,13 +33,28 @@ public class PerformanceController implements IMemoryMonitor, ITimingCollector {
   private volatile long mNativePerformanceActorPtr = 0;
   private WeakReference<IPerformanceObserver> mObserver;
   private WeakReference<ILynxEventReporterService> mEventReporterService;
+  private boolean mEnableController = true;
 
   public void setPerformanceObserver(IPerformanceObserver observer) {
     mObserver = new WeakReference<>(observer);
   }
 
+  public boolean isEnableController() {
+    return mEnableController;
+  }
+
+  /**
+   * Call this interface to disable performance monitoring only in Embedded Mode.
+   */
+  public void setEnableController(boolean enableController) {
+    mEnableController = enableController;
+  }
+
   @Override
   public void allocateMemory(IMemoryRecordBuilder builder) {
+    if (!mEnableController) {
+      return;
+    }
     if (builder == null) {
       return;
     }
@@ -55,6 +70,9 @@ public class PerformanceController implements IMemoryMonitor, ITimingCollector {
 
   @Override
   public void deallocateMemory(IMemoryRecordBuilder builder) {
+    if (!mEnableController) {
+      return;
+    }
     if (builder == null) {
       return;
     }
@@ -70,6 +88,9 @@ public class PerformanceController implements IMemoryMonitor, ITimingCollector {
 
   @Override
   public void updateMemoryUsage(IMemoryRecordBuilder builder) {
+    if (!mEnableController) {
+      return;
+    }
     if (builder == null) {
       return;
     }
@@ -85,6 +106,9 @@ public class PerformanceController implements IMemoryMonitor, ITimingCollector {
 
   @Override
   public void setMsTiming(String key, long msTimestamp, String pipelineID) {
+    if (!mEnableController) {
+      return;
+    }
     runOnReportThread(() -> {
       if (mNativePerformanceActorPtr == 0) {
         return;
@@ -95,6 +119,9 @@ public class PerformanceController implements IMemoryMonitor, ITimingCollector {
 
   @Override
   public void markTiming(final String key, final String pipelineID) {
+    if (!mEnableController) {
+      return;
+    }
     long usTimestamp = TimingUtil.currentTimeUs();
     runOnReportThread(() -> {
       if (mNativePerformanceActorPtr == 0) {
@@ -106,6 +133,9 @@ public class PerformanceController implements IMemoryMonitor, ITimingCollector {
 
   @Override
   public void markPaintEndTimingIfNeeded() {
+    if (!mEnableController) {
+      return;
+    }
     long usTimestamp = TimingUtil.currentTimeUs();
     runOnReportThread(() -> {
       if (mNativePerformanceActorPtr == 0) {
@@ -116,6 +146,9 @@ public class PerformanceController implements IMemoryMonitor, ITimingCollector {
   }
 
   public void setExtraTiming(TimingHandler.ExtraTimingInfo extraTiming) {
+    if (!mEnableController) {
+      return;
+    }
     runOnReportThread(() -> {
       if (mNativePerformanceActorPtr == 0) {
         return;
@@ -145,11 +178,17 @@ public class PerformanceController implements IMemoryMonitor, ITimingCollector {
 
   @CalledByNative
   protected void setNativePtr(long nativePtr) {
+    if (!mEnableController) {
+      return;
+    }
     mNativePerformanceActorPtr = nativePtr;
   }
 
   @CalledByNative
   protected void onPerformanceEvent(ReadableMap entryMap) {
+    if (!mEnableController) {
+      return;
+    }
     IPerformanceObserver observer = mObserver.get();
     PerformanceEntry entry = PerformanceEntryConverter.makePerformanceEntry(entryMap);
     if (observer != null) {
@@ -178,6 +217,9 @@ public class PerformanceController implements IMemoryMonitor, ITimingCollector {
 
   @AnyThread
   private void runOnReportThread(Runnable runnable) {
+    if (!mEnableController) {
+      return;
+    }
     LynxEventReporter.runOnReportThread(runnable);
   }
 

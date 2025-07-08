@@ -5,7 +5,7 @@ package com.lynx.tasm;
 
 import com.lynx.tasm.behavior.ILynxUIRenderer;
 
-public interface IUIRenderCreator {
+public interface IUIRendererCreator {
   /**
    * Provide the implementation of platform layer UI-related components/method
    * @return UIRender

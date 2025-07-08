@@ -219,6 +219,7 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
   private SparseArray<LynxGetDataCallback> mCallbackSparseArray = new SparseArray<>();
 
   private boolean mEnableReuseEngine;
+  private boolean mIsEngineFromReuse;
   private boolean mAutoFallbackEngineAfterDraw = false;
   private TemplateData mTemplateData;
   @Nullable private LynxEngine mLynxEngineRef;
@@ -287,6 +288,8 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
 
     if (mLynxView != null) {
       mLynxView.setTimingCollector(mPerformanceController);
+      mPerformanceController.setEnableController(
+          !EmbeddedMode.isBaseModeEnable(mLynxViewBuilder.embeddedMode));
     }
     mGenericInfo = new LynxGenericInfo();
     mLynxRuntimeOptions = builder.lynxRuntimeOptions;
@@ -387,9 +390,7 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
     }
     LynxEnv.inst().initNativeUIThread();
     init(context);
-    // if (!mLynxContext.getEnableFiber()
-    //     || (MeasureMode.fromMeasureSpec(builder.presetWidthMeasureSpec) != 0
-    //     || MeasureMode.fromMeasureSpec(builder.presetHeightMeasureSpec) != 0)) {
+
     // TODO: update viewport only if the builder has preset measure spec
     int widthMeasureSpec = builder.presetWidthMeasureSpec;
     int heightMeasureSpec = builder.presetHeightMeasureSpec;
@@ -403,8 +404,13 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
       widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(
           mLynxContext.getResources().getDisplayMetrics().widthPixels, View.MeasureSpec.EXACTLY);
     }
-    updateViewport(widthMeasureSpec, heightMeasureSpec);
-    // }
+
+    if (!mEnableReuseEngine || !mIsEngineFromReuse) {
+      // When the Engine is successfully reused, it is unnecessary to update the viewport during the
+      // LynxView initialization process.
+      updateViewport(widthMeasureSpec, heightMeasureSpec);
+    }
+
     mClient.addClient(LynxEnv.inst().getLynxViewClient());
     mClient.addClient(new LogLynxViewClient());
 
@@ -432,11 +438,13 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
       mLynxUIRender = lynxUIRenderer();
       // Cache the platform-level reuse object.
       mLynxEngineRef.setLynxUIRenderer(mLynxUIRender);
+      mIsEngineFromReuse = false;
     } else {
       // Successfully retrieved an engine from the pool.
       mLynxEngineRef.setLynxEngineState(LynxEngine.LynxEngineState.ON_REUSING);
       mLynxUIRender = mLynxEngineRef.getLynxUIRenderer();
       mLynxUIRender.attachBodyView(mLynxView, mLynxContext, mContext);
+      mIsEngineFromReuse = true;
     }
 
     // Setup for reused or new engine wrapper.
@@ -713,7 +721,8 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
 
     boolean enableVSyncAligned = mLynxViewBuilder.enableVSyncAlignedMessageLoop
         || LynxEnv.inst().enableVSyncAlignedMessageLoopGlobal();
-    mNativePtr = nativeCreate(runtimeWrapperPtr, mNativeFacade, mPerformanceController, mLoader,
+    mNativePtr = nativeCreate(runtimeWrapperPtr, mNativeFacade,
+        mPerformanceController.isEnableController() ? mPerformanceController : null, mLoader,
         mThreadStrategyForRendering.id(), mLynxViewBuilder.enableLayoutSafepoint,
         mLynxViewBuilder.enableLayoutOnly, screenMetrics.widthPixels, screenMetrics.heightPixels,
         screenMetrics.density, LynxEnv.inst().getLocale(), mLynxViewBuilder.enableJSRuntime(),
@@ -1303,7 +1312,7 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
     }
 
     mTemplateData = templateData;
-    if (mEnableReuseEngine && mLynxEngineRef != null && mLynxEngineRef.hasLoaded()) {
+    if (mEnableReuseEngine && isEngineReuseHasLoaded()) {
       if (mLynxEngineRef.isRunOnCurrentTemplateRender(this)) {
         mLynxContext.getUIBody().attachUIBodyView(mLynxView);
         updateData(templateData);
@@ -1311,7 +1320,6 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
         return;
       } else {
         fallbackNewEngine(false);
-        mEnableReuseEngine = false;
       }
     }
 
@@ -1943,6 +1951,7 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
 
     mLynxEngineRef = null;
     mEnableReuseEngine = false;
+    mIsEngineFromReuse = false;
     recreateLynxUIRenderer();
     if (mLynxUIRender != null) {
       mLynxUIRender.onInitLynxTemplateRender(
@@ -2547,7 +2556,7 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
     LLog.i(TAG, "LynxTemplateRender(" + this + ") is attached on lynxView:" + lynxView);
     ILynxUIRenderer lynxUIRenderer = lynxUIRenderer();
     mLynxView = lynxView;
-    mLynxView.mLynxUIRender = lynxUIRenderer;
+    mLynxView.setLynxUIRendererInternal(lynxUIRenderer);
     if (mDevTool != null) {
       mDevTool.attachContext(mContext);
     }
@@ -3445,13 +3454,27 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
 
   private void recreateLynxUIRenderer() {
     mLynxUIRender = mLynxViewBuilder.uiRenderCreator.createLynxUIRender();
-    mLynxView.mLynxUIRender = mLynxUIRender;
+    mLynxView.setLynxUIRendererInternal(mLynxUIRender);
+  }
+
+  private boolean isEngineReuseOnCurrentLynxView() {
+    if (mLynxEngineRef != null && mLynxEngineRef.isRunOnCurrentTemplateRender(this)) {
+      return true;
+    }
+    return false;
+  }
+
+  private boolean isEngineReuseHasLoaded() {
+    if (mLynxEngineRef != null && mLynxEngineRef.hasLoaded()) {
+      return true;
+    }
+    return false;
   }
 
   public ILynxUIRenderer lynxUIRenderer() {
     if (mLynxUIRender == null) {
       if (mLynxView != null) {
-        mLynxUIRender = mLynxView.mLynxUIRender;
+        mLynxUIRender = mLynxView.getLynxUIRendererInternal();
       } else {
         // for context free.
         mLynxUIRender = mLynxViewBuilder.uiRenderCreator.createLynxUIRender();

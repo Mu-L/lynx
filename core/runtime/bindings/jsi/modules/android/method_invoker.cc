@@ -391,6 +391,11 @@ base::expected<std::unique_ptr<pub::Value>, ErrorPair> MethodInvoker::Invoke(
   base::android::JniLocalScope scope(env);
   base::android::JavaValue transfer_method_params[args_count_];
   jvalue java_arguments[required_arg_count];
+  // Since the cached ScopedGlobalJavaRef is an lvalue, the copy constructor of
+  // ScopedGlobalJavaRef will be called when Vector is expanded, causing the
+  // jobject from ScopedGlobalJavaRef to be destroyed and JNI to call Crash.
+  // Therefore, list is used for caching here to prevent crash when Vector is
+  // expanded.
   std::list<base::android::ScopedGlobalJavaRef<jobject>> callback_container;
   TRACE_EVENT(LYNX_TRACE_CATEGORY_JSB, JS_VALUE_TO_JNI_VALUE);
   for (size_t i = 0; i < args_count_; i++) {

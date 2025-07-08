@@ -1402,10 +1402,9 @@ public abstract class LynxContext extends LynxBaseContext implements ExceptionHa
     if (bodyView == null) {
       return;
     }
-    ILynxUIRenderer lynxUIRenderer = bodyView.lynxUIRenderer();
+    ILynxUIRenderer lynxUIRenderer = bodyView.getLynxUIRendererInternal();
     if (lynxUIRenderer != null && lynxUIRenderer instanceof LynxUIRenderer) {
       ((LynxUIRenderer) lynxUIRenderer).EnsureEventDispatcher();
-      ;
     }
   }
 

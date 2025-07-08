@@ -315,6 +315,9 @@ public class UIBody extends UIGroup<UIBodyView> {
 
     private boolean mIsChildLynxPageUI;
 
+    // assign with the uiRenderer instance on TemplateRender
+    @RestrictTo(RestrictTo.Scope.LIBRARY) protected ILynxUIRenderer mLynxUIRender;
+
     public interface attachLynxPageUICallback {
       void attachLynxPageUI(@NonNull WeakReference<Object> ui);
     }
@@ -373,8 +376,8 @@ public class UIBody extends UIGroup<UIBodyView> {
         map.put(TraceEventDef.INSTANCE_ID, String.valueOf(mInstanceId));
         TraceEvent.beginSection(TraceEventDef.LYNX_TEMPLATE_RENDER_DRAW, map);
       }
-      boolean needLongTaskMonitor = false;
-      needLongTaskMonitor = LynxLongTaskMonitor.willProcessTask(
+
+      boolean needLongTaskMonitor = LynxLongTaskMonitor.willProcessTask(
           "LynxTemplateRender.Draw", mInstanceId, getLongTaskMonitorEnabled());
       if (mDrawChildHook != null) {
         mDrawChildHook.beforeDispatchDraw(canvas);
@@ -531,8 +534,20 @@ public class UIBody extends UIGroup<UIBodyView> {
     // run task on engine thread
     public void runOnTasmThread(Runnable runnable) {}
 
-    public ILynxUIRenderer lynxUIRenderer() {
-      return null;
+    /**
+     * @brief To be combative with different kinds of UIRenders, UIRender has to be built in
+     * BodyView ahead of TemplateRender. So we must provide this method for TemplateRender to get
+     * UIRenderer.
+     * @return internal UIRenderer
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
+    public ILynxUIRenderer getLynxUIRendererInternal() {
+      return mLynxUIRender;
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
+    public void setLynxUIRendererInternal(ILynxUIRenderer uiRenderer) {
+      mLynxUIRender = uiRenderer;
     }
   }
 }
