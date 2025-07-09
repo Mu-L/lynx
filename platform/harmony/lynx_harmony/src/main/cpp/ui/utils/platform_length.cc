@@ -21,11 +21,9 @@ static float GetValueInternal(const fml::RefPtr<lepus::CArray>& calc_array,
   }
   if (unit == PlatformLengthType::kCalc) {
     float ret = 0;
-    size_t i = 0;
-    PlatformLengthType item_type = PlatformLengthType::kNumber;
-    for (i = 0, item_type = static_cast<PlatformLengthType>(
-                    calc_array->get(i + 1).Number());
-         i < calc_array->size(); i += 2) {
+    for (size_t i = 0; i < calc_array->size(); i += 2) {
+      PlatformLengthType item_type =
+          static_cast<PlatformLengthType>(calc_array->get(i + 1).Number());
       fml::RefPtr<lepus::CArray> item_array{nullptr};
       float item_value = 0;
       if (PlatformLengthType::kCalc == item_type) {
