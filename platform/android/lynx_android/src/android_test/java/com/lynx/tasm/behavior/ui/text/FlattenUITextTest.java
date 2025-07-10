@@ -7,6 +7,9 @@ package com.lynx.tasm.behavior.ui.text;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.spy;
 
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.drawable.Drawable;
 import com.lynx.tasm.behavior.LynxContext;
 import com.lynx.testing.base.TestingUtils;
 import org.junit.After;
@@ -36,5 +39,27 @@ public class FlattenUITextTest {
     FlattenUIText text = spy(new FlattenUIText(mContext));
 
     assertEquals(text.getDrawPositionTop(), 0);
+  }
+
+  @Test
+  public void invalidateDrawable() {
+    FlattenUIText text = spy(new FlattenUIText(mContext));
+    FlattenUIText.DrawableCallback callback = spy(new FlattenUIText.DrawableCallback(text));
+
+    callback.invalidateDrawable(new Drawable() {
+      @Override
+      public void draw(Canvas canvas) {}
+
+      @Override
+      public void setAlpha(int i) {}
+
+      @Override
+      public void setColorFilter(ColorFilter colorFilter) {}
+
+      @Override
+      public int getOpacity() {
+        return 0;
+      }
+    });
   }
 }
