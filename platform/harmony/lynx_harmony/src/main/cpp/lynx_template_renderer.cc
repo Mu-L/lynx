@@ -265,7 +265,7 @@ void LynxTemplateRenderer::LoadTemplate(
   if (inspector_owner_ != nullptr) {
     inspector_owner_->OnLoadTemplate(url, source, template_data);
   }
-  shell_->LoadTemplate(url, source, pipeline_options, template_data,
+  shell_->LoadTemplate(url, source, pipeline_options, template_data, false,
                        enable_recycle_template_bundle);
 }
 
@@ -283,7 +283,7 @@ void LynxTemplateRenderer::LoadTemplateBundle(
     const std::shared_ptr<lynx::tasm::TemplateData>& template_data,
     bool enable_dump_element_tree) {
   shell_->LoadTemplateBundle(url, bundle, pipeline_options, template_data,
-                             enable_dump_element_tree);
+                             false, enable_dump_element_tree);
 }
 
 std::shared_ptr<lynx::tasm::PipelineOptions>
