@@ -57,7 +57,6 @@ group("lynxdevtool_lib") {
     ":lynx_tasm_recorder_for_devtool",
     "../../../devtool/lynx_devtool:lynx_devtool_group",
     "../../../devtool/lynx_devtool//js_debug:js_debug",
-    "../../../devtool/lynx_devtool/build:android_devtool_build",
     "../../../devtool/lynx_devtool/js_debug:v8_profile_devtool",
     "../../../devtool/lynx_devtool/tracing",
   ]
