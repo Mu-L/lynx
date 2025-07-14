@@ -583,15 +583,33 @@ public class JavaOnlyMap extends HashMap<String, Object> implements ReadableMap,
     put(key, value);
   }
 
+  // Does not support Deep Clone
+  // Does not support JNI calls from Native
   @Override
   public ByteBuffer getByteBuffer(String name) {
     Object result = get(name);
     if (result instanceof ByteBuffer) {
       return (ByteBuffer) result;
     }
-    return null;
+    if (result == null) {
+      return null;
+    }
+    throw new ClassCastException(result.getClass().getName() + " cannot be cast to "
+        + ByteBuffer.class.getName() + ", key: " + name);
   }
 
+  // Does not support Deep Clone
+  // Does not support JNI calls from Native
+  @Override
+  public ByteBuffer getByteBuffer(String name, ByteBuffer defaultValue) {
+    Object result = get(name);
+    if (result instanceof ByteBuffer) {
+      return (ByteBuffer) result;
+    }
+    return defaultValue;
+  }
+
+  // Does not support Deep Clone
   @Override
   @CalledByNative
   public void putByteBuffer(String key, ByteBuffer value) {

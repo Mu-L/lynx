@@ -42,6 +42,7 @@ public interface ReadableMap {
   ReadableMap getMap(String name, ReadableMap defaultValue);
   byte[] getByteArray(String name, byte[] defaultValue);
   PiperData getPiperData(String name, PiperData defaultValue);
+  ByteBuffer getByteBuffer(String name, ByteBuffer defaultValue);
 
   Dynamic getDynamic(String name);
   ReadableType getType(String name);

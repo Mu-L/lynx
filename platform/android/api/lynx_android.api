@@ -2724,6 +2724,7 @@ public class com::lynx::react::bridge::JavaOnlyMap : HashMap< String, Object >, 
   public void com.lynx.react.bridge.JavaOnlyMap.putByteArray(String key, byte[] value);
   public void com.lynx.react.bridge.JavaOnlyMap.putPiperData(String key, PiperData value);
   public ByteBuffer com.lynx.react.bridge.JavaOnlyMap.getByteBuffer(String name);
+  public ByteBuffer com.lynx.react.bridge.JavaOnlyMap.getByteBuffer(String name, ByteBuffer defaultValue);
   public void com.lynx.react.bridge.JavaOnlyMap.putByteBuffer(String key, ByteBuffer value);
   public HashMap< String, Object > com.lynx.react.bridge.JavaOnlyMap.toHashMap();
   public HashMap< String, Object > com.lynx.react.bridge.JavaOnlyMap.asHashMap();
@@ -7819,6 +7820,7 @@ public interface com::lynx::react::bridge::ReadableMap {
   public ReadableMap com.lynx.react.bridge.ReadableMap.getMap(String name, ReadableMap defaultValue);
   public byte[] com.lynx.react.bridge.ReadableMap.getByteArray(String name, byte[] defaultValue);
   public PiperData com.lynx.react.bridge.ReadableMap.getPiperData(String name, PiperData defaultValue);
+  public ByteBuffer com.lynx.react.bridge.ReadableMap.getByteBuffer(String name, ByteBuffer defaultValue);
   public Dynamic com.lynx.react.bridge.ReadableMap.getDynamic(String name);
   public ReadableType com.lynx.react.bridge.ReadableMap.getType(String name);
   public ReadableMapKeySetIterator com.lynx.react.bridge.ReadableMap.keySetIterator();
