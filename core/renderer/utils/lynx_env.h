@@ -106,6 +106,7 @@ class BASE_EXPORT_FOR_DEVTOOL LynxEnv {
     FIX_FONT_SIZE_OVERRIDE_DIRECTION_CHANGE_BUG,
     // FIXME(linxs): remove this config in the next version
     FIX_NEGATIVE_Z_INDEX_INSERT_BUG,
+    ENABLE_NEW_ANIMATOR_ON_PATCH_FINISH_OPT,
     // Please add new enum values above
     END_MARK,  // Keep this as the last enum value, and do not use
   };
@@ -224,6 +225,8 @@ class BASE_EXPORT_FOR_DEVTOOL LynxEnv {
             {Key::FIX_FONT_SIZE_OVERRIDE_DIRECTION_CHANGE_BUG,
              "fix_font_size_override_direction_change_bug"},
             {Key::FIX_NEGATIVE_Z_INDEX_INSERT_BUG, "fix_negative_z_index_bug"},
+            {Key::ENABLE_NEW_ANIMATOR_ON_PATCH_FINISH_OPT,
+             "enable_new_animator_on_patch_finish_opt"},
         });
     auto it = (*env_key_to_string_map).find(key);
     DCHECK(it != (*env_key_to_string_map).end());
@@ -351,6 +354,7 @@ class BASE_EXPORT_FOR_DEVTOOL LynxEnv {
   bool EnableReportMTSContextEvent();
   bool EnableFiberElementMemoryReport();
   bool FixFontSizeOverrideDirectionChangeBug();
+  bool EnableNewAnimatorOnPatchFinishOpt();
 
   LynxEnv(const LynxEnv&) = delete;
   LynxEnv& operator=(const LynxEnv&) = delete;

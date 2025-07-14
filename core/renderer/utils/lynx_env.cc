@@ -457,5 +457,10 @@ bool LynxEnv::EnableFiberElementMemoryReport() {
 bool LynxEnv::FixFontSizeOverrideDirectionChangeBug() {
   return GetBoolEnv(Key::FIX_FONT_SIZE_OVERRIDE_DIRECTION_CHANGE_BUG, true);
 }
+
+bool LynxEnv::EnableNewAnimatorOnPatchFinishOpt() {
+  return GetBoolEnv(Key::ENABLE_NEW_ANIMATOR_ON_PATCH_FINISH_OPT, true);
+}
+
 }  // namespace tasm
 }  // namespace lynx

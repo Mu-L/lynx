@@ -1465,8 +1465,20 @@ bool Element::TickAllAnimation(fml::TimePoint& frame_time,
   }
   bool has_layout_style = FlushAnimatedStyle();
   if (has_layout_style) {
-    // if has_layout_style is true, should call `OnPatchFinish`.
-    element_manager_->OnFinishUpdateProps(this, options);
+    if (tasm::LynxEnv::GetInstance().EnableNewAnimatorOnPatchFinishOpt()) {
+      if (is_radon_element()) {
+        element_manager_->SetNeedsLayout();
+        static_cast<RadonElement*>(this)
+            ->StylesManager()
+            .UpdateWithParentStatusForOnceInheritance(
+                static_cast<RadonElement*>(this->parent()));
+        this->FlushProps();
+      } else if (is_fiber_element()) {
+        static_cast<FiberElement*>(this)->MarkPropsDirty();
+      }
+    } else {
+      element_manager_->OnFinishUpdateProps(this, options);
+    }
   }
   return has_layout_style;
 }
