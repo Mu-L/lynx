@@ -61,6 +61,17 @@ public class LynxViewBuilder
     this();
   }
 
+  /**
+   * Experimental API.
+   *
+   * Set a default overriding density which will be applied to all LynxView constructed after it is
+   * set. Will use screen density if default density is not set.
+   * @param density overriding density by default, set it to null to reset the default density.
+   */
+  public static void setDefaultDensity(Float density) {
+    defaultDensity = density;
+  }
+
   public LynxViewBuilder setTemplateProvider(@Nullable AbsTemplateProvider provider) {
     templateProvider = provider;
     return this;
