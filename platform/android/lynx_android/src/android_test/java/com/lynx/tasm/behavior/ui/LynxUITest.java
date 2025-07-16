@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 import android.os.IBinder;
 import android.view.View;
 import com.lynx.tasm.behavior.LynxContext;
+import com.lynx.tasm.behavior.ui.view.UIView;
 import com.lynx.testing.base.TestingUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -130,5 +131,16 @@ public class LynxUITest {
     verify(parentUI, times(1))
         .beforeProcessChildViewInfo(parentUI.mViewInfo, childUI2.getView(), 0);
     verify(parentUI, times(1)).afterProcessChildViewInfo(parentUI.mViewInfo, childUI2.getView(), 0);
+  }
+
+  @Test
+  public void testGetOrCreateView() {
+    UIView ui = new UIView(mContext);
+    assertNotNull(ui.getView());
+
+    mContext.markFallbackProcess(true);
+    mContext.setUIBodyView(new UIBody.UIBodyView(mContext));
+    UIView fallbackUI = new UIView(mContext, new UIParams(1, 1, false, "", null, null, null));
+    assertNull(fallbackUI.getView());
   }
 }
