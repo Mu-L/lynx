@@ -32,14 +32,12 @@ public class LynxViewBuilder
     extends LynxBaseConfigurator<LynxViewBuilder> implements ILynxViewConfigProvider {
   AbsTemplateProvider templateProvider;
   Object lynxModuleExtraData;
-  Float densityOverride;
   DynamicComponentFetcher fetcher;
   LynxResourceFetcher resourceFetcher;
   LynxFontFaceLoader.Loader fontLoader;
   LynxImageFetcher imageFetcher;
 
   TemplateBundle templateBundle;
-  static Float defaultDensity = null;
   boolean enableLayoutOnly = LynxEnv.inst().isLayoutOnlyEnabled();
   Map<String, String> mImageCustomParam;
   Map<String, String> lynxViewConfig;
@@ -50,26 +48,11 @@ public class LynxViewBuilder
   public LynxViewBuilder() {
     LynxEnv.inst().lazyInitIfNeeded();
     templateProvider = LynxEnv.inst().getTemplateProvider();
-    densityOverride = null;
-    if (defaultDensity != null) {
-      densityOverride = defaultDensity;
-    }
   }
 
   @Deprecated
   public LynxViewBuilder(Context context) {
     this();
-  }
-
-  /**
-   * Experimental API.
-   *
-   * Set a default overriding density which will be applied to all LynxView constructed after it is
-   * set. Will use screen density if default density is not set.
-   * @param density overriding density by default, set it to null to reset the default density.
-   */
-  public static void setDefaultDensity(Float density) {
-    defaultDensity = density;
   }
 
   public LynxViewBuilder setTemplateProvider(@Nullable AbsTemplateProvider provider) {

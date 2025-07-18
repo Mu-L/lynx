@@ -6395,7 +6395,6 @@ public class com::lynx::tasm::LynxViewBuilder : LynxBaseConfigurator< LynxViewBu
   public LynxMediaResourceFetcher com.lynx.tasm.LynxViewBuilder.getLynxMediaResourceFetcher();
   public LynxTemplateResourceFetcher com.lynx.tasm.LynxViewBuilder.getLynxTemplateResourceFetcher();
   public LynxView com.lynx.tasm.LynxViewBuilder.build(@NonNull Context context);
-  public static void com.lynx.tasm.LynxViewBuilder.setDefaultDensity(Float density);
 }
 
 public enum com::lynx::tasm::utils::LynxViewBuilderProperty {

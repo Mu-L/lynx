@@ -29,7 +29,7 @@ import java.util.List;
 
 public class LynxBaseConfigurator<T extends LynxBaseConfigurator<T>> {
   protected boolean enableMultiAsyncThread = true;
-  protected float densityOverride;
+  protected Float densityOverride;
   protected BehaviorRegistry behaviorRegistry;
   protected LynxBackgroundRuntimeOptions lynxRuntimeOptions;
   protected boolean enableAutoExpose;
@@ -40,6 +40,8 @@ public class LynxBaseConfigurator<T extends LynxBaseConfigurator<T>> {
   protected boolean enableAutoConcurrency = false;
   protected boolean enableVSyncAlignedMessageLoop = false;
   protected boolean enablePendingJsTask = false;
+
+  static Float defaultDensity = null;
 
   /**
    * enable async hydration of ssr.
@@ -82,6 +84,21 @@ public class LynxBaseConfigurator<T extends LynxBaseConfigurator<T>> {
     lynxRuntimeOptions = new LynxBackgroundRuntimeOptions();
     behaviorRegistry = new BehaviorRegistry(LynxEnv.inst().getBehaviorMap());
     uiRendererCreator = new LynxUIRendererCreator();
+
+    if (defaultDensity != null) {
+      densityOverride = defaultDensity;
+    }
+  }
+
+  /**
+   * Experimental API.
+   *
+   * Set a default overriding density which will be applied to all LynxView constructed after it is
+   * set. Will use screen density if default density is not set.
+   * @param density overriding density by default, set it to null to reset the default density.
+   */
+  public static void setDefaultDensity(Float density) {
+    defaultDensity = density;
   }
 
   /**
