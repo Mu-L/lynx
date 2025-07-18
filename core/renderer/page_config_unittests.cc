@@ -103,6 +103,27 @@ TEST(PageConfigTest, EnableNativeScheduleCreateViewAsync) {
             TernaryBool::FALSE_VALUE);
 }
 
+TEST(PageConfigTest, EnableUnifiedPipeline) {
+  PageConfig page_config;
+  EXPECT_EQ(page_config.GetEnableUnifiedPipeline(),
+            TernaryBool::UNDEFINE_VALUE);
+
+  page_config.DecodePageConfigFromJsonStringWhileUndefined(
+      "{\n  \"enableNativeScheduleCreateViewAsync\" : false\n}");
+  EXPECT_EQ(page_config.GetEnableUnifiedPipeline(),
+            TernaryBool::UNDEFINE_VALUE);
+
+  PageConfig page_config_0;
+  page_config_0.DecodePageConfigFromJsonStringWhileUndefined(
+      "{\n  \"enableUnifiedPipeline\" : true\n}");
+  EXPECT_EQ(page_config_0.GetEnableUnifiedPipeline(), TernaryBool::TRUE_VALUE);
+
+  PageConfig page_config_1;
+  page_config_1.DecodePageConfigFromJsonStringWhileUndefined(
+      "{\n  \"enableUnifiedPipeline\" : false\n}");
+  EXPECT_EQ(page_config_1.GetEnableUnifiedPipeline(), TernaryBool::FALSE_VALUE);
+}
+
 #undef CHECK_CONFIG_VALUE
 
 }  // namespace test

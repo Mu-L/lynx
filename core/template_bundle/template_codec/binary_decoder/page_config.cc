@@ -57,6 +57,9 @@ const PageConfig::PageConfigMap<TernaryBool>& PageConfig::GetFuncBoolMap() {
           {kEnableNativeScheduleCreateViewAsync,
            {&PageConfig::SetEnableNativeScheduleCreateViewAsync,
             &PageConfig::GetEnableNativeScheduleCreateViewAsync}},
+          {"enableUnifiedPipeline",
+           {&PageConfig::SetEnableUnifiedPipeline,
+            &PageConfig::GetEnableUnifiedPipeline}},
       }};
   return *kPageConfigFuncBoolMap;
 }
