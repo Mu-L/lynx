@@ -494,10 +494,10 @@ struct VectorTemplateless {
    */
   BASE_VECTOR_NEVER_INLINE static void* PrepareInsert(void* array,
                                                       size_t element_size,
-                                                      void* dest) {
+                                                      const void* dest) {
     VectorPrototype<uint8_t>* proto_array =
         reinterpret_cast<VectorPrototype<uint8_t>*>(array);
-    auto diff = static_cast<uint8_t*>(dest) - proto_array->_begin_iter();
+    auto diff = static_cast<const uint8_t*>(dest) - proto_array->_begin_iter();
     if (proto_array->size() == proto_array->capacity()) {
       ReallocateTrivial(array, element_size);
     }
@@ -837,7 +837,7 @@ struct Vector : protected VectorTemplateless, public VectorPrototype<T> {
   }
 
   template <class... Args>
-  iterator emplace(const iterator pos, Args&&... args) {
+  iterator emplace(const_iterator pos, Args&&... args) {
     if constexpr (is_trivial) {
       // For trivial types, always call templateless implementation for binary
       // size benefits.
@@ -867,11 +867,11 @@ struct Vector : protected VectorTemplateless, public VectorPrototype<T> {
   iterator insert(std::nullptr_t,
                   U&& value) = delete;  // Avoid misuse of insert(0)
 
-  BASE_VECTOR_INLINE iterator insert(const iterator pos, const T& value) {
+  BASE_VECTOR_INLINE iterator insert(const_iterator pos, const T& value) {
     return emplace(pos, value);
   }
 
-  BASE_VECTOR_INLINE iterator insert(const iterator pos, T&& value) {
+  BASE_VECTOR_INLINE iterator insert(const_iterator pos, T&& value) {
     return emplace(pos, std::move(value));
   }
 
@@ -1237,7 +1237,7 @@ struct Vector : protected VectorTemplateless, public VectorPrototype<T> {
 
   // Returns pair<pos, true_if_construct_at_end>
   BASE_VECTOR_INLINE std::pair<iterator, bool> _nontrivial_prepare_insert(
-      const iterator pos) {
+      const_iterator pos) {
     auto diff = pos - _begin_iter();
     _grow_if_need();
     auto dest_pos = _begin_iter() + diff;
@@ -1569,7 +1569,9 @@ struct KeyValueArray : protected MapStatisticsBase<Stat> {
   using store_container_type =
       typename std::conditional_t<(N > 0), InlineVector<store_value_type, N>,
                                   Vector<store_value_type>>;
-  using store_iterator = typename store_container_type::iterator;
+  using store_iterator =
+      std::conditional_t<is_map, typename store_container_type::iterator,
+                         typename store_container_type::const_iterator>;
 
   container_type& array() const {
     return *reinterpret_cast<container_type*>(
@@ -1583,9 +1585,12 @@ struct KeyValueArray : protected MapStatisticsBase<Stat> {
   using MapStatisticsBase<Stat>::IncreaseEraseCount;
 
  public:
-  using iterator = typename container_type::iterator;
+  using iterator = std::conditional_t<is_map, typename container_type::iterator,
+                                      typename container_type::const_iterator>;
   using const_iterator = typename container_type::const_iterator;
-  using reverse_iterator = typename container_type::reverse_iterator;
+  using reverse_iterator =
+      std::conditional_t<is_map, typename container_type::reverse_iterator,
+                         typename container_type::const_reverse_iterator>;
   using const_reverse_iterator =
       typename container_type::const_reverse_iterator;
 
