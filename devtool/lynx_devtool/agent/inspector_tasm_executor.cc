@@ -81,10 +81,15 @@ void InspectorTasmExecutor::SendDOMEventMsg(const DomCdpEvent& event_name,
     msg["params"]["nodeId"] = nodeId;
     msg["params"]["name"] = name;
     Element* ptr = GetElementById(nodeId);
-    if (ptr != nullptr) {
-      msg["params"]["value"] =
-          ElementHelper::GetAttributesAsTextOfNode(ptr, name);
+
+    // At this point, if the element_root_
+    // has not yet been set in the OnElementNodeAdded callback,
+    // the DOM.attributeModified event will be dropped.
+    if (ptr == nullptr) {
+      return;
     }
+    msg["params"]["value"] =
+        ElementHelper::GetAttributesAsTextOfNode(ptr, name);
   } else if (event_name == DomCdpEvent::CHILD_NODE_REMOVED) {
     msg["method"] = "DOM.childNodeRemoved";
     msg["params"]["parentNodeId"] = parentNodeId;

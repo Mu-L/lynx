@@ -20,6 +20,13 @@ class InspectorElementObserver {
  public:
   virtual void OnDocumentUpdated() = 0;
 
+  // OnElementNodeAdded handles notifications for new element nodes.
+  // 1. It can notify each node individually as they are added,
+  //    or notify the devtool once with the root of a newly added subtree,
+  //    avoiding the need to notify every single node.
+  // 2. When the page root node is notified, it sets element_root_ on the
+  // devtool side,
+  //    which is used by the devtool to find element nodes by nodeId.
   virtual void OnElementNodeAdded(Element *ptr) = 0;
   virtual void OnElementNodeRemoved(Element *ptr) = 0;
   virtual void OnCharacterDataModified(Element *ptr) = 0;
