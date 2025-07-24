@@ -4,6 +4,8 @@
 
 #include "core/renderer/ui_wrapper/painting/painting_context.h"
 
+#include "core/services/trace/service_trace_event_def.h"
+
 namespace lynx {
 namespace tasm {
 
@@ -195,10 +197,17 @@ void PaintingContext::MarkUIOperationQueueFlushTiming(
   }
   Enqueue([perf_actor = perf_controller_actor_, key = std::move(key),
            pipeline_id]() {
-    TRACE_EVENT(LYNX_TRACE_CATEGORY, UI_OPERATION_QUEUE_MARK_TIMING);
+    auto timestamp = base::CurrentSystemTimeMicroseconds();
+    TRACE_EVENT_INSTANT(
+        LYNX_TRACE_CATEGORY, TIMING_MARK + key,
+        [&pipeline_id, &key, timestamp](lynx::perfetto::EventContext ctx) {
+          ctx.event()->add_debug_annotations("timing_key", key);
+          ctx.event()->add_debug_annotations("pipeline_id", pipeline_id);
+          ctx.event()->add_debug_annotations("timestamp",
+                                             std::to_string(timestamp));
+        });
     perf_actor->ActAsync([key = std::move(key), pipeline_id,
-                          timestamp = base::CurrentSystemTimeMicroseconds()](
-                             auto& controller) mutable {
+                          timestamp](auto& controller) mutable {
       controller->GetTimingHandler().SetTiming(
           key, static_cast<lynx::tasm::timing::TimestampUs>(timestamp),
           pipeline_id);
