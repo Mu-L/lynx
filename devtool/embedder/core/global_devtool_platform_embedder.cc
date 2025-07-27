@@ -24,7 +24,10 @@ class GlobalDevtoolPlatformCommon
   }
 
   lynx::trace::TraceController* GetTraceController() override {
+#if ENABLE_TRACE_PERFETTO || ENABLE_TRACE_SYSTRACE
     return lynx::trace::GetTraceControllerInstance();
+#endif
+    return nullptr;
   }
 
   lynx::trace::TracePlugin* GetFPSTracePlugin() override { return nullptr; }
