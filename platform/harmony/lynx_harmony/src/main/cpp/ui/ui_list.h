@@ -146,6 +146,7 @@ class UIList : public BaseScrollContainer,
   bool IsVisibleCellHorizontal(UIComponent* component) const;
   UIComponent* GetItemAtIndex(int32_t index);
   void DetectSnapScroll(int32_t action);
+  std::pair<float, float> CalculateOffsets(UIComponent* item);
   std::tuple<int32_t, float, float> CalcSnapScroll(bool forward,
                                                    bool has_velocity);
   float DistanceToItem(UIComponent* list_item, bool vertical, float factor,

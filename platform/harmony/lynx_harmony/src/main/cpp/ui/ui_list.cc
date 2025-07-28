@@ -558,6 +558,23 @@ UIComponent* UIList::GetItemAtIndex(int32_t index) {
   return nullptr;
 }
 
+std::pair<float, float> UIList::CalculateOffsets(UIComponent* item) {
+  bool vertical = IsVerticalScrollView();
+  float offset_x =
+      vertical
+          ? 0
+          : item->left_ - (width_ - item->width_) * snap_factor_ + snap_offset_;
+  offset_x = std::round((offset_x * context_->ScaledDensity())) /
+             context_->ScaledDensity();
+  float offset_y =
+      vertical
+          ? item->top_ - (height_ - item->height_) * snap_factor_ + snap_offset_
+          : 0;
+  offset_y = std::round((offset_y * context_->ScaledDensity())) /
+             context_->ScaledDensity();
+  return std::make_pair(offset_x, offset_y);
+}
+
 std::tuple<int32_t, float, float> UIList::CalcSnapScroll(bool forward,
                                                          bool has_velocity) {
   bool vertical = IsVerticalScrollView();
@@ -635,15 +652,8 @@ std::tuple<int32_t, float, float> UIList::CalcSnapScroll(bool forward,
   // case when children are larger then the viewport). Extrapolate from the
   // child that is visible to get the position of the view to snap to.
   if (target_item != nullptr) {
-    return {target_position,
-            vertical ? 0
-                     : target_item->left_ -
-                           (width_ - target_item->width_) * snap_factor_ +
-                           snap_offset_,
-            vertical ? target_item->top_ -
-                           (height_ - target_item->height_) * snap_factor_ +
-                           snap_offset_
-                     : 0};
+    auto offsets = CalculateOffsets(target_item);
+    return {target_position, offsets.first, offsets.second};
   }
 
   UIComponent* visible_item =
@@ -666,15 +676,8 @@ std::tuple<int32_t, float, float> UIList::CalcSnapScroll(bool forward,
 
   target_item = GetItemAtIndex(target_position);
 
-  return {target_position,
-          vertical ? 0
-                   : target_item->left_ -
-                         (width_ - target_item->width_) * snap_factor_ +
-                         snap_offset_,
-          vertical ? target_item->top_ -
-                         (height_ - target_item->height_) * snap_factor_ +
-                         snap_offset_
-                   : 0};
+  auto offsets = CalculateOffsets(target_item);
+  return {target_position, offsets.first, offsets.second};
 }
 
 float UIList::DistanceToItem(UIComponent* list_item, bool vertical,

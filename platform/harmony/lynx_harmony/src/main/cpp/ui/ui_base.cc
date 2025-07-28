@@ -1277,7 +1277,7 @@ void UIBase::SetExposureArea(const lepus::Value& value) {
     num = value.Number();
   } else if (value.IsString()) {
     auto str = value.StdString();
-    if (str.find("%") == str.size() - 1) {
+    if (!str.empty() && str.find("%") == str.size() - 1) {
       num = std::stof(str.substr(0, str.size() - 1)) / 100.f;
     }
   }
