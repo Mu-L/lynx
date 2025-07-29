@@ -80,6 +80,12 @@ Add the `DEVECO_SDK_HOME` variable to your environment configuration file.
 export DEVECO_SDK_HOME=/Applications/DevEco-Studio.app/Contents/sdk
 ```
 
+Also, ensure the `hvigorw` tool is in your `PATH`.
+
+```bash
+export PATH=/Applications/DevEco-Studio.app/Contents/tools/hvigor/bin:$PATH
+```
+
 #### Install Harmony Dependencies
 
 Execute the following commands to install Harmony-specific dependencies using `ohpm`.
