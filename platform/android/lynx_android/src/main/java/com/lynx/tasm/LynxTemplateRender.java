@@ -3677,8 +3677,7 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
     if (builder.lynxViewGroup != null) {
       return builder;
     }
-    builder.setCustomBehaviorRegistry(mLynxViewBuilder.getBehaviorRegistry())
-        .setUIRendererCreator(mLynxViewBuilder.getUIRendererCreator())
+    builder.setUIRendererCreator(mLynxViewBuilder.getUIRendererCreator())
         .setFontLoader(mLynxViewBuilder.fontLoader)
         .setImageFetcher(mLynxViewBuilder.imageFetcher)
         .setFontScale(mLynxViewBuilder.getFontScale())
@@ -3689,6 +3688,7 @@ public class LynxTemplateRender implements ILynxEngine, ILynxErrorReceiver {
         .mergeLynxRuntimeOptions(mLynxViewBuilder.getLynxRuntimeOptions())
         .setScreenSize(mLynxViewBuilder.getScreenWidth(), mLynxViewBuilder.getScreenHeight())
         .setThreadStrategyForRendering(mLynxViewBuilder.getThreadStrategy());
+    builder.setCustomBehaviorRegistry(mLynxViewBuilder.getBehaviorRegistry());
     return builder;
   }
 

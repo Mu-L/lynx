@@ -6414,6 +6414,7 @@ public class com::lynx::tasm::LynxViewBuilder : LynxBaseConfigurator< LynxViewBu
   public LynxViewBuilder com.lynx.tasm.LynxViewBuilder.setDynamicComponentFetcher(DynamicComponentFetcher fetcher);
   public LynxViewBuilder com.lynx.tasm.LynxViewBuilder.setEnableCreateViewAsync(boolean enable);
   public LynxViewBuilder com.lynx.tasm.LynxViewBuilder.setImageFetcher(LynxImageFetcher imageFetcher);
+  public void com.lynx.tasm.LynxViewBuilder.setCustomBehaviorRegistry(@NonNull BehaviorRegistry registry);
   public LynxViewBuilder com.lynx.tasm.LynxViewBuilder.addBehaviors(@NonNull List< Behavior > behaviorList);
   public LynxViewBuilder com.lynx.tasm.LynxViewBuilder.addBehavior(@NonNull Behavior behavior);
   public LynxViewBuilder com.lynx.tasm.LynxViewBuilder.setLynxGroup(@Nullable LynxGroup group);

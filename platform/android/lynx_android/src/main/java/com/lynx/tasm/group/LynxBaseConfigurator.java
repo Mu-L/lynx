@@ -105,9 +105,8 @@ public class LynxBaseConfigurator<T extends LynxBaseConfigurator<T>> {
   /**
    * Set Custom BehaviorRegistry
    */
-  public T setCustomBehaviorRegistry(@NonNull BehaviorRegistry registry) {
+  public void setCustomBehaviorRegistry(@NonNull BehaviorRegistry registry) {
     this.behaviorRegistry = registry;
-    return (T) this;
   }
 
   /**

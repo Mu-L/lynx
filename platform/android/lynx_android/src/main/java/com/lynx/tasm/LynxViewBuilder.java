@@ -163,6 +163,11 @@ public class LynxViewBuilder
   }
 
   @Override
+  public void setCustomBehaviorRegistry(@NonNull BehaviorRegistry registry) {
+    super.setCustomBehaviorRegistry(registry);
+  }
+
+  @Override
   public LynxViewBuilder addBehaviors(@NonNull List<Behavior> behaviorList) {
     return super.addBehaviors(behaviorList);
   }
