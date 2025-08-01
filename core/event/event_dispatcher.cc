@@ -31,7 +31,6 @@
 
 #include "core/event/event_dispatcher.h"
 
-#include "base/include/fml/memory/weak_ptr.h"
 #include "core/event/event.h"
 #include "core/event/event_target.h"
 
@@ -45,7 +44,7 @@ DispatchEventResult EventDispatcher::DispatchEvent(EventTarget& target,
 }
 
 EventDispatcher::EventDispatcher(EventTarget& target, Event& event)
-    : target_(target.GetWeakTarget()), event_(&event) {
+    : target_(&target), event_(&event) {
   event_->InitEventPath(*target_);
 }
 
@@ -61,11 +60,7 @@ DispatchEventResult EventDispatcher::Dispatch() {
   auto path = event_->event_path();
   // capture
   for (auto item = path.rbegin(); item != path.rend(); ++item) {
-    fml::WeakPtr<EventTarget> target = *item;
-    if (!target) {
-      continue;
-    }
-    event_->set_event_phase((event_->target() == target)
+    event_->set_event_phase((event_->target() == *item)
                                 ? Event::PhaseType::kAtTarget
                                 : Event::PhaseType::kCapturingPhase);
     event_->set_current_target(*item);
@@ -77,7 +72,7 @@ DispatchEventResult EventDispatcher::Dispatch() {
   }
   // bubble
   for (auto& item : path) {
-    if (!item || event_->target() == item) {
+    if (event_->target() == item) {
       // target is handled by capture phase.
       continue;
     }

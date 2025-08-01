@@ -29,7 +29,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "base/include/fml/memory/weak_ptr.h"
 #include "core/event/event_dispatch_result.h"
 
 #ifndef CORE_EVENT_EVENT_DISPATCHER_H_
@@ -55,7 +54,7 @@ class EventDispatcher {
  private:
   EventDispatcher(EventTarget&, Event&);
 
-  fml::WeakPtr<EventTarget> target_;
+  EventTarget* target_;
   Event* event_;
 };
 
