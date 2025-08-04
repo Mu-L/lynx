@@ -30,6 +30,117 @@ struct remove_cvref {
 template <typename T>
 using remove_cvref_t = typename remove_cvref<T>::type;
 
+/**
+ * Checks if a type is template instance of another type.
+ * For example:
+ *     is_instance<std::shared_ptr<std::string>, std::shared_ptr> = true
+ */
+template <class, template <class, class...> class>
+struct is_instance : public std::false_type {};
+
+template <class... Ts, template <class, class...> class U>
+struct is_instance<U<Ts...>, U> : public std::true_type {};
+
+/**
+ * By default, std::is_trivially_copyable_v<std::pair<int, int>> is false which
+ * causes Vector<std::pair<int, int>> to be treated with non-trivial
+ * element type. We check first and second elements of std::pair<> and treat the
+ * whole type as trivial if both elements are trivial.
+ *
+ * From C++23, the standard was updated to mandate that if `T1` and `T2` are
+ * both trivially copyable, then `std::pair<T1, T2>` must also be trivially
+ * copyable.
+ */
+template <typename T, bool is_pair>
+struct IsTrivial {};
+
+template <typename T>
+struct IsTrivial<T, false> {
+  static constexpr auto value =
+      std::is_trivially_destructible_v<T> && std::is_trivially_copyable_v<T>;
+};
+
+template <typename T>
+struct IsTrivial<T, true> {
+  static constexpr auto value =
+      std::is_trivially_destructible_v<T> &&
+      IsTrivial<typename T::first_type,
+                is_instance<typename T::first_type, std::pair>{}>::value &&
+      IsTrivial<typename T::second_type,
+                is_instance<typename T::second_type, std::pair>{}>::value;
+};
+
+// Check if T has declared flag `TriviallyDestructibleAfterMove`.
+// When this optimization hint is turned on, if one T instance is moved away,
+// its destructor will not be called.
+template <typename T, typename = void>
+struct has_trivially_destructible_after_move_flag : std::false_type {};
+
+template <typename T>
+struct has_trivially_destructible_after_move_flag<
+    T, std::void_t<typename T::TriviallyDestructibleAfterMove>>
+    : std::true_type {};
+
+template <typename T, bool is_pair>
+struct IsTriviallyDestructibleAfterMove {};
+
+template <typename T>
+struct IsTriviallyDestructibleAfterMove<T, false> {
+  static constexpr auto value =
+      std::is_trivially_destructible_v<T> ||
+      has_trivially_destructible_after_move_flag<T>::value;
+};
+
+template <typename T>
+struct IsTriviallyDestructibleAfterMove<T, true> {
+  static constexpr auto value =
+      (std::is_trivially_destructible_v<typename T::first_type> ||
+       IsTriviallyDestructibleAfterMove<
+           typename T::first_type,
+           is_instance<typename T::first_type, std::pair>{}>::value) &&
+      (std::is_trivially_destructible_v<typename T::second_type> ||
+       IsTriviallyDestructibleAfterMove<
+           typename T::second_type,
+           is_instance<typename T::second_type, std::pair>{}>::value);
+};
+
+// Check if T has declared flag `TriviallyRelocatable`.
+// When this optimization hint is turned on, the instances of type T can be
+// moved as a whole(if multiple instances on linear memory) to another piece of
+// memory using the memcpy or memmove method, and the T type instance in the
+// original memory does not need destruction.
+template <typename T, typename = void>
+struct has_trivially_relocatable_flag : std::false_type {};
+
+template <typename T>
+struct has_trivially_relocatable_flag<
+    T, std::void_t<typename T::TriviallyRelocatable>> : std::true_type {};
+
+template <typename T, bool is_pair>
+struct IsTriviallyRelocatable {};
+
+template <typename T>
+struct IsTriviallyRelocatable<T, false> {
+  static constexpr auto value =
+      IsTrivial<T, is_instance<T, std::pair>{}>::value ||
+      has_trivially_relocatable_flag<T>::value;
+};
+
+template <typename T>
+struct IsTriviallyRelocatable<T, true> {
+  static constexpr auto value =
+      (IsTrivial<typename T::first_type,
+                 is_instance<typename T::first_type, std::pair>{}>::value ||
+       IsTriviallyRelocatable<
+           typename T::first_type,
+           is_instance<typename T::first_type, std::pair>{}>::value) &&
+      (IsTrivial<typename T::second_type,
+                 is_instance<typename T::second_type, std::pair>{}>::value ||
+       IsTriviallyRelocatable<
+           typename T::second_type,
+           is_instance<typename T::second_type, std::pair>{}>::value);
+};
+
 }  // namespace base
 }  // namespace lynx
 

@@ -2196,7 +2196,7 @@ TEST(Vector, Nontrivial) {
 TEST(Vector, NontrivialHintOfTriviallyDestructibleAfterMove) {
   class NontrivialInt {
    public:
-    using TriviallyDestructibleAfterMoveInBaseVector = bool;
+    using TriviallyDestructibleAfterMove = bool;
 
     NontrivialInt(int i = -1) { value_ = new std::string(std::to_string(i)); }
 
@@ -2731,7 +2731,7 @@ TEST(Vector, NontrivialHintOfTriviallyDestructibleAfterMove) {
 TEST(Vector, NontrivialHintOfTriviallyRelocatable) {
   class NontrivialInt {
    public:
-    using TriviallyRelocatableInBaseVector = bool;
+    using TriviallyRelocatable = bool;
 
     NontrivialInt(int i = -1) { value_ = new std::string(std::to_string(i)); }
 

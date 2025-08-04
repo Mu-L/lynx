@@ -17,6 +17,7 @@
 
 #include "base/include/base_export.h"
 #include "base/include/fml/memory/ref_counted.h"
+#include "base/include/type_traits_addon.h"
 
 namespace lynx {
 namespace base {
@@ -308,9 +309,9 @@ class String {
     }
   };
 
-  // A flag telling `base::Vector<base::String>` to optimize for
-  // reallocate, insert and erase.
-  using TriviallyRelocatableInBaseVector = bool;
+  // A flag telling base containers such as `base::Vector<base::String>` to
+  // optimize for reallocate, insert and erase.
+  using TriviallyRelocatable = bool;
 
  protected:
   friend class Unsafe;

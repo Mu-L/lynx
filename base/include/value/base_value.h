@@ -15,6 +15,7 @@
 #include "base/include/closure.h"
 #include "base/include/fml/memory/ref_counted.h"
 #include "base/include/log/logging.h"
+#include "base/include/type_traits_addon.h"
 #include "base/include/value/base_string.h"
 #include "base/include/value/lynx_value_extended.h"
 #include "base/include/value/ref_type.h"
@@ -658,9 +659,9 @@ class BASE_EXPORT_FOR_DEVTOOL Value {
   // A flag telling `base::flex_optional<>` to save memory.
   using AlwaysUseFlexOptionalMemSave = bool;
 
-  // A flag telling `base::Vector<lepus::Value>` to optimize for
-  // reallocate, insert and erase.
-  using TriviallyRelocatableInBaseVector = bool;
+  // A flag telling base containers such as `base::Vector<Value>` to optimize
+  // for reallocate, insert and erase.
+  using TriviallyRelocatable = bool;
 
  private:
   void Copy(const Value& value);
