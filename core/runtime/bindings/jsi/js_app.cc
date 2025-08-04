@@ -52,7 +52,6 @@
 
 #if ENABLE_TESTBENCH_RECORDER
 #include "core/services/recorder/native_module_recorder.h"
-#include "core/services/recorder/testbench_base_recorder.h"
 #endif
 
 namespace lynx {
@@ -2145,11 +2144,6 @@ void App::EvaluateScript(const std::string& url, std::string script,
                          ApiCallBack callback) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, APP_EVAL_SCRIPT, "url", url);
   LOGI("App::EvaluateScript:" << url << " length: " << script.length());
-#if ENABLE_TESTBENCH_RECORDER
-  tasm::recorder::TestBenchBaseRecorder::GetInstance().RecordScripts(
-      url.c_str(), script.c_str());
-#endif
-
   auto rt = rt_.lock();
   if (rt) {
     Scope scope(*rt);
