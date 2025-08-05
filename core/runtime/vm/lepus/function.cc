@@ -38,8 +38,7 @@ std::size_t Function::AddConstValue(const Value& v) {
     }
   }
   const_values_.push_back(v);
-  const_size_ = const_values_.size();
-  return const_size_ - 1;
+  return const_values_.size() - 1;
 }
 
 void Function::DecodeLineCol(uint64_t line_col, int32_t& line, int32_t& col) {
@@ -167,7 +166,6 @@ void Function::PushDebugInfoToConstValues(const Value& value) {
       const_values_.push_back(value);
     }
   }
-  const_size_ = const_values_.size();
 }
 
 void Function::GetLineCol(int32_t index, int32_t& line, int32_t& col) {

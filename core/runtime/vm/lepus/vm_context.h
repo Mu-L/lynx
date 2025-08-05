@@ -261,6 +261,9 @@ class VMContext : public Context {
  private:
   // To reduce arguments need to be passed.
   struct RunFrameContext {
+    Value*& a;
+    Value*& b;
+    Value*& c;
     Value*& regs;
     Instruction i;
   };
