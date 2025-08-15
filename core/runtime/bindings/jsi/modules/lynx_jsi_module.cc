@@ -272,14 +272,12 @@ LynxJSIModule::invokeMethod(const MethodMetadata& method, Runtime* rt,
 }
 
 void LynxJSIModule::InvokeCallback(
-    const std::shared_ptr<LynxModuleCallback>& callback,
-    base::MoveOnlyClosure<bool, const std::shared_ptr<LynxModuleCallback>&>
-        invoke_pre_func) {
+    const std::shared_ptr<LynxModuleCallback>& callback) {
   auto module_callback = std::static_pointer_cast<ModuleCallback>(callback);
   if (module_callback->timing_collector_) {
     module_callback->timing_collector_->CallbackThreadSwitchStart();
   }
-  delegate_->CallJSCallback(module_callback, std::move(invoke_pre_func));
+  delegate_->CallJSCallback(module_callback);
 }
 
 void LynxJSIModule::RunOnJSThread(base::closure func) {

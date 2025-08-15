@@ -40,9 +40,7 @@ class LynxJSIModule : public LynxModule, public LynxNativeModule::Delegate {
 
   // LynxNativeModule::Delegate
   void InvokeCallback(
-      const std::shared_ptr<LynxModuleCallback>& callback,
-      base::MoveOnlyClosure<bool, const std::shared_ptr<LynxModuleCallback>&>
-          invoke_pre_func = nullptr) override;
+      const std::shared_ptr<LynxModuleCallback>& callback) override;
   void RunOnJSThread(base::closure func) override;
   void RunOnPlatformThread(base::closure func) override;
   const std::shared_ptr<pub::PubValueFactory>& GetValueFactory() override;
