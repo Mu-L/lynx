@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "template_bundle/template_codec/binary_decoder/lynx_config_auto_gen.h"
 #define private public
 #define protected public
 
@@ -20,12 +19,10 @@ TEST_F(LynxBinaryConfigDecoderTest, ReadPipelineSchedulerConfig) {
 }
 
 TEST_F(LynxBinaryConfigDecoderTest, ReadEnableAsyncResolveSubtree) {
-  EXPECT_FALSE(page_config_->GetEnableAsyncResolveSubtree() ==
-               TernaryBool::TRUE_VALUE);
+  EXPECT_FALSE(page_config_->GetEnableAsyncResolveSubtree());
   config_decoder_->DecodePageConfig(
       "{\n  \"enableAsyncResolveSubtree\" : true\n}", page_config_);
-  EXPECT_TRUE(page_config_->GetEnableAsyncResolveSubtree() ==
-              TernaryBool::TRUE_VALUE);
+  EXPECT_TRUE(page_config_->GetEnableAsyncResolveSubtree());
 }
 
 }  // namespace test
