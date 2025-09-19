@@ -10,7 +10,6 @@
 #include <string_view>
 #include <utility>
 
-#include "base/include/base_export.h"
 #include "base/include/closure.h"
 
 namespace lynx {
@@ -31,18 +30,17 @@ class DataURIUtil {
   /**
    * decode base64 encoded data uri(data:[<mediatype>];base64,<data>) str to
    * binary data
-   * @param uri base64 encoded data uri string
-   * @return size & binary data, binary data's size maybe larger than the size
-   * returned, do not assume them is equal, return 0 if failed
+   * @param uri
+   * @return @see DecodeBase64
    */
-  BASE_EXPORT static int32_t DecodeDataURI(const std::string_view &uri,
-                                           BufferFactory factory);
+  static int32_t DecodeDataURI(const std::string_view &uri,
+                               BufferFactory factory);
 
   /**
    * Check if the given string is a data uri, do not handle any leading blank,
    * trim first.
    */
-  BASE_EXPORT static bool IsDataURI(const std::string_view &uri);
+  static bool IsDataURI(const std::string_view &uri);
 };
 
 }  // namespace base

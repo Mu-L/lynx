@@ -17,7 +17,6 @@
 #include <utility>
 #include <vector>
 
-#include "base/include/base_export.h"
 #include "base/include/fml/macros.h"
 #include "base/include/vector.h"
 
@@ -48,18 +47,18 @@ inline bool BeginsWith(std::string_view s, std::string_view begin) {
 // automatically trimmed.
 // Return pointer to last character processed.
 // Return false of callback to terminate processing.
-BASE_EXPORT const char* SplitString(
+const char* SplitString(
     std::string_view target, char separator, bool trim,
     const std::function<bool(const char*, size_t, int)>& callback);
 
-BASE_EXPORT bool SplitString(std::string_view target, char separator,
-                             std::vector<std::string>& result);
+bool SplitString(std::string_view target, char separator,
+                 std::vector<std::string>& result);
 
-BASE_EXPORT bool SplitStringBySpaceOutOfBrackets(
-    std::string_view target, std::vector<std::string>& result);
+bool SplitStringBySpaceOutOfBrackets(std::string_view target,
+                                     std::vector<std::string>& result);
 
 // For CSS style handlers with maximum 4 components.
-BASE_EXPORT bool SplitStringBySpaceOutOfBrackets(
+bool SplitStringBySpaceOutOfBrackets(
     std::string_view target, base::InlineVector<std::string, 4>& result);
 
 template <typename OutputStringType, typename T>
@@ -80,16 +79,15 @@ std::vector<OutputStringType> SplitString(T str, T delims,
   return output;
 }
 
-BASE_EXPORT std::vector<std::string_view> SplitToStringViews(
+std::vector<std::string_view> SplitToStringViews(
     std::string_view str, const std::string& delims = " ");
 
 // Returns a string joined by the given delimiter.
-BASE_EXPORT std::string Join(const std::vector<std::string>& vec,
-                             const char* delimiter);
+std::string Join(const std::vector<std::string>& vec, const char* delimiter);
 
 std::string JoinString(const std::vector<std::string>& pieces);
 
-BASE_EXPORT std::string CamelCaseToDashCase(std::string_view);
+std::string CamelCaseToDashCase(std::string_view);
 
 inline bool EndsWith(std::string_view s, std::string_view ending) {
   if (s.length() >= ending.length()) {
@@ -100,12 +98,11 @@ inline bool EndsWith(std::string_view s, std::string_view ending) {
   }
 }
 
-BASE_EXPORT bool EndsWithIgnoreSourceCase(std::string_view s,
-                                          std::string_view ending);
+bool EndsWithIgnoreSourceCase(std::string_view s, std::string_view ending);
 
 void TrimWhitespaceASCII(std::string_view input, int position,
                          std::string* output);
-BASE_EXPORT std::string StringToLowerASCII(std::string_view input);
+std::string StringToLowerASCII(std::string_view input);
 
 namespace internal {
 template <class T>
@@ -132,15 +129,14 @@ std::string AppendString(const Args&... args) {
 }
 
 // String utils
-BASE_EXPORT std::string TrimString(std::string_view str);
-BASE_EXPORT std::string_view TrimToStringView(std::string_view to_trim);
-BASE_EXPORT std::string TrimString(std::string input, std::string trim_chars,
-                                   TrimPositions positions);
-BASE_EXPORT std::string_view TrimString(std::string_view input,
-                                        std::string_view trim_chars,
-                                        TrimPositions positions);
+std::string TrimString(std::string_view str);
+std::string_view TrimToStringView(std::string_view to_trim);
+std::string TrimString(std::string input, std::string trim_chars,
+                       TrimPositions positions);
+std::string_view TrimString(std::string_view input, std::string_view trim_chars,
+                            TrimPositions positions);
 
-BASE_EXPORT base::InlineVector<std::string, 32> SplitStringByCharsOrderly(
+base::InlineVector<std::string, 32> SplitStringByCharsOrderly(
     std::string_view str, char cs[], size_t char_count);
 
 // Use like this `SplitStringByCharsOrderly<':', ';'>(input);`
@@ -150,8 +146,7 @@ auto SplitStringByCharsOrderly(std::string_view str) {
   return SplitStringByCharsOrderly(str, cs, sizeof(cs));
 }
 
-BASE_EXPORT void ReplaceAll(std::string& str, std::string_view from,
-                            std::string_view to);
+void ReplaceAll(std::string& str, std::string_view from, std::string_view to);
 
 inline std::string_view TruncateToStringView(const std::string& input,
                                              size_t max_length) {
@@ -167,12 +162,12 @@ bool ConvertParenthesesStringToVector(std::string& origin,
                                       std::vector<std::string>& ret,
                                       char separator = ',');
 // delimiter=",": "a,b,(1,2,3),d" =>[a,b,(1,2,3),d]
-BASE_EXPORT std::vector<std::string> SplitStringIgnoreBracket(std::string str,
-                                                              char delimiter);
+std::vector<std::string> SplitStringIgnoreBracket(std::string str,
+                                                  char delimiter);
 
 // Remove all spaces (https://www.cplusplus.com/reference/cctype/isspace/) from
 // `str`.
-BASE_EXPORT std::string RemoveSpaces(std::string_view str);
+std::string RemoveSpaces(std::string_view str);
 // this method will modify input str.
 // "a b    c  d   " => "a b c d "
 void ReplaceMultiSpaceWithOne(std::string& str);
@@ -195,31 +190,30 @@ inline bool IsUtf8Start(char c) {
   return (c & 0xc0) != 0x80;
 }
 
-BASE_EXPORT std::u16string U8StringToU16(std::string_view u8_string);
-BASE_EXPORT std::string U16StringToU8(std::u16string_view u16_string);
-BASE_EXPORT std::u32string U8StringToU32(std::string_view u8_string);
-BASE_EXPORT std::string U32StringToU8(std::u32string_view u32_string);
+std::u16string U8StringToU16(std::string_view u8_string);
+std::string U16StringToU8(std::u16string_view u16_string);
+std::u32string U8StringToU32(std::string_view u8_string);
+std::string U32StringToU8(std::u32string_view u32_string);
 std::u32string U16StringToU32(std::u16string_view u16_string);
 std::u16string U32StringToU16(std::u32string_view u32_string);
 
 // The following functions implementation is different from the above
 // implementation. It considers the LE/BE and has some special character
 // replacement. Auto judge LE or BE. Default to LE.
-BASE_EXPORT std::string Utf16ToUtf8(const char16_t* u16str, size_t length);
+std::string Utf16ToUtf8(const char16_t* u16str, size_t length);
 inline std::string Utf16ToUtf8(const std::u16string& u16str) {
   return Utf16ToUtf8(u16str.c_str(), u16str.length());
 }
 // Convert to utf16-le
-BASE_EXPORT std::u16string Utf8ToUtf16(const char* u8str, size_t length,
-                                       bool addbom, bool* ok);
+std::u16string Utf8ToUtf16(const char* u8str, size_t length, bool addbom,
+                           bool* ok);
 
 inline std::u16string Utf8ToUtf16(const std::string& str) {
   return Utf8ToUtf16(str.c_str(), str.length(), false, nullptr);
 }
 
-BASE_EXPORT std::string FormatStringWithVaList(const char* format,
-                                               va_list args);
-BASE_EXPORT std::string FormatString(const char* format, ...);
+std::string FormatStringWithVaList(const char* format, va_list args);
+std::string FormatString(const char* format, ...);
 
 inline bool StringEqual(const char* a, const char* b) {
   assert(a != nullptr && b != nullptr);

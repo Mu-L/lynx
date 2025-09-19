@@ -1,5 +1,4 @@
-import("//build/config/profiler.gni")
-import("//build_overrides/darwin.gni")
+import("//${lynx_dir}/build_overrides/darwin.gni")
 
 declare_args() {
   # Whether to use a custom message loop.
@@ -14,7 +13,6 @@ declare_args() {
 
 base_configs = rebase_path([ ":base_private_config" ])
 base_public_configs = rebase_path([ ":base_public_config" ])
-use_sanitizer = is_asan || is_lsan || is_tsan || is_msan || is_hwasan
 
 template("lynx_base_source_set") {
   source_set(target_name) {
@@ -35,9 +33,6 @@ template("lynx_base_source_set") {
     if (!defined(configs)) {
       configs = []
     }
-    if (!defined(libs)) {
-      libs = []
-    }
     if (defined(invoker.configs)) {
       configs += invoker.configs
     }
@@ -48,20 +43,10 @@ template("lynx_base_source_set") {
     if (defined(invoker.public_configs)) {
       public_configs += invoker.public_configs
     }
-    if (is_android) {
-      libs += [ "log" ]
-    }
     configs += base_configs
     public_configs += base_public_configs
     if (is_apple) {
       configs += darwin_config
-    }
-    if (is_android && !is_debug) {
-      if (!use_sanitizer && !enable_profiling) {
-        cflags += [ "-fomit-frame-pointer" ]
-      }
-      configs -= [ "//build/config/compiler:optimize" ]
-      cflags += [ "-O3" ]
     }
   }
 }

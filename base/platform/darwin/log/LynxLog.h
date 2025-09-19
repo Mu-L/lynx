@@ -70,12 +70,11 @@ LYNX_BASE_EXTERN void SetDebugLoggingDelegate(LynxLogDelegate *delegate);
 LYNX_BASE_EXTERN NSInteger AddLoggingDelegate(LynxLogDelegate *delegate);
 LYNX_BASE_EXTERN LynxLogDelegate *GetLoggingDelegate(NSInteger delegateId);
 LYNX_BASE_EXTERN void RemoveLoggingDelegate(NSInteger delegateId);
-LYNX_BASE_EXTERN NSArray<LynxLogDelegate *> *GetLoggingDelegates(void);
 LYNX_BASE_EXTERN void SetMinimumLoggingLevel(LynxLogLevel minLogLevel);
 LYNX_BASE_EXTERN void SetJSLogsFromExternalChannels(bool isOpen);
 LYNX_BASE_EXTERN LynxLogLevel GetMinimumLoggingLevel(void);
 
-LYNX_BASE_EXTERN LynxLogFunction LynxDefaultLogFunction;
+extern LynxLogFunction LynxDefaultLogFunction;
 
 LYNX_BASE_EXTERN NSInteger LynxSetLogFunction(LynxLogFunction logFunction);
 LYNX_BASE_EXTERN LynxLogFunction LynxGetLogFunction(void);

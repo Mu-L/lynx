@@ -19,8 +19,6 @@
 #include <algorithm>
 #include <string>
 
-#include "base/include/base_export.h"
-
 namespace lynx {
 namespace base {
 
@@ -69,8 +67,8 @@ class MD5 {
                         uint4 ac);
 };
 
-BASE_EXPORT std::string md5(const std::string& str);
-BASE_EXPORT std::string md5(const char* data, const size_t length);
+std::string md5(const std::string& str);
+std::string md5(const char* data, const size_t length);
 
 }  // namespace base
 }  // namespace lynx

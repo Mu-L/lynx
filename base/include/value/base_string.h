@@ -41,8 +41,7 @@ struct StaticStringPayload {
 /// General implementation of String managed by atomic reference counter.
 /// Constructors and factory methods of RefCountedStringImpl are hidden and
 /// are only visible to String.
-class BASE_EXPORT RefCountedStringImpl
-    : public fml::RefCountedThreadSafeStorage {
+class RefCountedStringImpl : public fml::RefCountedThreadSafeStorage {
  public:
   ~RefCountedStringImpl() override = default;
 

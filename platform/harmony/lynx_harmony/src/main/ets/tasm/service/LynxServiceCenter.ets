@@ -12,6 +12,7 @@ export enum LynxServiceType {
   Http,
   Security,
   Extension,
+  Log,
   DevTool,
 }
 

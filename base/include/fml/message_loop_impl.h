@@ -42,9 +42,8 @@ using VSyncRequest = base::MoveOnlyClosure<void, VSyncCallback>;
 /// \see fml::MessageLoop
 /// \see fml::MessageLoopAndroid
 /// \see fml::MessageLoopDarwin
-class BASE_EXPORT MessageLoopImpl
-    : public Wakeable,
-      public fml::RefCountedThreadSafe<MessageLoopImpl> {
+class MessageLoopImpl : public Wakeable,
+                        public fml::RefCountedThreadSafe<MessageLoopImpl> {
  public:
   static fml::RefPtr<MessageLoopImpl> Create(void* platform_loop = nullptr);
 

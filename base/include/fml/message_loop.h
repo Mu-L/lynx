@@ -9,7 +9,6 @@
 #define BASE_INCLUDE_FML_MESSAGE_LOOP_H_
 #include <iostream>
 
-#include "base/include/base_export.h"
 #include "base/include/fml/macros.h"
 #include "base/include/fml/task_queue_id.h"
 #include "base/include/fml/task_runner.h"
@@ -33,7 +32,7 @@ class MessageLoopImpl;
 /// \see fml::MessageLoopImpl
 /// \see fml::MessageLoopTaskQueues
 /// \see fml::Wakeable
-class BASE_EXPORT MessageLoop {
+class MessageLoop {
  public:
   static MessageLoop& GetCurrent();
 

@@ -13,7 +13,6 @@
 
 #include <atomic>
 
-#include "base/include/base_export.h"
 #include "base/include/fml/macros.h"
 #include "base/include/fml/message_loop_impl.h"
 #include "base/include/fml/unique_fd.h"
@@ -31,7 +30,7 @@ struct UniqueLooperTraits {
 ///
 /// This implemenation wraps usage of Android's \p looper.
 /// \see https://developer.android.com/ndk/reference/group/looper
-class BASE_EXPORT MessageLoopAndroid : public MessageLoopImpl {
+class MessageLoopAndroid : public MessageLoopImpl {
  public:
   static bool Register(JNIEnv* env);
 

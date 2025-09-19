@@ -16,7 +16,6 @@
 #include <condition_variable>
 #include <mutex>
 
-#include "base/include/base_export.h"
 #include "base/include/fml/macros.h"
 #include "base/include/fml/time/time_delta.h"
 
@@ -30,7 +29,7 @@ namespace fml {
 // to Windows's auto-reset Event, which is also imitated by Chromium's
 // auto-reset |base::WaitableEvent|. However, there are some limitations -- see
 // |Signal()|.) This class is thread-safe.
-class BASE_EXPORT AutoResetWaitableEvent final {
+class AutoResetWaitableEvent final {
  public:
   AutoResetWaitableEvent() {}
   ~AutoResetWaitableEvent() {}

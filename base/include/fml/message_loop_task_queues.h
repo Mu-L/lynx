@@ -15,7 +15,6 @@
 #include <set>
 #include <vector>
 
-#include "base/include/base_export.h"
 #include "base/include/closure.h"
 #include "base/include/fml/delayed_task.h"
 #include "base/include/fml/macros.h"
@@ -72,7 +71,7 @@ enum class FlushType {
 /// This also wakes up the loop at the required times.
 /// \see fml::MessageLoop
 /// \see fml::Wakeable
-class BASE_EXPORT MessageLoopTaskQueues {
+class MessageLoopTaskQueues {
  public:
   // Lifecycle.
 

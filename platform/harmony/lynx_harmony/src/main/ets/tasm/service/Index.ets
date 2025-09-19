@@ -16,6 +16,8 @@ export { ILynxSecurityService, SecurityResult, LynxTasmType } from './ILynxSecur
 
 export { ILynxHttpService } from './ILynxHttpService'
 
+export { ILynxLogService, LogOutputChannelType } from './ILynxLogService'
+
 export { ILynxExtensionService } from './ILynxExtensionService'
 
 export { LynxExtensionModule } from '../../extension/LynxExtensionModule'

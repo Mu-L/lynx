@@ -31,4 +31,8 @@ starlight_source_set("starlight_standalone_android") {
     "android/starlight_android.cc",
     "android/starlight_android.h",
   ]
+  deps = [
+    "../../../base/src:base",
+    "../../../base/src:base_log",
+  ]
 }

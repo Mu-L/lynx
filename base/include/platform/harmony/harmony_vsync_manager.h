@@ -9,7 +9,6 @@
 #include <mutex>
 #include <vector>
 
-#include "base/include/base_export.h"
 #include "base/include/fml/macros.h"
 
 struct OH_NativeVSync;
@@ -22,13 +21,13 @@ class HarmonyVsyncManager {
  public:
   using VSyncCallback = std::function<void(long long)>;
 
-  BASE_EXPORT static HarmonyVsyncManager& GetInstance();
+  static HarmonyVsyncManager& GetInstance();
 
   // request the next vsync signal, then callback when it arrives.
   // OH_NativeVSync_Create takes very long time (≈1ms), may slow down
   // initization, so we use a global OH_NativeVSync here, and dispatch to each
   // vsync monitor.
-  BASE_EXPORT void RequestVSync(const VSyncCallback& callback);
+  void RequestVSync(const VSyncCallback& callback);
 
  private:
   HarmonyVsyncManager();

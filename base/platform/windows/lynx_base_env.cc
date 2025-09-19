@@ -40,8 +40,5 @@ void LynxBaseEnv::Init(bool is_print_log_to_all_channel) {
   lynx::InitLynxBaseLog(is_print_log_to_all_channel);
   initBaseTrace();
 }
-
-void LynxBaseEnv::OnlyInitBaseTrace() { initBaseTrace(); }
-
 }  // namespace base
 }  // namespace lynx

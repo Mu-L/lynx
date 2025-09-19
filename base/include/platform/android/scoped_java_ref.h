@@ -12,7 +12,6 @@
 
 #include <string>
 
-#include "base/include/base_export.h"
 #include "base/include/fml/macros.h"
 
 namespace lynx {
@@ -27,7 +26,7 @@ class JavaRef;
 // other JavaRef<> template types. This allows you to e.g. pass
 // ScopedLocalJavaRef<jstring> into a function taking const JavaRef<jobject>&
 template <>
-class BASE_EXPORT JavaRef<jobject> {
+class JavaRef<jobject> {
  public:
   JavaRef();
 
@@ -246,7 +245,7 @@ class ScopedWeakGlobalJavaRef final : public JavaRef<T> {
   }
 };
 
-class BASE_EXPORT ScopedJavaLocalFrame {
+class ScopedJavaLocalFrame {
  public:
   explicit ScopedJavaLocalFrame(JNIEnv* env);
   ScopedJavaLocalFrame(JNIEnv* env, int capacity);

@@ -5,13 +5,12 @@
 #ifndef BASE_INCLUDE_FML_PLATFORM_THREAD_CONFIG_SETTER_H_
 #define BASE_INCLUDE_FML_PLATFORM_THREAD_CONFIG_SETTER_H_
 
-#include "base/include/base_export.h"
 #include "base/include/fml/thread.h"
 
 namespace lynx {
 namespace fml {
 
-class BASE_EXPORT PlatformThreadPriority {
+class PlatformThreadPriority {
  public:
   static void Setter(const lynx::fml::Thread::ThreadConfig& config);
 };

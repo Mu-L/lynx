@@ -27,10 +27,6 @@ podspec_target("BaseDevtool_podspec") {
       "-fno-rtti",
     ]
     pod_target_xcconfig = {
-      HEADER_SEARCH_PATHS = [
-        "//PODS_ROOT/LynxBase/lynx",
-        "//PODS_ROOT/LynxBase",
-      ]
       GCC_PREPROCESSOR_DEFINITIONS = [
         "OS_IOS=1",
         "HOST_OSTYPE=HOST_IOS",
@@ -111,7 +107,6 @@ subspec_target("framework") {
       "//lynx",
       "../../../../third_party/jsoncpp/include/",
       "//PODS_ROOT/Lynx/lynx",
-      "//PODS_ROOT/LynxBase/lynx",
     ]
     GCC_PREPROCESSOR_DEFINITIONS = [
       "RAPIDJSON_HAS_STDSTRING=1",
@@ -127,7 +122,6 @@ subspec_target("framework") {
 
   if (use_flatten_deps) {
     dependency += lynx_dependency
-    dependency += lynxbase_dependency
   }
 }
 
@@ -152,14 +146,14 @@ subspec_target("ThirdParty") {
 subspec_target("fml") {
   pod_target_xcconfig = {
     HEADER_SEARCH_PATHS = [
-      "//PODS_ROOT/LynxBase/lynx",
-      "//PODS_ROOT/LynxBase",
+      "//PODS_ROOT/Lynx/lynx",
+      "//PODS_ROOT/Lynx",
       "//lynx",
     ]
   }
   deps = [ "../../../../base/src:base_log_headers" ]
   if (!use_flatten_deps) {
-    dependency = [ "LynxBase/Framework" ]
+    dependency = [ "Lynx/Native/fml" ]
   }
 }
 

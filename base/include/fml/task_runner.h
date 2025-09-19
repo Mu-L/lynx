@@ -37,8 +37,8 @@ class BasicTaskRunner {
 /// TaskRunner.
 ///
 /// \see fml::MessageLoop
-class BASE_EXPORT TaskRunner : public fml::RefCountedThreadSafe<TaskRunner>,
-                               public BasicTaskRunner {
+class TaskRunner : public fml::RefCountedThreadSafe<TaskRunner>,
+                   public BasicTaskRunner {
  public:
   virtual ~TaskRunner();
 

@@ -5,13 +5,11 @@
 #ifndef BASE_INCLUDE_FML_SYNCHRONIZATION_SHARED_MUTEX_H_
 #define BASE_INCLUDE_FML_SYNCHRONIZATION_SHARED_MUTEX_H_
 
-#include "base/include/base_export.h"
-
 namespace lynx {
 namespace fml {
 
 // Interface for a reader/writer lock.
-class BASE_EXPORT SharedMutex {
+class SharedMutex {
  public:
   static SharedMutex* Create();
   virtual ~SharedMutex() = default;

@@ -41,7 +41,6 @@ android {
 
 dependencies {
    compileOnly project(":LynxAndroid")
-   compileOnly project(":LynxBase")
    compileOnly project(":LynxProcessor")
    kapt project(':LynxProcessor')
    annotationProcessor project(':LynxProcessor')

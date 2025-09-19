@@ -33,7 +33,11 @@ unittest_set("test_bench_utils_testset") {
 
   include_dirs = [ "//third_party/googletest/googletest/include" ]
 
-  deps = [ "//third_party/zlib:zlib" ]
+  deps = [
+    "../../../base/src:base_log",
+    "../../../base/src:string_utils",
+    "//third_party/zlib:zlib",
+  ]
 }
 
 unittest_exec("test_bench_utils_unittest_exec") {

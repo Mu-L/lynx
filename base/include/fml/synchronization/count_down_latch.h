@@ -10,14 +10,13 @@
 
 #include <atomic>
 
-#include "base/include/base_export.h"
 #include "base/include/fml/macros.h"
 #include "base/include/fml/synchronization/waitable_event.h"
 
 namespace lynx {
 namespace fml {
 
-class BASE_EXPORT CountDownLatch {
+class CountDownLatch {
  public:
   explicit CountDownLatch(size_t count);
 

@@ -112,7 +112,6 @@ def run_pod_lint(component):
     
     if component == 'all':
         # skip lint and push pod to local pod source
-        pod_lint_component('LynxBase',local_pod_source_name)
         pod_lint_component('Lynx',local_pod_source_name)
         pod_lint_component('BaseDevtool',local_pod_source_name)
         pod_lint_component('LynxDevtool',local_pod_source_name)
@@ -135,8 +134,7 @@ def publish_component(component, sources):
 def publish_to_cocoapods(component, sources):
     print(f'Start publish {component} to cocoapods')
     if component == 'all':
-        # publish in order: LynxBase -> Lynx -> BaseDevtool -> LynxDevtool -> LynxService
-        publish_component('LynxBase', sources)
+        # publish in order: Lynx -> BaseDevtool -> LynxDevtool -> LynxService
         publish_component('Lynx', sources)
         publish_component('BaseDevtool', sources)
         publish_component('LynxDevtool', sources)
@@ -151,7 +149,6 @@ def publish_to_local(component, local_source_name):
     
     skip_pod_lint('private')
     if component == 'all':
-        publish_component_to_local_source('LynxBase',local_source_name)
         publish_component_to_local_source('Lynx',local_source_name)
         publish_component_to_local_source('BaseDevtool',local_source_name)
         publish_component_to_local_source('LynxDevtool',local_source_name)

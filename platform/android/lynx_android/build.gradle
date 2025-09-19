@@ -38,12 +38,10 @@ android {
                 pickFirst 'lib/*/libquick.so'
                 pickFirst 'lib/*/libc++_shared.so'
                 pickFirst 'lib/*/liblynxtrace.so'
-                pickFirst 'lib/*/liblynxbase.so'
             } else {
                 exclude 'lib/*/libnapi.so'
                 exclude 'lib/*/libquick.so'
                 exclude 'lib/*/liblynxtrace.so'
-                exclude 'lib/*/liblynxbase.so'
                 exclude 'lib/*/libv8_libfull.cr.so' 
             }
         }
@@ -311,7 +309,6 @@ task configGnCompileParas {
 }
 
 dependencies {
-    implementation project(':LynxBase')
     implementation project(':LynxTrace')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 

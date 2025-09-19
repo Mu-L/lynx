@@ -4,7 +4,6 @@
 
 import { common } from '@kit.AbilityKit';
 import { LLog, LynxEnv, LynxServiceCenter, LynxServiceType } from '@lynx/lynx';
-import { LynxBaseServiceCenter, LynxBaseServiceType } from '@lynx/lynx_base';
 import { LynxDevToolService } from '@lynx/lynx_devtool_service';
 import { LynxLogService } from '@lynx/lynx_log_service';
 import { LynxHttpService } from '@lynx/lynx_http_service';
@@ -36,7 +35,7 @@ export class LynxInitProcessor {
   }
 
   private initLogService(): void {
-    LynxBaseServiceCenter.registerService(LynxBaseServiceType.Log, LynxLogService.instance);
+    LynxServiceCenter.registerService(LynxServiceType.Log, LynxLogService.instance);
   }
   
   private initHttpService(): void {

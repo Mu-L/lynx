@@ -7,12 +7,10 @@
 
 #include <string>
 
-#include "base/include/base_export.h"
-
 namespace lynx {
 namespace base {
 
-class BASE_EXPORT FileUtils {
+class FileUtils {
  public:
   [[nodiscard]] static bool ReadFileBinary(const std::string &path,
                                            size_t max_size,

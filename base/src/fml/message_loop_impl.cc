@@ -14,8 +14,7 @@
 
 #include "base/include/fml/fml_trace_event_def.h"
 #include "base/include/timer/time_utils.h"
-#include "base/src/base_trace/base_trace_event_def.h"
-#include "base/src/base_trace/trace_event.h"
+#include "base/trace/native/trace_event.h"
 #include "build/build_config.h"
 
 namespace lynx {
@@ -102,7 +101,7 @@ void MessageLoopImpl::DoTerminate() {
 }
 
 void MessageLoopImpl::FlushTasks(FlushType type) {
-  BASE_TRACE_EVENT(LYNX_BASE_TRACE_CATEGORY, MESSAGE_LOOP_FLUSH_TASK);
+  TRACE_EVENT("lynx", MESSAGE_LOOP_FLUSH_TASK);
   if (FlushTasksWithRestrictionDuration(
           type, queue_ids_, restriction_duration_.ToMilliseconds())) {
     // Call WakeUp here to flush the remaining tasks when reaching maximum
@@ -119,8 +118,7 @@ void MessageLoopImpl::FlushVSyncAlignedTasks(FlushType type) {
 bool MessageLoopImpl::FlushTasksWithRestrictionDuration(
     FlushType type, const std::vector<TaskQueueId>& queue_ids,
     int64_t restriction_duration) {
-  BASE_TRACE_EVENT(LYNX_BASE_TRACE_CATEGORY,
-                   MESSAGE_LOOP_FLUSH_VASYNC_ALIGNED_TASKS);
+  TRACE_EVENT("lynx", MESSAGE_LOOP_FLUSH_VASYNC_ALIGNED_TASKS);
   const auto now = fml::TimePoint::Now();
   bool reach_max_restriction = false;
   std::optional<TaskSource::TopTaskResult> task;
@@ -216,7 +214,7 @@ std::vector<TaskQueueId> MessageLoopImpl::GetTaskQueueIds() const {
 
 void MessageLoopImpl::Bind(const TaskQueueId& queue_id,
                            bool should_run_expired_tasks_immediately) {
-  BASE_TRACE_EVENT(LYNX_BASE_TRACE_CATEGORY, MESSAGE_LOOP_IMPL_BIND);
+  TRACE_EVENT("lynx", MESSAGE_LOOP_IMPL_BIND);
 
   (vsync_request_ && task_queue_->IsTaskQueueAlignedWithVSync(queue_id))
       ? vsync_aligned_task_queue_ids_.emplace_back(queue_id)
