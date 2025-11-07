@@ -25,8 +25,4 @@ public interface ILynxViewRuntimeCacheManager {
   void setLynxEngine(ILynxEngine lynxEngine);
 
   ILynxEngine getLynxEngine();
-
-  void setBitmapSizeCache(String source, int width, int height);
-
-  BitmapSize getBitmapSizeCache(String source);
 }

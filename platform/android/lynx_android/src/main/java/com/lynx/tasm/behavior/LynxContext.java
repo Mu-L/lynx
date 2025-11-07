@@ -42,7 +42,6 @@ import com.lynx.tasm.core.JSProxy;
 import com.lynx.tasm.core.LynxLayoutProxy;
 import com.lynx.tasm.fluency.FluencyTraceHelper;
 import com.lynx.tasm.fontface.FontFace;
-import com.lynx.tasm.group.ILynxViewRuntimeCacheManager;
 import com.lynx.tasm.image.model.LynxImageFetcher;
 import com.lynx.tasm.loader.LynxFontFaceLoader;
 import com.lynx.tasm.performance.PerformanceController;
@@ -92,7 +91,6 @@ public abstract class LynxContext extends LynxBaseContext implements ExceptionHa
   private LynxFontFaceLoader.Loader fontLoader;
   private List<PatchFinishListener> mPatchFinishListeners;
   private UIExposure mExposure = null;
-  private ILynxViewRuntimeCacheManager lynxViewGroup;
   // for fresco monitor
   private Object mFrescoCallerContext = null;
   // for fresco disk cache choice
@@ -265,23 +263,6 @@ public abstract class LynxContext extends LynxBaseContext implements ExceptionHa
    */
   public void setEmbeddedMode(@EmbeddedMode.Mode int embeddedMode) {
     this.embeddedMode = embeddedMode;
-  }
-
-  /**
-   * @brief set lynxview runtime cache manager;
-   * @param cacheManager
-   */
-  @RestrictTo(RestrictTo.Scope.LIBRARY)
-  public void setRuntimeCacheManager(ILynxViewRuntimeCacheManager cacheManager) {
-    this.lynxViewGroup = cacheManager;
-  }
-
-  /**
-   * @brief acquire the lynxview runtime cache manager;
-   * @return lynxViewGroup instance
-   */
-  public ILynxViewRuntimeCacheManager getRuntimeCacheManager() {
-    return this.lynxViewGroup;
   }
 
   public void setEnableAsyncLoadImage(boolean b) {
