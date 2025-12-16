@@ -4,57 +4,56 @@
 
 #include "clay/gfx/image/animated_image.h"
 
-#include <utility>
-
 #include "clay/gfx/graphics_context.h"
+#if (defined(OS_MAC) || defined(OS_WIN))
+#include "clay/shell/platform/common/codec/desktop_image.h"
+#endif
 
 namespace clay {
 
 std::shared_ptr<AnimatedImage> AnimatedImage::Make(
-    fml::RefPtr<fml::TaskRunner> task_runner,
     std::shared_ptr<PlatformImage> platform_image) {
   auto image = std::shared_ptr<AnimatedImage>(new AnimatedImage);
   image->type_ = ImageType::kAnimated;
   image->image_ = platform_image;
-  image->frame_timer_ = std::make_unique<fml::OneshotTimer>(task_runner);
   return image;
 }
 
 void AnimatedImage::Upload(fml::RefPtr<GPUUnrefQueue> unref_queue, Size size) {
-  auto pixmap = image_->ToBitmap();
-  if (!pixmap) {
+#if (defined(OS_MAC) || defined(OS_WIN))
+  auto skity_pixmap =
+      static_cast<DesktopImage*>(image_.get())->GetCurrentPixmap();
+  if (!skity_pixmap) {
     return;
   }
   auto image = skity::Image::MakeDeferredTextureImage(
-      skity::Texture::FormatFromColorType(pixmap->GetColorType()),
-      pixmap->Width(), pixmap->Height(), pixmap->GetAlphaType());
+      skity::Texture::FormatFromColorType(skity_pixmap->GetColorType()),
+      skity_pixmap->Width(), skity_pixmap->Height(),
+      skity_pixmap->GetAlphaType());
   gpu_image_ = GPUObject(GraphicsImage::Make(image), unref_queue);
   unref_queue->GetTaskRunner()->PostTask(
-      [context = unref_queue->GetContext(), image, pixmap]() {
+      [context = unref_queue->GetContext(), image, skity_pixmap]() {
         auto texture = context->CreateTexture(
-            skity::Texture::FormatFromColorType(pixmap->GetColorType()),
-            pixmap->Width(), pixmap->Height(), pixmap->GetAlphaType());
-        texture->DeferredUploadImage(std::move(pixmap));
+            skity::Texture::FormatFromColorType(skity_pixmap->GetColorType()),
+            skity_pixmap->Width(), skity_pixmap->Height(),
+            skity_pixmap->GetAlphaType());
+        texture->DeferredUploadImage(std::move(skity_pixmap));
         image->SetTexture(texture);
       });
-  NextFrame();
+#endif
 }
 
-void AnimatedImage::SetAnimationFrameCallback(std::function<void()> func) {
-  animation_frame_callback_ = std::move(func);
+fml::RefPtr<SharedImageSink> AnimatedImage::GetSharedImageSink() {
+  if (!shared_image_) {
+    shared_image_ = image_->ToSharedImage();
+  }
+  return shared_image_;
 }
 
-void AnimatedImage::NextFrame() {
-  frame_timer_->Start(
-      fml::TimeDelta::FromMilliseconds(image_->GetDuration()),
-      [weak = weak_from_this()] {
-        if (auto self = weak.lock()) {
-          auto animated_image = static_cast<AnimatedImage*>(self.get());
-          animated_image->image_->DrawFrame(
-              fml::TimePoint::Now().ToEpochDelta().ToMilliseconds(),
-              animated_image->animation_frame_callback_);
-        }
-      });
+bool AnimatedImage::DoAnimationFrame(int64_t frame_time,
+                                     std::function<void()> on_frame_changed) {
+  image_->DrawFrame(frame_time, std::move(on_frame_changed));
+  return true;
 }
 
 void AnimatedImage::SetAutoPlay(bool auto_play) {
@@ -63,19 +62,9 @@ void AnimatedImage::SetAutoPlay(bool auto_play) {
 void AnimatedImage::SetLoopCount(int loop_count) {
   image_->SetLoopCount(loop_count);
 }
-void AnimatedImage::StartAnimate() {
-  image_->StartAnimation();
-  if (animation_frame_callback_) {
-    animation_frame_callback_();
-  }
-}
+void AnimatedImage::StartAnimate() { image_->StartAnimation(); }
 void AnimatedImage::StopAnimation() { image_->StopAnimation(); }
 void AnimatedImage::PauseAnimation() { image_->PauseAnimation(); }
-void AnimatedImage::ResumeAnimation() {
-  image_->ResumeAnimation();
-  if (animation_frame_callback_) {
-    animation_frame_callback_();
-  }
-}
+void AnimatedImage::ResumeAnimation() { image_->ResumeAnimation(); }
 
 }  // namespace clay
