@@ -266,9 +266,6 @@ class TasmMediator : public LynxEngine::Delegate {
  private:
   void InitVSyncMonitorIfNeeded();
   bool IsEmbeddedModeOn() const { return page_options_.IsEmbeddedModeOn(); }
-  bool IsFragmentLayerRenderModeOn() const {
-    return page_options_.IsFragmentLayerRender();
-  }
   std::shared_ptr<LynxActor<NativeFacade>> facade_actor_;
 
   std::shared_ptr<LynxActor<BTSRuntime>> runtime_actor_;
