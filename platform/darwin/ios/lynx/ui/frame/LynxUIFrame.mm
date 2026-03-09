@@ -13,13 +13,7 @@
 #import <Lynx/LynxUI+Private.h>
 #import <Lynx/LynxUIContext.h>
 
-@class LynxTemplateBundle;
-
-@interface LynxUIFrame () {
-  LynxTemplateBundle* _pendingBundle;
-  BOOL _isPropsUpdated;
-  BOOL _isUrlChanged;
-}
+@interface LynxUIFrame ()
 @end
 
 @implementation LynxUIFrame
@@ -46,25 +40,10 @@ LYNX_REGISTER_UI("frame")
 }
 
 - (void)onReceiveAppBundle:(LynxTemplateBundle*)bundle {
-  if (_isUrlChanged && _isPropsUpdated && [self loadBundle:bundle]) {
-    _pendingBundle = nil;
-    _isUrlChanged = NO;
-    _isPropsUpdated = NO;
-  } else {
-    _pendingBundle = bundle;
-  }
-}
-
-- (BOOL)loadBundle:(LynxTemplateBundle*)bundle {
-  LynxFrameView* view = [self view];
-  if (view == nil) {
-    return NO;
-  }
   // need to establish the parent-child UI relationship before loadBundle currently
   // TODO(hexionghui): fix it later
   [self attachPageUICallback];
-  [view setAppBundle:bundle];
-  return YES;
+  [[self view] setAppBundle:bundle];
 }
 
 - (void)updateFrame:(CGRect)frame
@@ -104,14 +83,6 @@ LYNX_REGISTER_UI("frame")
 
 - (void)propsDidUpdate {
   [super propsDidUpdate];
-  if (_isUrlChanged) {
-    if (_pendingBundle && [self loadBundle:_pendingBundle]) {
-      _pendingBundle = nil;
-      _isUrlChanged = NO;
-    }
-  }
-  _isPropsUpdated = YES;
-
   [[self view] propsDidUpdate];
 }
 
@@ -123,11 +94,7 @@ LYNX_PROP_SETTER("data", updateData, NSDictionary*) {
   }
 }
 
-LYNX_PROP_SETTER("src", setUrl, NSString*) {
-  _isUrlChanged = YES;
-  _isPropsUpdated = NO;
-  [[self view] setUrl:value];
-}
+LYNX_PROP_SETTER("src", setUrl, NSString*) { [[self view] setUrl:value]; }
 
 LYNX_PROP_SETTER("global-props", updateGlobalProps, NSDictionary*) {
   if (value != nil) {
