@@ -3558,8 +3558,8 @@ void TemplateAssembler::RunPixelPipeline() {
                     "pipeline_id", pipeline_option->pipeline_id);
               });
 
-  if (current_pipeline_context->AdvanceLifecycleTo(
-          LifecycleState::kInStyleResolve) &&
+  if (pipeline_context_manager_->AdvanceLifecycleTo(
+          current_pipeline_context, LifecycleState::kInStyleResolve) &&
       current_pipeline_context->IsResolveRequested()) {
     TRACE_EVENT(LYNX_TRACE_CATEGORY, LYNX_PIPELINE_TRIGGER_RESOLVE);
     // trigger resolve;
@@ -3569,11 +3569,11 @@ void TemplateAssembler::RunPixelPipeline() {
                                                   pipeline_option->target_node);
     current_pipeline_context->ResetResolveRequested();
   }
-  current_pipeline_context->AdvanceLifecycleTo(
-      LifecycleState::kAfterStyleResolve);
+  pipeline_context_manager_->AdvanceLifecycleTo(
+      current_pipeline_context, LifecycleState::kAfterStyleResolve);
 
-  if (current_pipeline_context->AdvanceLifecycleTo(
-          LifecycleState::kInPerformLayout) &&
+  if (pipeline_context_manager_->AdvanceLifecycleTo(
+          current_pipeline_context, LifecycleState::kInPerformLayout) &&
       current_pipeline_context->IsLayoutRequested()) {
     TRACE_EVENT(LYNX_TRACE_CATEGORY, LYNX_PIPELINE_TRIGGER_LAYOUT);
     // Current context may be reset in layout job, so we need to reset
@@ -3689,8 +3689,8 @@ void TemplateAssembler::OnLayoutAfter(PipelineLayoutData& layout_data) {
                     "pipeline_id", pipeline_option->pipeline_id);
               });
 
-  current_pipeline_context->AdvanceLifecycleTo(
-      LifecycleState::kAfterPerformLayout);
+  pipeline_context_manager_->AdvanceLifecycleTo(
+      current_pipeline_context, LifecycleState::kAfterPerformLayout);
 
   // TODO(@nihao.royal): ResetCurrentPipelineContext here to make flush occurs
   // after pipeline ends, later we will support a micro task to do flush things.
@@ -3698,8 +3698,8 @@ void TemplateAssembler::OnLayoutAfter(PipelineLayoutData& layout_data) {
   pipeline_context_manager_->ResetCurrentPipelineContext();
   if (layout_data.layout_triggered) {
     // Execute Flush UI OP;
-    if (current_pipeline_context->AdvanceLifecycleTo(
-            LifecycleState::kUIOpFlush) &&
+    if (pipeline_context_manager_->AdvanceLifecycleTo(
+            current_pipeline_context, LifecycleState::kUIOpFlush) &&
         current_pipeline_context->IsFlushUIOperationRequested()) {
       TRACE_EVENT(LYNX_TRACE_CATEGORY, LYNX_PIPELINE_FLUSH_UI_OPERATION);
       page_proxy()->element_manager()->painting_context()->Flush();
@@ -3725,7 +3725,8 @@ void TemplateAssembler::OnLayoutAfter(PipelineLayoutData& layout_data) {
     }
   }
 
-  current_pipeline_context->AdvanceLifecycleTo(LifecycleState::kStopped);
+  pipeline_context_manager_->AdvanceLifecycleTo(current_pipeline_context,
+                                                LifecycleState::kStopped);
   pipeline_context_manager_->RemovePipelineContextByVersion(
       current_pipeline_context->GetVersion());
 }
