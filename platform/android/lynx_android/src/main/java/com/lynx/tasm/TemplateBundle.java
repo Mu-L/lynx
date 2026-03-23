@@ -85,7 +85,7 @@ public final class TemplateBundle {
       if (checkIfEnvPrepared()) {
         SecurityResult securityResult = verifyTasm(template, buffer, url);
         if (!securityResult.isVerified()) {
-          result = new TemplateBundle(0, length, url,
+          result = new TemplateBundle(0, template.length, url,
               "template verify failed, error message: " + securityResult.getErrorMsg(), null);
           return result;
         }
