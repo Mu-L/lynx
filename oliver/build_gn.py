@@ -32,11 +32,12 @@ def gen_build_file(platform, arch, debug, root_path, type, sysroot):
   if platform == 'linux' and len(sysroot) != 0:
     args += ' target_sysroot=\\\"%s\\\"' % os.path.join(root_path, sysroot)
   if type == 'ssr':
-    args += ' build_lepus_compile=true'
+    args += ' build_lepus_compile=true enable_air=false'
   elif type == 'security':
-    args += ' build_lepus_compile=false'
+    args += ' build_lepus_compile=false enable_air=false'
   elif type == 'tasm':
     args += ' build_lepus_compile=true \
+      enable_air=false \
       enable_inspector=true \
       enable_inspector_test=true \
       build_lynx_lepus_node=true \
@@ -45,6 +46,7 @@ def gen_build_file(platform, arch, debug, root_path, type, sysroot):
       args += ' emsdk_dir=\\\"/root/emsdk\\\"'
   elif type == 'testing':
     args += ' build_lepus_compile=false \
+      enable_air=false \
       enable_napi_binding=true \
       enable_lepusng_worklet=true \
       jsengine_type=\\\"quickjs\\\"'
