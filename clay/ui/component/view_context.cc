@@ -970,7 +970,8 @@ float ViewContext::GetBaseline(int id) const {
 }
 
 void ViewContext::SetDefaultOverflowVisible(bool value) {
-  RenderObject::ChangeDefaultOverflowValue(value);
+  page_view_->SetDefaultOverflow(value ? CSSProperty::OVERFLOW_XY
+                                       : CSSProperty::OVERFLOW_HIDDEN);
 }
 
 void ViewContext::SetExternalScreenshotCallback(
