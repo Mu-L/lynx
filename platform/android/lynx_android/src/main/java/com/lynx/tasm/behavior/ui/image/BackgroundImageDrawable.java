@@ -155,15 +155,6 @@ public class BackgroundImageDrawable extends BackgroundLayerDrawable {
   public void setLynxUI(LynxBaseUI ui) {
     super.setLynxUI(ui);
     mUI = new WeakReference<>(ui);
-  }
-
-  @Override
-  public void onLynxUIPropsUpdated() {
-    super.onLynxUIPropsUpdated();
-    if (mUI == null || mUI.get() == null) {
-      return;
-    }
-    LynxBaseUI ui = mUI.get();
     mLynxImageManager.setLocalCache(ui.getEnableLocalCache());
     mLynxImageManager.setLynxBaseUI(ui);
     mLynxImageManager.setSkipRedirection(ui.getSkipRedirection());
