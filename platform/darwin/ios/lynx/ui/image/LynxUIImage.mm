@@ -882,7 +882,6 @@ UIEdgeInsets LynxRoundInsetsToPixel(UIEdgeInsets edgeInsets) {
   requestUrl.lastRequestUrl = url;
   [self initResourceLoaderInformation];
   [requestUrl initResourceInformation];
-  LLogInfo(@"LynxUIImage setSrc, raw src: %@", url.absoluteString);
   _cancelBlocks[@(requestUrl.type)] = [[LynxImageLoader sharedInstance]
       loadImageFromLynxURL:requestUrl
                       size:size
