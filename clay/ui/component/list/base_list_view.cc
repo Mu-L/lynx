@@ -77,10 +77,10 @@ void BaseListView::ListPrefetchTask::Run() {
     TRACE_EVENT("clay", "ListPrefetchTask::Run");
     auto list_view = static_cast<BaseListView*>(host_view_.get());
     ListRecycler* recycler = list_view->recycler_.get();
-    if (recycler->HasItemCached(id())) {
+    if (recycler->HasItemCached(id_)) {
       return;
     }
-    ListItemViewHolder* view_holder = recycler->GetItemForPosition(id());
+    ListItemViewHolder* view_holder = recycler->GetItemForPosition(id_);
     if (view_holder && view_holder->IsBound() && !view_holder->IsInvalid()) {
       view_holder->AddFlags(ListItemViewHolder::Flag::kFlagPrefetch);
       recycler->RecycleItem(view_holder);
@@ -152,7 +152,7 @@ void BaseListView::FlushTasks() {
 }
 
 void BaseListView::SetWidth(float width) {
-  if (Width() == width) {
+  if (width_ == width) {
     return;
   }
   BaseView::SetWidth(width);
@@ -160,7 +160,7 @@ void BaseListView::SetWidth(float width) {
 }
 
 void BaseListView::SetHeight(float height) {
-  if (Height() == height) {
+  if (height_ == height) {
     return;
   }
   BaseView::SetHeight(height);

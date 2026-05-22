@@ -73,7 +73,13 @@ class BackgroundOrMaskImageClient : public ImageResourceClient {
   RenderObject* render_object_;
 };
 
-RenderObject::RenderObject() = default;
+RenderObject::RenderObject()
+    : raster_transition_properties_(ClayAnimationPropertyType::kNone),
+      raster_animation_properties_(ClayAnimationPropertyType::kNone),
+      transition_manager_(nullptr),
+      keyframes_manager_(nullptr),
+      previous_(nullptr),
+      next_(nullptr) {}
 
 RenderObject::~RenderObject() {
   // Remove this layer from the composite layer tree.
