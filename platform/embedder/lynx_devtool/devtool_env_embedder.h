@@ -26,7 +26,18 @@ class DevToolEnvEmbedder {
 
   bool IsLogBoxEnabled() const;
 
+  /**
+   * @deprecated DevTool setting callers should use DevToolSettingsEmbedder
+   * typed APIs instead. This string-key API is retained for backward
+   * compatibility.
+   */
   void SetDevToolSwitch(std::string key, bool value);
+
+  /**
+   * @deprecated DevTool setting callers should use DevToolSettingsEmbedder
+   * typed APIs instead. This string-key API is retained for backward
+   * compatibility.
+   */
   bool GetDevToolSwitch(std::string key) const;
 
   void SetAppInfo(const std::string& key, const std::string& value);
