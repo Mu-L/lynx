@@ -1,6 +1,3 @@
-## 0.0.16
-- Add `text-decoration-thickness`, `-x-text-decoration-width`, and `-x-text-decoration-gap` CSS properties.
-
 ## 0.0.15
 - Add compat_data and notes for `offset-path` and `offset-rotate` CSS properties.
 
